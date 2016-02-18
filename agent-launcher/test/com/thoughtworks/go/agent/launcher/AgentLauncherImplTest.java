@@ -1,20 +1,35 @@
-/*************************GO-LICENSE-START*********************************
- * Copyright 2014 ThoughtWorks, Inc.
+/*
+ * Copyright 2016 ThoughtWorks, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *    http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *************************GO-LICENSE-END***********************************/
+ */
 
 package com.thoughtworks.go.agent.launcher;
+
+import com.googlecode.junit.ext.checkers.OSChecker;
+import com.thoughtworks.cruise.agent.common.launcher.AgentLaunchDescriptor;
+import com.thoughtworks.cruise.agent.common.launcher.AgentLaunchDescriptorKeys;
+import com.thoughtworks.cruise.agent.common.launcher.AgentLauncher;
+import com.thoughtworks.go.agent.ServerUrlGenerator;
+import com.thoughtworks.go.agent.common.util.Downloader;
+import com.thoughtworks.go.agent.common.util.JarUtil;
+import com.thoughtworks.go.agent.testhelper.FakeBootstrapperServer;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -26,22 +41,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.jar.Attributes;
 import java.util.jar.JarOutputStream;
 import java.util.jar.Manifest;
-
-import com.googlecode.junit.ext.checkers.OSChecker;
-import com.thoughtworks.cruise.agent.launcher.AgentLauncherImpl;
-import com.thoughtworks.go.agent.ServerUrlGenerator;
-import com.thoughtworks.cruise.agent.common.launcher.AgentLaunchDescriptor;
-import com.thoughtworks.cruise.agent.common.launcher.AgentLaunchDescriptorKeys;
-import com.thoughtworks.cruise.agent.common.launcher.AgentLauncher;
-import com.thoughtworks.go.agent.common.util.Downloader;
-import com.thoughtworks.go.agent.common.util.JarUtil;
-import com.thoughtworks.go.agent.testhelper.FakeBootstrapperServer;
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
 
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsNot.not;
@@ -63,7 +62,9 @@ public class AgentLauncherImplTest {
 
     @After
     public void tearDown() {
-        new File("testdata/agent-launcher.jar").delete();
+        FileUtils.deleteQuietly(new File("testdata/agent-launcher.jar"));
+        FileUtils.deleteQuietly(new File(Downloader.AGENT_BINARY));
+        FileUtils.deleteQuietly(new File(Downloader.AGENT_LAUNCHER));
         new Lockfile(new File(AgentLauncherImpl.AGENT_BOOTSTRAPPER_LOCK_FILE)).delete();
     }
 

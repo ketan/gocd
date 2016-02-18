@@ -16,12 +16,16 @@
 
 package com.thoughtworks.go.agent.launcher;
 
-import java.util.Map;
-
+import com.thoughtworks.go.agent.common.util.Downloader;
 import com.thoughtworks.go.agent.testhelper.FakeBootstrapperServer;
 import com.thoughtworks.go.mothers.ServerUrlGeneratorMother;
+import org.apache.commons.io.FileUtils;
+import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
+import java.io.File;
+import java.util.Map;
 
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertNotNull;
@@ -29,6 +33,11 @@ import static org.junit.Assert.assertThat;
 
 @RunWith(FakeBootstrapperServer.class)
 public class ServerBinaryDownloaderTest {
+
+    @After
+    public void tearDown() throws Exception {
+        FileUtils.deleteQuietly(new File(Downloader.AGENT_BINARY));
+    }
 
     @Test
     public void shouldGetAllHeaders() throws Exception {

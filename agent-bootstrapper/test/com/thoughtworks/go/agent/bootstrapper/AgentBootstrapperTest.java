@@ -16,19 +16,23 @@
 
 package com.thoughtworks.go.agent.bootstrapper;
 
+import com.thoughtworks.cruise.agent.common.launcher.AgentLaunchDescriptor;
+import com.thoughtworks.cruise.agent.common.launcher.AgentLauncher;
+import com.thoughtworks.go.agent.common.util.Downloader;
+import com.thoughtworks.go.util.ReflectionUtil;
+import org.apache.commons.io.FileUtils;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+
+import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Semaphore;
 
-import com.thoughtworks.cruise.agent.common.launcher.AgentLaunchDescriptor;
-import com.thoughtworks.cruise.agent.common.launcher.AgentLauncher;
-import com.thoughtworks.go.util.ReflectionUtil;
-import org.junit.Before;
-import org.junit.Test;
-
-import static org.junit.Assert.fail;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.spy;
@@ -38,6 +42,12 @@ public class AgentBootstrapperTest {
     @Before
     public void setUp() throws Exception {
         System.setProperty(AgentBootstrapper.WAIT_TIME_BEFORE_RELAUNCH_IN_MS, "0");
+    }
+
+    @After
+    public void tearDown() throws Exception {
+        System.clearProperty(AgentBootstrapper.WAIT_TIME_BEFORE_RELAUNCH_IN_MS);
+        FileUtils.deleteQuietly(new File(Downloader.AGENT_LAUNCHER));
     }
 
     @Test

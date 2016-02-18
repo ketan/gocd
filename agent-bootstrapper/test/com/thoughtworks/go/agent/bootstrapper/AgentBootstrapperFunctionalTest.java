@@ -16,12 +16,6 @@
 
 package com.thoughtworks.go.agent.bootstrapper;
 
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.PrintStream;
-
 import com.googlecode.junit.ext.checkers.OSChecker;
 import com.thoughtworks.go.agent.common.util.Downloader;
 import com.thoughtworks.go.agent.testhelper.FakeBootstrapperServer;
@@ -34,13 +28,12 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import java.io.*;
+
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsNot.not;
-import static org.junit.Assert.assertThat;
 import static org.hamcrest.core.StringContains.containsString;
+import static org.junit.Assert.*;
 
 @RunWith(FakeBootstrapperServer.class)
 public class AgentBootstrapperFunctionalTest {
@@ -51,11 +44,13 @@ public class AgentBootstrapperFunctionalTest {
     public void setUp() throws IOException {
         new File(".agent-bootstrapper.running").delete();
         FileUtils.copyFile(new File("testdata", Downloader.AGENT_LAUNCHER), new File(Downloader.AGENT_LAUNCHER));
+        System.setProperty(AgentBootstrapper.WAIT_TIME_BEFORE_RELAUNCH_IN_MS, "0");
     }
 
     @After
-    public void tearDown() {
+    public void tearDown() throws Exception {
         FileUtils.deleteQuietly(new File(Downloader.AGENT_LAUNCHER));
+        System.clearProperty(AgentBootstrapper.WAIT_TIME_BEFORE_RELAUNCH_IN_MS);
     }
 
     @Test

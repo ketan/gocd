@@ -14,11 +14,9 @@
 # limitations under the License.
 #*************************GO-LICENSE-END**********************************
 
-manual-testing/multiple/wd
-manual-testing/multiple/project1-wd
-.svn
 .DS_Store
-
+.gradle
+.gradletasknamecache
 agent-bootstrapper/testdata/agent-launcher.jar
 agent-bootstrapper/testdata/test-agent.jar
 server/testdata/test-agent.jar
@@ -229,4 +227,4 @@ server/webapp/WEB-INF/rails.new/config/cipher
 app-server/target/*
 jetty6/target/*
 jetty9/target/*
-
+buildSrc/build/
