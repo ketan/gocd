@@ -23,7 +23,6 @@ describe "/shared/_application_nav.html.erb" do
     class << view
       include ApplicationHelper
     end
-    stub_server_health_messages
     assign(:user, com.thoughtworks.go.server.domain.Username::ANONYMOUS)
     allow(view).to receive(:is_user_an_admin?).and_return(true)
   end
