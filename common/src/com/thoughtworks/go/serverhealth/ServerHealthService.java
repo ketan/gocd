@@ -77,7 +77,7 @@ public class ServerHealthService {
     public synchronized void onTimer(CruiseConfigProvider provider) {
         CruiseConfig currentConfig = provider.getCurrentConfig();
         getAllValidLogs(currentConfig);
-        LOG.info("Recomputing material to pipeline mappings.");
+        LOG.debug("Recomputing material to pipeline mappings.");
 
         HashMap<ServerHealthState, Set<String>> erroredPipelines = new HashMap<>();
 
@@ -85,7 +85,7 @@ public class ServerHealthService {
             erroredPipelines.put(entry.getValue(), entry.getValue().getPipelineNames(currentConfig));
         }
         pipelinesWithErrors = erroredPipelines;
-        LOG.info("Done recomputing material to pipeline mappings.");
+        LOG.debug("Done recomputing material to pipeline mappings.");
     }
 
     public Set<String> getPipelinesWithErrors(ServerHealthState serverHealthState) {
