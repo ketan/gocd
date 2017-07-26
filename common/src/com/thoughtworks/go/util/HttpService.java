@@ -32,12 +32,14 @@ import org.apache.http.message.BasicNameValuePair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 import java.util.Arrays;
 import java.util.Properties;
 
+@Component
 public class HttpService {
     private HttpClientFactory httpClientFactory;
     private static final Logger LOGGER = LoggerFactory.getLogger(HttpService.class);

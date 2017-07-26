@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 ThoughtWorks, Inc.
+ * Copyright 2017 ThoughtWorks, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,12 +21,14 @@ import com.thoughtworks.go.util.SystemEnvironment;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
 import org.eclipse.jetty.websocket.client.WebSocketClient;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import javax.net.ssl.TrustManager;
 import java.security.KeyStore;
 import java.security.cert.CRL;
 import java.util.Collection;
 
+@Component
 public class GoAgentServerWebSocketClientBuilder extends GoAgentServerClientBuilder<WebSocketClient> {
     @Autowired
     public GoAgentServerWebSocketClientBuilder(SystemEnvironment systemEnvironment) {

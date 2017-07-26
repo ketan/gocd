@@ -27,10 +27,14 @@ import com.thoughtworks.go.plugin.infra.PluginManagerReference;
 import com.thoughtworks.go.remote.AgentIdentifier;
 import com.thoughtworks.go.server.service.AgentRuntimeInfo;
 import com.thoughtworks.go.server.service.ElasticAgentRuntimeInfo;
-import com.thoughtworks.go.util.*;
+import com.thoughtworks.go.util.SubprocessLogger;
+import com.thoughtworks.go.util.SystemEnvironment;
+import com.thoughtworks.go.util.SystemUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.scheduling.annotation.Scheduled;
 
+import javax.annotation.PostConstruct;
 import java.io.File;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
@@ -66,10 +70,13 @@ public abstract class AgentController {
         ipAddress = SystemUtil.getClientIp(systemEnvironment.getServiceUrl());
     }
 
+    @Scheduled(initialDelayString = "${agent.ping.delay}", fixedDelayString = "${agent.ping.interval}")
     public abstract void ping();
 
+    @Scheduled(initialDelayString = "${agent.instruction.delay}", fixedDelayString = "${agent.instruction.interval}")
     public abstract void execute();
 
+    @Scheduled(initialDelayString = "${agent.get.work.delay}", fixedDelayString = "${agent.get.work.interval}")
     public final void loop() {
         try {
             LOG.debug("[Agent Loop] Trying to retrieve work.");
@@ -122,6 +129,7 @@ public abstract class AgentController {
     }
 
     // Executed when Spring initializes this bean
+    @PostConstruct
     void init() throws IOException {
         initPipelinesFolder();
         initSslInfratructure();
