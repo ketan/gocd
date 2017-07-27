@@ -59,7 +59,8 @@ def props = [
   'db.user'                         : 'sa',
   'db.password'                     : '',
   'db.name'                         : 'cruise',
-  'db.port'                         : ''
+  'db.port'                         : '',
+  'spring.profiles.active'          : 'test'
 ]
 props.putAll(project.hasProperty('testSystemProperties') ? project.testSystemProperties : [:])
 project.ext.testSystemProperties = props

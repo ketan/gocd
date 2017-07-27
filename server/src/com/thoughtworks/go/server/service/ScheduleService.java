@@ -48,6 +48,8 @@ import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallback;
@@ -63,6 +65,7 @@ import java.util.stream.Collectors;
 import static com.thoughtworks.go.util.GoConstants.DEFAULT_APPROVED_BY;
 
 @Service
+@EnableScheduling
 public class ScheduleService {
     private static final Logger LOGGER = LoggerFactory.getLogger(ScheduleService.class);
 
@@ -152,6 +155,7 @@ public class ScheduleService {
     }
 
     //Note: This is called from a Spring timer
+    @Scheduled(initialDelay = 10000, fixedDelayString = "${cruise.buildCause.consumer.interval}")
     public void autoSchedulePipelinesFromRequestBuffer() {
         synchronized (autoScheduleMutex) {
             try {
@@ -569,6 +573,7 @@ public class ScheduleService {
 
     //Note: This is called from a Spring timer
 
+    @Scheduled(initialDelay = 3000, fixedDelayString = "${cruise.reschedule.hung.builds.interval}")
     public void rescheduleHungJobs() {
         try {
             //TODO 2779
@@ -587,6 +592,7 @@ public class ScheduleService {
     }
 
     // Note: This is also called from a spring timer (cancelHungJobs)
+    @Scheduled(initialDelay = 3000, fixedDelayString = "${cruise.cancel.hung.jobs.interval}")
     public void cancelHungJobs() {
         try {
             consoleActivityMonitor.cancelUnresponsiveJobs(this);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 ThoughtWorks, Inc.
+ * Copyright 2017 ThoughtWorks, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,9 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
@@ -39,7 +42,7 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(locations = {"classpath:/applicationContext-plugin-infra.xml"})
+@ContextConfiguration
 public class MultipleExtensionPluginWithPluginManagerIntegrationTest {
     public static final String PLUGIN_DESC_PROPERTY_SET_BY_PLUGIN_EXT_1 = "testplugin.multiple.extension.DescriptorPlugin1.setPluginDescriptor.invoked";
     public static final String PLUGIN_DESC_PROPERTY_SET_BY_PLUGIN_EXT_2 = "testplugin.multiple.extension.DescriptorPlugin2.setPluginDescriptor.invoked";
@@ -50,7 +53,15 @@ public class MultipleExtensionPluginWithPluginManagerIntegrationTest {
     private static final String PLUGIN_ID = "testplugin.multiple.extension";
     @Autowired DefaultPluginManager pluginManager;
     @Autowired DefaultPluginJarChangeListener jarChangeListener;
-    @Autowired SystemEnvironment systemEnvironment;
+
+    @Configuration
+    @ComponentScan("com.thoughtworks.go.plugin.infra")
+    public static class SpringConfig {
+        @Bean
+        SystemEnvironment get() {
+            return new SystemEnvironment();
+        }
+    }
 
     static {
         System.setProperty(PLUGIN_ACTIVATOR_JAR_PATH.propertyName(), "defaultFiles/go-plugin-activator.jar");

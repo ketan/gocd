@@ -45,6 +45,8 @@ import com.thoughtworks.go.util.SystemEnvironment;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -61,6 +63,7 @@ import static com.thoughtworks.go.serverhealth.ServerHealthState.warning;
  * @understands when to send requests to update a material on the database
  */
 @Service
+@EnableScheduling
 public class MaterialUpdateService implements GoMessageListener<MaterialUpdateCompletedMessage>, ConfigChangedListener {
     private static final Logger LOGGER = LoggerFactory.getLogger(MaterialUpdateService.class);
 
@@ -106,6 +109,7 @@ public class MaterialUpdateService implements GoMessageListener<MaterialUpdateCo
         goConfigService.register(pipelineConfigChangedListener());
     }
 
+    @Scheduled(initialDelayString = "${cruise.material.update.delay}", fixedDelayString = "${cruise.material.update.interval}")
     public void onTimer() {
         for (MaterialSource materialSource : materialSources) {
             Set<Material> materialsForUpdate = materialSource.materialsForUpdate();

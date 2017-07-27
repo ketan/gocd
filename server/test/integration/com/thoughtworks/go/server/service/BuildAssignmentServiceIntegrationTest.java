@@ -351,7 +351,7 @@ public class BuildAssignmentServiceIntegrationTest {
         };
 
         final BuildAssignmentService buildAssignmentServiceUnderTest = new BuildAssignmentService(goConfigService, mockJobInstanceService, scheduleService,
-                agentService, environmentConfigService, transactionTemplate, scheduledPipelineLoader, pipelineService, builderFactory, agentRemoteHandler, elasticAgentPluginService, timeProvider);
+                agentService, environmentConfigService, transactionTemplate, scheduledPipelineLoader, pipelineService, builderFactory, agentRemoteHandler, elasticAgentPluginService);
 
         final Throwable[] fromThread = new Throwable[1];
         buildAssignmentServiceUnderTest.onTimer();
@@ -394,7 +394,7 @@ public class BuildAssignmentServiceIntegrationTest {
         when(mockGoConfigService.getCurrentConfig()).thenReturn(config);
 
         buildAssignmentService = new BuildAssignmentService(mockGoConfigService, jobInstanceService, scheduleService, agentService, environmentConfigService,
-                transactionTemplate, scheduledPipelineLoader, pipelineService, builderFactory, agentRemoteHandler, elasticAgentPluginService, timeProvider);
+                transactionTemplate, scheduledPipelineLoader, pipelineService, builderFactory, agentRemoteHandler, elasticAgentPluginService);
         buildAssignmentService.onTimer();
 
         AgentConfig agentConfig = AgentMother.localAgent();

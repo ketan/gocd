@@ -34,6 +34,8 @@ import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -42,6 +44,7 @@ import java.util.List;
 import java.util.Map;
 
 @Service
+@EnableScheduling
 public class PipelineScheduler implements ConfigChangedListener, GoMessageListener<ScheduleCheckCompletedMessage> {
     private static final Logger LOGGER = LoggerFactory.getLogger(PipelineScheduler.class);
 
@@ -92,6 +95,7 @@ public class PipelineScheduler implements ConfigChangedListener, GoMessageListen
     }
 
     //NOTE: This is called on a thread by Spring
+    @Scheduled(initialDelayString = "${cruise.produce.build.cause.delay}", fixedDelayString = "${cruise.produce.build.cause.interval}")
     public void onTimer() {
         autoProduceBuildCauseAndSave();
     }

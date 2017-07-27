@@ -34,7 +34,6 @@ public class CachedGoPartials {
 
     @Autowired
     public CachedGoPartials(ServerHealthService serverHealthService) {
-
         this.serverHealthService = serverHealthService;
     }
 

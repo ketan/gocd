@@ -29,7 +29,6 @@ import com.thoughtworks.go.server.service.builders.BuilderFactory;
 import com.thoughtworks.go.server.transaction.TransactionTemplate;
 import com.thoughtworks.go.server.websocket.Agent;
 import com.thoughtworks.go.server.websocket.AgentRemoteHandler;
-import com.thoughtworks.go.util.TimeProvider;
 import com.thoughtworks.go.util.URLService;
 import com.thoughtworks.go.websocket.Action;
 import com.thoughtworks.go.websocket.Message;
@@ -37,6 +36,8 @@ import com.thoughtworks.go.websocket.MessageEncoding;
 import org.apache.commons.collections.Closure;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallback;
@@ -53,6 +54,7 @@ import static org.apache.commons.collections.CollectionUtils.forAllDo;
  * @understands how to assign work to agents
  */
 @Service
+@EnableScheduling
 public class BuildAssignmentService implements ConfigChangedListener {
     private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(BuildAssignmentService.class.getName());
     public static final NoWork NO_WORK = new NoWork();
@@ -70,14 +72,13 @@ public class BuildAssignmentService implements ConfigChangedListener {
     private final BuilderFactory builderFactory;
     private AgentRemoteHandler agentRemoteHandler;
     private final ElasticAgentPluginService elasticAgentPluginService;
-    private final TimeProvider timeProvider;
 
     @Autowired
     public BuildAssignmentService(GoConfigService goConfigService, JobInstanceService jobInstanceService, ScheduleService scheduleService,
                                   AgentService agentService, EnvironmentConfigService environmentConfigService,
                                   TransactionTemplate transactionTemplate, ScheduledPipelineLoader scheduledPipelineLoader, PipelineService pipelineService, BuilderFactory builderFactory,
                                   AgentRemoteHandler agentRemoteHandler,
-                                  ElasticAgentPluginService elasticAgentPluginService, TimeProvider timeProvider) {
+                                  ElasticAgentPluginService elasticAgentPluginService) {
         this.goConfigService = goConfigService;
         this.jobInstanceService = jobInstanceService;
         this.scheduleService = scheduleService;
@@ -89,7 +90,6 @@ public class BuildAssignmentService implements ConfigChangedListener {
         this.builderFactory = builderFactory;
         this.agentRemoteHandler = agentRemoteHandler;
         this.elasticAgentPluginService = elasticAgentPluginService;
-        this.timeProvider = timeProvider;
     }
 
     public void initialize() {
@@ -183,6 +183,7 @@ public class BuildAssignmentService implements ConfigChangedListener {
         return match;
     }
 
+    @Scheduled(initialDelay = 10000, fixedDelayString = "${cruise.build.assignment.service.interval}")
     public void onTimer() {
         reloadJobPlans();
         matchingJobForRegisteredAgents();

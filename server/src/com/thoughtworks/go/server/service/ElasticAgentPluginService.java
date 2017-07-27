@@ -41,6 +41,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 
@@ -51,6 +53,7 @@ import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Service
+@EnableScheduling
 public class ElasticAgentPluginService implements JobStatusListener {
     private static final Logger LOGGER = LoggerFactory.getLogger(ElasticAgentPluginService.class);
 
@@ -90,6 +93,7 @@ public class ElasticAgentPluginService implements JobStatusListener {
         this.serverHealthService = serverHealthService;
     }
 
+    @Scheduled(initialDelay = 3000, fixedDelayString = "${go.elasticplugin.heartbeat.interval}")
     public void heartbeat() {
         LinkedMultiValueMap<String, ElasticAgentMetadata> elasticAgentsOfMissingPlugins = agentService.allElasticAgents();
 //      pingMessage TTL is set lesser than elasticPluginHeartBeatInterval to ensure there aren't multiple ping request for the same plugin

@@ -21,10 +21,10 @@
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xmlns:context="http://www.springframework.org/schema/context"
        xmlns:aop="http://www.springframework.org/schema/aop"
-       xmlns:p="http://www.springframework.org/schema/p"
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
         http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-2.5.xsd
-        http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.5.xsd" default-init-method="init">
+        http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.5.xsd"
+       default-init-method="init">
 
     <context:annotation-config/>
 
@@ -57,6 +57,7 @@
     <context:component-scan base-package="com.thoughtworks.go.server.valuestreammap"/>
     <context:component-scan base-package="com.thoughtworks.go.plugin.access"/>
     <context:component-scan base-package="com.thoughtworks.go.plugin.infra"/>
+    <context:component-scan base-package="com.thoughtworks.go.i18n"/>
 
     <import resource="velocity-config.xml"/>
     <import resource="applicationContext-shine-server.xml"/>
@@ -65,8 +66,7 @@
     <bean id="systemEnvironment" class="com.thoughtworks.go.util.SystemEnvironment"/>
 
     <!--enable Spring support for configuring Spring AOP based on @AspectJ aspects-->
-    <aop:aspectj-autoproxy>
-    </aop:aspectj-autoproxy>
+    <aop:aspectj-autoproxy/>
 
     <!--OVERIDE THE SPRING ADAPTERS STARTS-->
     <bean id="messageSource" class="org.springframework.context.support.ReloadableResourceBundleMessageSource">
@@ -85,13 +85,6 @@
         <constructor-arg ref="messageSource"/>
     </bean>
 
-    <bean id="currentLocale" class="com.thoughtworks.go.i18n.CurrentLocale"/>
-
-    <bean id="localizer" class="com.thoughtworks.go.i18n.Localizer">
-        <constructor-arg index="0" ref="messageSouceAccessor"/>
-        <constructor-arg index="1" ref="currentLocale"/>
-    </bean>
-
     <bean class="org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter">
         <property name="supportedMethods">
             <list>
@@ -108,8 +101,6 @@
     <bean class="org.springframework.web.servlet.mvc.SimpleControllerHandlerAdapter"/>
     <bean class="com.thoughtworks.go.server.web.AnnotatedExceptionResolver"/>
     <!--END OVERIDE THE SPRING ADAPTERS-->
-
-    <bean id="configRepositoryValidatorService" class="com.thoughtworks.go.config.validation.ConfigRepositoryValidatorService" autowire="autodetect" lazy-init="false" />
 
     <bean class="org.quartz.impl.StdSchedulerFactory" name="schedulerFactory"/>
     <bean class="com.thoughtworks.go.server.domain.PipelineTimeline" name="pipelineTimeline" lazy-init="true" autowire="autodetect"/>

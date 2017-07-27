@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 ThoughtWorks, Inc.
+ * Copyright 2017 ThoughtWorks, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,6 +36,8 @@ import org.eclipse.jgit.treewalk.CanonicalTreeParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.io.ByteArrayOutputStream;
@@ -49,6 +51,7 @@ import java.util.Properties;
  * @understands versioning cruise-config
  */
 @Component
+@EnableScheduling
 public class ConfigRepository {
     private static final String CRUISE_CONFIG_XML = "cruise-config.xml";
     private static final String STUDIOS_PRODUCT = "support@thoughtworks.com";
@@ -385,6 +388,7 @@ public class ConfigRepository {
         }
     }
 
+    @Scheduled(cron = "${go.config.repo.gc.cron}")
     public void garbageCollect() throws Exception {
         if (!systemEnvironment.get(SystemEnvironment.GO_CONFIG_REPO_PERIODIC_GC)) {
             return;

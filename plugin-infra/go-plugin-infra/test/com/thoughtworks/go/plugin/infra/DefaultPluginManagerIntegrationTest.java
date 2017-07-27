@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 ThoughtWorks, Inc.
+ * Copyright 2017 ThoughtWorks, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,9 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
@@ -39,8 +42,18 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(locations = {"classpath:/applicationContext-plugin-infra.xml"})
+@ContextConfiguration
 public class DefaultPluginManagerIntegrationTest {
+
+    @Configuration
+    @ComponentScan("com.thoughtworks.go.plugin.infra")
+    public static class SpringConfig {
+        @Bean
+        SystemEnvironment get() {
+            return new SystemEnvironment();
+        }
+    }
+
     public static final String PLUGIN_DESC_PROPERTY_SET_BY_TEST_PLUGIN_1 = "testplugin.descriptorValidator.setPluginDescriptor.invoked";
     private static final String PLUGIN_DIR_NAME = "./tmp-DefPlgnMgrIntTest";
     private static final String BUNDLE_DIR_NAME = "./tmp-bundles-DefPlgnMgrIntTest";
@@ -49,7 +62,6 @@ public class DefaultPluginManagerIntegrationTest {
     private static final String PLUGIN_ID_1 = "testplugin.descriptorValidator";
     @Autowired DefaultPluginManager pluginManager;
     @Autowired DefaultPluginJarChangeListener jarChangeListener;
-    @Autowired SystemEnvironment systemEnvironment;
 
     static {
         System.setProperty(PLUGIN_ACTIVATOR_JAR_PATH.propertyName(), "defaultFiles/go-plugin-activator.jar");
