@@ -113,7 +113,7 @@ public class ShineDaoIntegrationTest {
 
         LazyStageGraphLoader graphLoader = new LazyStageGraphLoader(importer, stageStorage);
         StagesQuery stagesQuery = new StagesQuery(graphLoader, stagesQueryCache);
-        shineDao = new ShineDao(stagesQuery, stageService, pipelineHistoryService);
+        shineDao = new ShineDao(stagesQuery, stageService);
         goURLRepository = new StubGoURLRepository("http://localhost:8153", artifactsRoot);
 
         failureSetup = new TestFailureSetup(materialRepository, dbHelper, pipelineTimeline, configHelper, transactionTemplate);

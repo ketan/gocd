@@ -32,19 +32,8 @@
         http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd">
 
     <context:annotation-config/>
+    <context:component-scan base-package="com.thoughtworks.go.server.dao.sparql" />
+    <context:component-scan base-package="com.thoughtworks.studios.shine" />
     <import resource="propertyConfigurer.xml"/>
-
-    <bean class="com.thoughtworks.studios.shine.cruise.stage.StagesQuery" lazy-init="false" id="stagesQuery">
-        <constructor-arg index="0" ref="lazyStageGraphLoader"/>
-        <constructor-arg index="1" ref="stagesQueryGoCache"/>
-    </bean>
-
-
-    <bean id="shineDao" class="com.thoughtworks.go.server.dao.sparql.ShineDao" lazy-init="false">
-        <constructor-arg ref="stagesQuery" index="0"/>
-        <constructor-arg ref="stageService" index="1"/>
-        <constructor-arg ref="pipelineHistoryService" index="2"/>
-    </bean>
-
 
 </beans>

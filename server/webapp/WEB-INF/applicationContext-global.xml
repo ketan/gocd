@@ -56,11 +56,11 @@
     <context:component-scan base-package="com.thoughtworks.go.server.initializers"/>
     <context:component-scan base-package="com.thoughtworks.go.server.valuestreammap"/>
     <context:component-scan base-package="com.thoughtworks.go.plugin.access"/>
+    <context:component-scan base-package="com.thoughtworks.go.plugin.infra"/>
 
     <import resource="velocity-config.xml"/>
     <import resource="applicationContext-shine-server.xml"/>
 
-    <context:component-scan base-package="com.thoughtworks.go.plugin.infra"/>
     <bean id="zipUtil" class="com.thoughtworks.go.util.ZipUtil"/>
     <bean id="systemEnvironment" class="com.thoughtworks.go.util.SystemEnvironment"/>
 

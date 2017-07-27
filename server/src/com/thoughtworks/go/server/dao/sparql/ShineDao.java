@@ -23,7 +23,6 @@ import com.thoughtworks.go.domain.testinfo.StageTestRuns;
 import com.thoughtworks.go.domain.testinfo.TestStatus;
 import com.thoughtworks.go.domain.testinfo.TestSuite;
 import com.thoughtworks.go.i18n.LocalizedMessage;
-import com.thoughtworks.go.server.service.PipelineInstanceLoader;
 import com.thoughtworks.go.server.service.StageService;
 import com.thoughtworks.go.server.service.result.LocalizedOperationResult;
 import com.thoughtworks.studios.shine.cruise.GoOntology;
@@ -34,6 +33,7 @@ import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.util.Arrays;
 import java.util.List;
@@ -41,14 +41,14 @@ import java.util.List;
 /**
  * @understands how to get data out of shine
  */
-
+@Service
 public class ShineDao {
     private static final Logger LOGGER = LoggerFactory.getLogger(ShineDao.class);
     private StagesQuery stagesQuery;
     private final StageService stageService;
 
     @Autowired
-    public ShineDao(StagesQuery stagesQuery, StageService stageService, PipelineInstanceLoader pipelineInstanceLoader) {
+    public ShineDao(StagesQuery stagesQuery, StageService stageService) {
         this.stagesQuery = stagesQuery;
         this.stageService = stageService;
     }
