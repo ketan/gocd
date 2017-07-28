@@ -16,18 +16,17 @@
 
 package com.thoughtworks.go.server.web.i18n;
 
-import java.util.Locale;
-import javax.servlet.ServletContext;
-import javax.servlet.http.HttpServletRequest;
-
 import org.jmock.Expectations;
 import org.jmock.Mockery;
 import org.jmock.lib.legacy.ClassImposteriser;
 import org.junit.Before;
-import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.context.MessageSourceResolvable;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.servlet.support.RequestContext;
+
+import javax.servlet.ServletContext;
+import javax.servlet.http.HttpServletRequest;
+import java.util.Locale;
 
 public class RequestContextTestCase {
 
@@ -65,8 +64,10 @@ public class RequestContextTestCase {
             allowing(webApplicationContext)
                     .getMessage(with(any(String.class)), with(any(Object[].class)), with(any(Locale.class)));
             will(returnValue(""));
-            allowing(webApplicationContext).getBean(with(any(String.class)), with(any(Class.class)));
-            will(throwException(new NoSuchBeanDefinitionException("No such bean!")));
+            allowing(webApplicationContext).containsBean(with(any(String.class)));
+            will(returnValue(false));
+//            allowing(webApplicationContext).getBean(with(any(String.class)), with(any(Class.class)));
+//            will(throwException(new NoSuchBeanDefinitionException("No such bean!")));
         }
     }
 

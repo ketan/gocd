@@ -20,9 +20,11 @@
        xmlns:context="http://www.springframework.org/schema/context"
        xmlns:aop="http://www.springframework.org/schema/aop"
        xmlns:p="http://www.springframework.org/schema/p"
+       xmlns:security="http://www.springframework.org/schema/security"
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
         http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-2.5.xsd
-        http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.5.xsd"
+        http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.5.xsd
+        http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-3.0.3.xsd"
        default-init-method="init">
 
     <context:annotation-config/>
@@ -33,25 +35,19 @@
 
     <!-- This bean name 'filterChainProxy' is referenced in web.xml -->
     <bean id="filterChainProxy" class="org.springframework.security.util.FilterChainProxy">
-        <property name="filterInvocationDefinitionSource">
-            <value>
-                CONVERT_URL_TO_LOWERCASE_BEFORE_COMPARISON
-                PATTERN_TYPE_APACHE_ANT
-                /api/config-repository.git/**=modeAwareFilter,httpSessionContextIntegrationFilter,apiSessionFilter,removeAdminPermissionFilter,basicProcessingFilter,authenticationProcessingFilter,userEnabledCheckFilter,anonymousProcessingFilter,basicAuthenticationAccessDenied,denyGoCDAccessForArtifactsFilter,sessionFixationProtectionFilter,filterInvocationInterceptor
-
-                /remoting/**=modeAwareFilter,artifactSizeEnforcementFilter,i18nlocaleResolver,httpSessionContextIntegrationFilter,x509ProcessingFilter,x509AccessDenied,agentRemotingFilterInvocationInterceptor,flashLoader,urlRewriter
-                /agent-websocket/**=modeAwareFilter,artifactSizeEnforcementFilter,i18nlocaleResolver,httpSessionContextIntegrationFilter,x509ProcessingFilter,x509AccessDenied,agentRemotingFilterInvocationInterceptor
-                /api/feeds/**=modeAwareFilter,i18nlocaleResolver,httpSessionContextIntegrationFilter,apiSessionFilter,goLogoutFilter,removeAdminPermissionFilter,oauthProcessingFilter,basicProcessingFilter,authenticationProcessingFilter,reAuthenticationFilter,userEnabledCheckFilter,anonymousProcessingFilter,basicAuthenticationAccessDenied,denyGoCDAccessForArtifactsFilter,sessionFixationProtectionFilter,filterInvocationInterceptor,flashLoader,urlRewriter
-                /api/pipelines.xml=modeAwareFilter,i18nlocaleResolver,httpSessionContextIntegrationFilter,apiSessionFilter,goLogoutFilter,removeAdminPermissionFilter,oauthProcessingFilter,basicProcessingFilter,authenticationProcessingFilter,reAuthenticationFilter,userEnabledCheckFilter,anonymousProcessingFilter,basicAuthenticationAccessDenied,denyGoCDAccessForArtifactsFilter,sessionFixationProtectionFilter,filterInvocationInterceptor,flashLoader,urlRewriter
-                /api/*/*.xml=modeAwareFilter,i18nlocaleResolver,httpSessionContextIntegrationFilter,apiSessionFilter,goLogoutFilter,removeAdminPermissionFilter,oauthProcessingFilter,basicProcessingFilter,authenticationProcessingFilter,reAuthenticationFilter,userEnabledCheckFilter,anonymousProcessingFilter,basicAuthenticationAccessDenied,denyGoCDAccessForArtifactsFilter,sessionFixationProtectionFilter,filterInvocationInterceptor,flashLoader,urlRewriter
-                /api/pipelines/*/*.xml=modeAwareFilter,i18nlocaleResolver,httpSessionContextIntegrationFilter,apiSessionFilter,goLogoutFilter,removeAdminPermissionFilter,oauthProcessingFilter,basicProcessingFilter,authenticationProcessingFilter,reAuthenticationFilter,userEnabledCheckFilter,anonymousProcessingFilter,basicAuthenticationAccessDenied,denyGoCDAccessForArtifactsFilter,sessionFixationProtectionFilter,filterInvocationInterceptor,flashLoader,urlRewriter
-
-                /cctray.xml=modeAwareFilter,i18nlocaleResolver,httpSessionContextIntegrationFilter,apiSessionFilter,goLogoutFilter,removeAdminPermissionFilter,oauthProcessingFilter,basicProcessingFilter,authenticationProcessingFilter,reAuthenticationFilter,userEnabledCheckFilter,anonymousProcessingFilter,basicAuthenticationAccessDenied,denyGoCDAccessForArtifactsFilter,sessionFixationProtectionFilter,filterInvocationInterceptor,flashLoader,urlRewriter
-                /api/**=modeAwareFilter,i18nlocaleResolver,httpSessionContextIntegrationFilter,apiSessionFilter,goLogoutFilter,removeAdminPermissionFilter,oauthProcessingFilter,basicProcessingFilter,authenticationProcessingFilter,reAuthenticationFilter,userEnabledCheckFilter,anonymousProcessingFilter,basicAuthenticationAccessDenied,denyGoCDAccessForArtifactsFilter,sessionFixationProtectionFilter,filterInvocationInterceptor,flashLoader,urlRewriter
-                /files/**=modeAwareFilter,artifactSizeEnforcementFilter,i18nlocaleResolver,httpSessionContextIntegrationFilter,goLogoutFilter,removeAdminPermissionFilter,oauthProcessingFilter,basicProcessingFilter,authenticationProcessingFilter,reAuthenticationFilter,userEnabledCheckFilter,anonymousProcessingFilter,cruiseLoginOrBasicAuthentication,sessionFixationProtectionFilter,filterInvocationInterceptor,flashLoader,urlRewriter
-                /**=modeAwareFilter,i18nlocaleResolver,httpSessionContextIntegrationFilter,goLogoutFilter,removeAdminPermissionFilter,oauthProcessingFilter,webBasedAuthFilter,preAuthenticationFilter,basicProcessingFilter,authenticationProcessingFilter,reAuthenticationFilter,userEnabledCheckFilter,anonymousProcessingFilter,cruiseLoginOrBasicAuthentication,denyGoCDAccessForArtifactsFilter,sessionFixationProtectionFilter,filterInvocationInterceptor,flashLoader,urlRewriter
-            </value>
-        </property>
+        <security:filter-chain-map path-type="ant">
+            <security:filter-chain pattern="/api/config-repository.git/**" filters="modeAwareFilter,httpSessionContextIntegrationFilter,apiSessionFilter,removeAdminPermissionFilter,basicProcessingFilter,authenticationProcessingFilter,userEnabledCheckFilter,anonymousProcessingFilter,basicAuthenticationAccessDenied,denyGoCDAccessForArtifactsFilter,sessionFixationProtectionFilter,filterInvocationInterceptor"/>
+            <security:filter-chain pattern="/remoting/**" filters="modeAwareFilter,artifactSizeEnforcementFilter,i18nlocaleResolver,httpSessionContextIntegrationFilter,x509ProcessingFilter,x509AccessDenied,agentRemotingFilterInvocationInterceptor,flashLoader,urlRewriter"/>
+            <security:filter-chain pattern="/agent-websocket/**" filters="modeAwareFilter,artifactSizeEnforcementFilter,i18nlocaleResolver,httpSessionContextIntegrationFilter,x509ProcessingFilter,x509AccessDenied,agentRemotingFilterInvocationInterceptor"/>
+            <security:filter-chain pattern="/api/feeds/**" filters="modeAwareFilter,i18nlocaleResolver,httpSessionContextIntegrationFilter,apiSessionFilter,goLogoutFilter,removeAdminPermissionFilter,oauthProcessingFilter,basicProcessingFilter,authenticationProcessingFilter,reAuthenticationFilter,userEnabledCheckFilter,anonymousProcessingFilter,basicAuthenticationAccessDenied,denyGoCDAccessForArtifactsFilter,sessionFixationProtectionFilter,filterInvocationInterceptor,flashLoader,urlRewriter"/>
+            <security:filter-chain pattern="/api/pipelines.xml" filters="modeAwareFilter,i18nlocaleResolver,httpSessionContextIntegrationFilter,apiSessionFilter,goLogoutFilter,removeAdminPermissionFilter,oauthProcessingFilter,basicProcessingFilter,authenticationProcessingFilter,reAuthenticationFilter,userEnabledCheckFilter,anonymousProcessingFilter,basicAuthenticationAccessDenied,denyGoCDAccessForArtifactsFilter,sessionFixationProtectionFilter,filterInvocationInterceptor,flashLoader,urlRewriter"/>
+            <security:filter-chain pattern="/api/*/*.xml" filters="modeAwareFilter,i18nlocaleResolver,httpSessionContextIntegrationFilter,apiSessionFilter,goLogoutFilter,removeAdminPermissionFilter,oauthProcessingFilter,basicProcessingFilter,authenticationProcessingFilter,reAuthenticationFilter,userEnabledCheckFilter,anonymousProcessingFilter,basicAuthenticationAccessDenied,denyGoCDAccessForArtifactsFilter,sessionFixationProtectionFilter,filterInvocationInterceptor,flashLoader,urlRewriter"/>
+            <security:filter-chain pattern="/api/pipelines/*/*.xml" filters="modeAwareFilter,i18nlocaleResolver,httpSessionContextIntegrationFilter,apiSessionFilter,goLogoutFilter,removeAdminPermissionFilter,oauthProcessingFilter,basicProcessingFilter,authenticationProcessingFilter,reAuthenticationFilter,userEnabledCheckFilter,anonymousProcessingFilter,basicAuthenticationAccessDenied,denyGoCDAccessForArtifactsFilter,sessionFixationProtectionFilter,filterInvocationInterceptor,flashLoader,urlRewriter"/>
+            <security:filter-chain pattern="/cctray.xml" filters="modeAwareFilter,i18nlocaleResolver,httpSessionContextIntegrationFilter,apiSessionFilter,goLogoutFilter,removeAdminPermissionFilter,oauthProcessingFilter,basicProcessingFilter,authenticationProcessingFilter,reAuthenticationFilter,userEnabledCheckFilter,anonymousProcessingFilter,basicAuthenticationAccessDenied,denyGoCDAccessForArtifactsFilter,sessionFixationProtectionFilter,filterInvocationInterceptor,flashLoader,urlRewriter"/>
+            <security:filter-chain pattern="/api/**" filters="modeAwareFilter,i18nlocaleResolver,httpSessionContextIntegrationFilter,apiSessionFilter,goLogoutFilter,removeAdminPermissionFilter,oauthProcessingFilter,basicProcessingFilter,authenticationProcessingFilter,reAuthenticationFilter,userEnabledCheckFilter,anonymousProcessingFilter,basicAuthenticationAccessDenied,denyGoCDAccessForArtifactsFilter,sessionFixationProtectionFilter,filterInvocationInterceptor,flashLoader,urlRewriter"/>
+            <security:filter-chain pattern="/files/**" filters="modeAwareFilter,artifactSizeEnforcementFilter,i18nlocaleResolver,httpSessionContextIntegrationFilter,goLogoutFilter,removeAdminPermissionFilter,oauthProcessingFilter,basicProcessingFilter,authenticationProcessingFilter,reAuthenticationFilter,userEnabledCheckFilter,anonymousProcessingFilter,cruiseLoginOrBasicAuthentication,sessionFixationProtectionFilter,filterInvocationInterceptor,flashLoader,urlRewriter"/>
+            <security:filter-chain pattern="/**" filters="modeAwareFilter,i18nlocaleResolver,httpSessionContextIntegrationFilter,goLogoutFilter,removeAdminPermissionFilter,oauthProcessingFilter,webBasedAuthFilter,preAuthenticationFilter,basicProcessingFilter,authenticationProcessingFilter,reAuthenticationFilter,userEnabledCheckFilter,anonymousProcessingFilter,cruiseLoginOrBasicAuthentication,denyGoCDAccessForArtifactsFilter,sessionFixationProtectionFilter,filterInvocationInterceptor,flashLoader,urlRewriter"/>
+        </security:filter-chain-map>
     </bean>
 
     <bean id="urlRewriter" class="org.tuckey.web.filters.urlrewrite.UrlRewriteFilter" autowire="autodetect"/>
@@ -211,19 +207,15 @@
     <bean id="agentRemotingFilterInvocationInterceptor"
           class="org.springframework.security.intercept.web.FilterSecurityInterceptor">
         <property name="authenticationManager" ref="goAuthenticationManager"/>
-        <property name="accessDecisionManager">
-            <ref bean="accessDecisionManager"/>
-        </property>
+        <property name="accessDecisionManager" ref="accessDecisionManager"/>
         <property name="objectDefinitionSource">
-            <value><![CDATA[
-                CONVERT_URL_TO_LOWERCASE_BEFORE_COMPARISON
-                PATTERN_TYPE_APACHE_ANT
-                /remoting/remotebuildrepository=ROLE_AGENT
-                /remoting/files/**=ROLE_AGENT
-                /remoting/properties/**=ROLE_AGENT
-                /remoting/**=ROLE_SUPERVISOR
-                /agent-websocket/**=ROLE_AGENT
-            ]]></value>
+            <security:filter-invocation-definition-source path-type="ant" lowercase-comparisons="true">
+                <security:intercept-url pattern="/remoting/remotebuildrepository" access="ROLE_AGENT"/>
+                <security:intercept-url pattern="/remoting/files/**" access="ROLE_AGENT"/>
+                <security:intercept-url pattern="/remoting/properties/**" access="ROLE_AGENT"/>
+                <security:intercept-url pattern="/remoting/**" access="ROLE_SUPERVISOR"/>
+                <security:intercept-url pattern="/agent-websocket/**" access="ROLE_AGENT"/>
+            </security:filter-invocation-definition-source>
         </property>
     </bean>
 
@@ -242,88 +234,82 @@
             </bean>
         </property>
         <property name="objectDefinitionSource">
-            <value><![CDATA[
-                CONVERT_URL_TO_LOWERCASE_BEFORE_COMPARISON
-                PATTERN_TYPE_APACHE_ANT
-                /auth/login=IS_AUTHENTICATED_ANONYMOUSLY
-                /auth/logout=IS_AUTHENTICATED_ANONYMOUSLY
-                /auth/security_check=IS_AUTHENTICATED_ANONYMOUSLY
-                /compressed/*=IS_AUTHENTICATED_ANONYMOUSLY
-                /assets/**=IS_AUTHENTICATED_ANONYMOUSLY
-                /api/webhooks/github/notify/**=IS_AUTHENTICATED_ANONYMOUSLY
-                /images/cruise.ico=IS_AUTHENTICATED_ANONYMOUSLY
-                /admin/agent=IS_AUTHENTICATED_ANONYMOUSLY
-                /admin/latest-agent.status=IS_AUTHENTICATED_ANONYMOUSLY
-                /admin/agent-launcher.jar=IS_AUTHENTICATED_ANONYMOUSLY
-                /admin/tfs-impl.jar=IS_AUTHENTICATED_ANONYMOUSLY
-                /admin/agent-plugins.zip=IS_AUTHENTICATED_ANONYMOUSLY
-                /admin/configuration/file/**=ROLE_SUPERVISOR
-                /admin/configuration/**=ROLE_SUPERVISOR,ROLE_GROUP_SUPERVISOR
-                /admin/restful/configuration/**=ROLE_SUPERVISOR,ROLE_GROUP_SUPERVISOR
-                /admin/pipelines/**=ROLE_SUPERVISOR,ROLE_GROUP_SUPERVISOR
-                /admin/pipeline_group/**=ROLE_SUPERVISOR,ROLE_GROUP_SUPERVISOR
-                /admin/templates/**=ROLE_SUPERVISOR,ROLE_TEMPLATE_SUPERVISOR,ROLE_TEMPLATE_VIEW_USER,ROLE_GROUP_SUPERVISOR
-                /admin/commands/**=ROLE_SUPERVISOR,ROLE_GROUP_SUPERVISOR, ROLE_TEMPLATE_SUPERVISOR
-                /admin/plugins=ROLE_SUPERVISOR,ROLE_GROUP_SUPERVISOR
-                /admin/pipeline/**=ROLE_SUPERVISOR,ROLE_GROUP_SUPERVISOR
-                /admin/materials/**=ROLE_SUPERVISOR,ROLE_GROUP_SUPERVISOR
-                /admin/package_repositories/**=ROLE_SUPERVISOR,ROLE_GROUP_SUPERVISOR
-                /admin/package_definitions/**=ROLE_SUPERVISOR,ROLE_GROUP_SUPERVISOR
-                /api/admin/internal/material_test=ROLE_SUPERVISOR,ROLE_GROUP_SUPERVISOR
-                /api/admin/internal/pipelines=ROLE_SUPERVISOR,ROLE_GROUP_SUPERVISOR
-                /api/admin/internal/resources=ROLE_SUPERVISOR,ROLE_GROUP_SUPERVISOR
-                /api/admin/internal/environments=ROLE_SUPERVISOR
-                /api/admin/internal/repository_check_connection=ROLE_SUPERVISOR, ROLE_GROUP_SUPERVISOR
-                /api/admin/internal/package_check_connection=ROLE_SUPERVISOR, ROLE_GROUP_SUPERVISOR
-                /api/admin/pipelines=ROLE_SUPERVISOR,ROLE_GROUP_SUPERVISOR
-                /api/admin/pipelines/*=ROLE_SUPERVISOR,ROLE_GROUP_SUPERVISOR
-                /api/admin/encrypt=ROLE_SUPERVISOR, ROLE_GROUP_SUPERVISOR, ROLE_TEMPLATE_SUPERVISOR
-                /api/admin/scms/**=ROLE_SUPERVISOR, ROLE_GROUP_SUPERVISOR
-                /api/admin/repositories/**=ROLE_SUPERVISOR, ROLE_GROUP_SUPERVISOR
-                /api/admin/packages/**=ROLE_SUPERVISOR, ROLE_GROUP_SUPERVISOR
-                /api/admin/plugin_info/**=ROLE_SUPERVISOR, ROLE_GROUP_SUPERVISOR
-                /api/admin/plugin_settings/**=ROLE_SUPERVISOR
-                /api/admin/agents=ROLE_SUPERVISOR
-                /api/admin/config_repos=ROLE_SUPERVISOR
-                /api/elastic/profiles/**=ROLE_SUPERVISOR, ROLE_GROUP_SUPERVISOR
-                /admin/elastic_profiles/**=ROLE_SUPERVISOR, ROLE_GROUP_SUPERVISOR
-                /api/admin/templates/**=ROLE_USER
-                /api/admin/**=ROLE_SUPERVISOR
-                /api/config-repository.git/**=ROLE_SUPERVISOR
-                /api/jobs/scheduled.xml=ROLE_SUPERVISOR
-                /admin/agents=ROLE_USER
-                /admin/**=ROLE_SUPERVISOR
-                /**/addresources.json=ROLE_SUPERVISOR
-                /**/registeragent.json=ROLE_SUPERVISOR
-                /api/feeds/**=ROLE_SUPERVISOR
-                /api/support=ROLE_SUPERVISOR
-                /api/pipelines.xml=ROLE_USER
-                /api/version=IS_AUTHENTICATED_ANONYMOUSLY
-                /api/plugin_images/**=IS_AUTHENTICATED_ANONYMOUSLY
-                /api/*/*.xml=ROLE_USER
-                /api/pipelines/*/*.xml=ROLE_USER,ROLE_OAUTH_USER
-                /api/agents/**=ROLE_USER
-                /api/users/**=ROLE_USER
-                /api/version_infos/**=ROLE_USER
-                /*/environments/*=ROLE_SUPERVISOR
-
-                /oauth/admin/**=ROLE_SUPERVISOR
-
-                /oauth/token=IS_AUTHENTICATED_ANONYMOUSLY
-                /oauth/authorize=ROLE_USER
-                /oauth/user_tokens=ROLE_USER
-                /oauth/user_tokens/revoke/**=ROLE_USER
-
-                /plugin/interact/**=IS_AUTHENTICATED_ANONYMOUSLY
-
-                /agents=ROLE_USER
-                /agents/*/job_run_history*=ROLE_SUPERVISOR
-                /agents/*/job_run_history/*=ROLE_SUPERVISOR
-                /config_view/templates/*=ROLE_USER
-                /add-on/*/admin/**=ROLE_SUPERVISOR
-                /add-on/*/api/**=ROLE_OAUTH_USER
-                /**=ROLE_USER
-            ]]></value>
+            <security:filter-invocation-definition-source path-type="ant" lowercase-comparisons="true">
+                <security:intercept-url pattern="/auth/login" access="IS_AUTHENTICATED_ANONYMOUSLY"/>
+                <security:intercept-url pattern="/auth/logout" access="IS_AUTHENTICATED_ANONYMOUSLY"/>
+                <security:intercept-url pattern="/auth/security_check" access="IS_AUTHENTICATED_ANONYMOUSLY"/>
+                <security:intercept-url pattern="/compressed/*" access="IS_AUTHENTICATED_ANONYMOUSLY"/>
+                <security:intercept-url pattern="/assets/**" access="IS_AUTHENTICATED_ANONYMOUSLY"/>
+                <security:intercept-url pattern="/api/webhooks/github/notify/**" access="IS_AUTHENTICATED_ANONYMOUSLY"/>
+                <security:intercept-url pattern="/images/cruise.ico" access="IS_AUTHENTICATED_ANONYMOUSLY"/>
+                <security:intercept-url pattern="/admin/agent" access="IS_AUTHENTICATED_ANONYMOUSLY"/>
+                <security:intercept-url pattern="/admin/latest-agent.status" access="IS_AUTHENTICATED_ANONYMOUSLY"/>
+                <security:intercept-url pattern="/admin/agent-launcher.jar" access="IS_AUTHENTICATED_ANONYMOUSLY"/>
+                <security:intercept-url pattern="/admin/tfs-impl.jar" access="IS_AUTHENTICATED_ANONYMOUSLY"/>
+                <security:intercept-url pattern="/admin/agent-plugins.zip" access="IS_AUTHENTICATED_ANONYMOUSLY"/>
+                <security:intercept-url pattern="/admin/configuration/file/**" access="ROLE_SUPERVISOR"/>
+                <security:intercept-url pattern="/admin/configuration/**" access="ROLE_SUPERVISOR,ROLE_GROUP_SUPERVISOR"/>
+                <security:intercept-url pattern="/admin/restful/configuration/**" access="ROLE_SUPERVISOR,ROLE_GROUP_SUPERVISOR"/>
+                <security:intercept-url pattern="/admin/pipelines/**" access="ROLE_SUPERVISOR,ROLE_GROUP_SUPERVISOR"/>
+                <security:intercept-url pattern="/admin/pipeline_group/**" access="ROLE_SUPERVISOR,ROLE_GROUP_SUPERVISOR"/>
+                <security:intercept-url pattern="/admin/templates/**" access="ROLE_SUPERVISOR,ROLE_TEMPLATE_SUPERVISOR,ROLE_TEMPLATE_VIEW_USER,ROLE_GROUP_SUPERVISOR"/>
+                <security:intercept-url pattern="/admin/commands/**" access="ROLE_SUPERVISOR,ROLE_GROUP_SUPERVISOR, ROLE_TEMPLATE_SUPERVISOR"/>
+                <security:intercept-url pattern="/admin/plugins" access="ROLE_SUPERVISOR,ROLE_GROUP_SUPERVISOR"/>
+                <security:intercept-url pattern="/admin/pipeline/**" access="ROLE_SUPERVISOR,ROLE_GROUP_SUPERVISOR"/>
+                <security:intercept-url pattern="/admin/materials/**" access="ROLE_SUPERVISOR,ROLE_GROUP_SUPERVISOR"/>
+                <security:intercept-url pattern="/admin/package_repositories/**" access="ROLE_SUPERVISOR,ROLE_GROUP_SUPERVISOR"/>
+                <security:intercept-url pattern="/admin/package_definitions/**" access="ROLE_SUPERVISOR,ROLE_GROUP_SUPERVISOR"/>
+                <security:intercept-url pattern="/api/admin/internal/material_test" access="ROLE_SUPERVISOR,ROLE_GROUP_SUPERVISOR"/>
+                <security:intercept-url pattern="/api/admin/internal/pipelines" access="ROLE_SUPERVISOR,ROLE_GROUP_SUPERVISOR"/>
+                <security:intercept-url pattern="/api/admin/internal/resources" access="ROLE_SUPERVISOR,ROLE_GROUP_SUPERVISOR"/>
+                <security:intercept-url pattern="/api/admin/internal/environments" access="ROLE_SUPERVISOR"/>
+                <security:intercept-url pattern="/api/admin/internal/repository_check_connection" access="ROLE_SUPERVISOR, ROLE_GROUP_SUPERVISOR"/>
+                <security:intercept-url pattern="/api/admin/internal/package_check_connection" access="ROLE_SUPERVISOR, ROLE_GROUP_SUPERVISOR"/>
+                <security:intercept-url pattern="/api/admin/pipelines" access="ROLE_SUPERVISOR,ROLE_GROUP_SUPERVISOR"/>
+                <security:intercept-url pattern="/api/admin/pipelines/*" access="ROLE_SUPERVISOR,ROLE_GROUP_SUPERVISOR"/>
+                <security:intercept-url pattern="/api/admin/encrypt" access="ROLE_SUPERVISOR, ROLE_GROUP_SUPERVISOR, ROLE_TEMPLATE_SUPERVISOR"/>
+                <security:intercept-url pattern="/api/admin/scms/**" access="ROLE_SUPERVISOR, ROLE_GROUP_SUPERVISOR"/>
+                <security:intercept-url pattern="/api/admin/repositories/**" access="ROLE_SUPERVISOR, ROLE_GROUP_SUPERVISOR"/>
+                <security:intercept-url pattern="/api/admin/packages/**" access="ROLE_SUPERVISOR, ROLE_GROUP_SUPERVISOR"/>
+                <security:intercept-url pattern="/api/admin/plugin_info/**" access="ROLE_SUPERVISOR, ROLE_GROUP_SUPERVISOR"/>
+                <security:intercept-url pattern="/api/admin/plugin_settings/**" access="ROLE_SUPERVISOR"/>
+                <security:intercept-url pattern="/api/admin/agents" access="ROLE_SUPERVISOR"/>
+                <security:intercept-url pattern="/api/admin/config_repos" access="ROLE_SUPERVISOR"/>
+                <security:intercept-url pattern="/api/elastic/profiles/**" access="ROLE_SUPERVISOR, ROLE_GROUP_SUPERVISOR"/>
+                <security:intercept-url pattern="/admin/elastic_profiles/**" access="ROLE_SUPERVISOR, ROLE_GROUP_SUPERVISOR"/>
+                <security:intercept-url pattern="/api/admin/templates/**" access="ROLE_USER"/>
+                <security:intercept-url pattern="/api/admin/**" access="ROLE_SUPERVISOR"/>
+                <security:intercept-url pattern="/api/config-repository.git/**" access="ROLE_SUPERVISOR"/>
+                <security:intercept-url pattern="/api/jobs/scheduled.xml" access="ROLE_SUPERVISOR"/>
+                <security:intercept-url pattern="/admin/agents" access="ROLE_USER"/>
+                <security:intercept-url pattern="/admin/**" access="ROLE_SUPERVISOR"/>
+                <security:intercept-url pattern="/**/addresources.json" access="ROLE_SUPERVISOR"/>
+                <security:intercept-url pattern="/**/registeragent.json" access="ROLE_SUPERVISOR"/>
+                <security:intercept-url pattern="/api/feeds/**" access="ROLE_SUPERVISOR"/>
+                <security:intercept-url pattern="/api/support" access="ROLE_SUPERVISOR"/>
+                <security:intercept-url pattern="/api/pipelines.xml" access="ROLE_USER"/>
+                <security:intercept-url pattern="/api/version" access="IS_AUTHENTICATED_ANONYMOUSLY"/>
+                <security:intercept-url pattern="/api/plugin_images/**" access="IS_AUTHENTICATED_ANONYMOUSLY"/>
+                <security:intercept-url pattern="/api/*/*.xml" access="ROLE_USER"/>
+                <security:intercept-url pattern="/api/pipelines/*/*.xml" access="ROLE_USER,ROLE_OAUTH_USER"/>
+                <security:intercept-url pattern="/api/agents/**" access="ROLE_USER"/>
+                <security:intercept-url pattern="/api/users/**" access="ROLE_USER"/>
+                <security:intercept-url pattern="/api/version_infos/**" access="ROLE_USER"/>
+                <security:intercept-url pattern="/*/environments/*" access="ROLE_SUPERVISOR"/>
+                <security:intercept-url pattern="/oauth/admin/**" access="ROLE_SUPERVISOR"/>
+                <security:intercept-url pattern="/oauth/token" access="IS_AUTHENTICATED_ANONYMOUSLY"/>
+                <security:intercept-url pattern="/oauth/authorize" access="ROLE_USER"/>
+                <security:intercept-url pattern="/oauth/user_tokens" access="ROLE_USER"/>
+                <security:intercept-url pattern="/oauth/user_tokens/revoke/**" access="ROLE_USER"/>
+                <security:intercept-url pattern="/plugin/interact/**" access="IS_AUTHENTICATED_ANONYMOUSLY"/>
+                <security:intercept-url pattern="/agents" access="ROLE_USER"/>
+                <security:intercept-url pattern="/agents/*/job_run_history*" access="ROLE_SUPERVISOR"/>
+                <security:intercept-url pattern="/agents/*/job_run_history/*" access="ROLE_SUPERVISOR"/>
+                <security:intercept-url pattern="/config_view/templates/*" access="ROLE_USER"/>
+                <security:intercept-url pattern="/add-on/*/admin/**" access="ROLE_SUPERVISOR"/>
+                <security:intercept-url pattern="/add-on/*/api/**" access="ROLE_OAUTH_USER"/>
+                <security:intercept-url pattern="/**" access="ROLE_USER"/>
+            </security:filter-invocation-definition-source>
         </property>
     </bean>
 
