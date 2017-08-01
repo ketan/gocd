@@ -39,14 +39,12 @@
     <context:component-scan base-package="com.thoughtworks.go.server.service.support"/>
     <context:component-scan base-package="com.thoughtworks.go.plugins"/>
     <context:component-scan base-package="com.thoughtworks.go.config.registry"/>
-    <context:component-scan base-package="com.thoughtworks.go.server.search"/>
     <context:component-scan base-package="com.thoughtworks.go.server.messaging"/>
     <context:component-scan base-package="com.thoughtworks.go.server.util"/>
     <context:component-scan base-package="com.thoughtworks.go.server.scheduling"/>
     <context:component-scan base-package="com.thoughtworks.go.server.cronjob"/>
     <context:component-scan base-package="com.thoughtworks.go.server.materials"/>
     <context:component-scan base-package="com.thoughtworks.go.server.persistence"/>
-    <context:component-scan base-package="com.thoughtworks.studios.shine"/>
     <context:component-scan base-package="com.thoughtworks.go.server.oauth"/>
     <context:component-scan base-package="com.thoughtworks.go.server.web"/>
     <context:component-scan base-package="com.thoughtworks.go.server.websocket"/>
