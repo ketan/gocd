@@ -17,6 +17,7 @@
 package com.thoughtworks.go.server.service;
 
 import com.thoughtworks.go.util.SystemEnvironment;
+import com.thoughtworks.go.util.scheduling.TaskSchedulerProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
 import org.springframework.scheduling.TaskScheduler;

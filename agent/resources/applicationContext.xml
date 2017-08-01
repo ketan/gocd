@@ -26,6 +26,7 @@
 
   <context:component-scan base-package="com.thoughtworks.go.plugin.infra"/>
   <context:component-scan base-package="com.thoughtworks.go.util"/>
+  <context:component-scan base-package="com.thoughtworks.go.util.scheduling"/>
   <context:component-scan base-package="com.thoughtworks.go.agent"/>
   <context:component-scan base-package="com.thoughtworks.go.plugin.access"/>
   <context:component-scan base-package="com.thoughtworks.go.publishers"/>

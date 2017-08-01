@@ -14,10 +14,21 @@
  * limitations under the License.
  */
 
-package com.thoughtworks.go.server.service;
+package com.thoughtworks.go.util.scheduling;
 
 import org.springframework.scheduling.TaskScheduler;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
+import org.springframework.stereotype.Service;
 
-public interface TaskSchedulerProvider {
-    public TaskScheduler poolScheduler();
+@Service
+public class DefaultTaskSchedulerProvider implements TaskSchedulerProvider {
+    @Override
+    public TaskScheduler poolScheduler() {
+        ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler();
+        scheduler.setThreadNamePrefix("poolScheduler");
+        scheduler.setPoolSize(10);
+        scheduler.initialize();
+        scheduler.setDaemon(false);
+        return scheduler;
+    }
 }
