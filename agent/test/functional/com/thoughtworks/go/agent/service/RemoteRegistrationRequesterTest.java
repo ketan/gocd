@@ -17,6 +17,7 @@
 package com.thoughtworks.go.agent.service;
 
 import com.thoughtworks.go.agent.AgentAutoRegistrationPropertiesImpl;
+import com.thoughtworks.go.agent.common.ssl.DefaultGoAgentServerHttpClient;
 import com.thoughtworks.go.agent.common.ssl.GoAgentServerHttpClient;
 import com.thoughtworks.go.config.DefaultAgentRegistry;
 import com.thoughtworks.go.security.Registration;
@@ -50,7 +51,7 @@ public class RemoteRegistrationRequesterTest {
     @Test
     public void shouldPassAllParametersToPostForRegistrationOfNonElasticAgent() throws IOException, ClassNotFoundException {
         String url = "http://cruise.com/go";
-        GoAgentServerHttpClient httpClient = mock(GoAgentServerHttpClient.class);
+        GoAgentServerHttpClient httpClient = mock(DefaultGoAgentServerHttpClient.class);
         when(httpClient.execute(argThat(isA(HttpUriRequest.class)))).thenReturn(mock(CloseableHttpResponse.class));
         final DefaultAgentRegistry defaultAgentRegistry = new DefaultAgentRegistry();
         Properties properties = new Properties();
@@ -66,7 +67,7 @@ public class RemoteRegistrationRequesterTest {
     @Test
     public void shouldPassAllParametersToPostForRegistrationOfElasticAgent() throws IOException, ClassNotFoundException {
         String url = "http://cruise.com/go";
-        GoAgentServerHttpClient httpClient = mock(GoAgentServerHttpClient.class);
+        GoAgentServerHttpClient httpClient = mock(DefaultGoAgentServerHttpClient.class);
         when(httpClient.execute(argThat(isA(HttpUriRequest.class)))).thenReturn(mock(CloseableHttpResponse.class));
 
         final DefaultAgentRegistry defaultAgentRegistry = new DefaultAgentRegistry();

@@ -16,9 +16,8 @@
 
 package com.thoughtworks.go.agent;
 
-import com.thoughtworks.go.agent.common.ssl.GoAgentServerHttpClient;
+import com.thoughtworks.go.agent.common.ssl.DefaultGoAgentServerHttpClient;
 import com.thoughtworks.go.agent.common.ssl.GoAgentServerHttpClientBuilder;
-import com.thoughtworks.go.agent.common.ssl.GoAgentServerWebSocketClientBuilder;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.BeanUtils;
@@ -55,7 +54,7 @@ public class SpringBeanCandidateConstructorIntegrationTest {
         AutowiredAnnotationBeanPostProcessor autowiredAnnotationBeanPostProcessor = new AutowiredAnnotationBeanPostProcessor();
 
         //Beans which are instantiated by explicitly specifying a constructor and its args in the applicationContext xml files
-        List<Class<?>> exclusions = Arrays.asList(GoAgentServerHttpClient.class, GoAgentServerHttpClientBuilder.class,
+        List<Class<?>> exclusions = Arrays.asList(DefaultGoAgentServerHttpClient.class, GoAgentServerHttpClientBuilder.class,
                 AgentHTTPClientController.class);
         for (String name : allBeans) {
             Object bean = beanFactory.getSingleton(name);

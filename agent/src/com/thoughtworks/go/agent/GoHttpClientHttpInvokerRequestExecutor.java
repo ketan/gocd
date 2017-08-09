@@ -16,7 +16,7 @@
 
 package com.thoughtworks.go.agent;
 
-import com.thoughtworks.go.agent.common.ssl.GoAgentServerHttpClient;
+import com.thoughtworks.go.agent.common.ssl.DefaultGoAgentServerHttpClient;
 import com.thoughtworks.go.util.SystemEnvironment;
 import org.apache.http.Header;
 import org.apache.http.HttpResponse;
@@ -40,11 +40,11 @@ import java.util.zip.GZIPInputStream;
 
 @Component
 public class GoHttpClientHttpInvokerRequestExecutor extends AbstractHttpInvokerRequestExecutor {
-    private final GoAgentServerHttpClient goAgentServerHttpClient;
+    private final DefaultGoAgentServerHttpClient goAgentServerHttpClient;
     private final SystemEnvironment environment;
 
     @Autowired
-    public GoHttpClientHttpInvokerRequestExecutor(GoAgentServerHttpClient goAgentServerHttpClient, SystemEnvironment environment) {
+    public GoHttpClientHttpInvokerRequestExecutor(DefaultGoAgentServerHttpClient goAgentServerHttpClient, SystemEnvironment environment) {
         this.goAgentServerHttpClient = goAgentServerHttpClient;
         this.environment = environment;
     }

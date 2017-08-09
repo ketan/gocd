@@ -41,7 +41,6 @@ import static org.junit.Assert.fail;
 import static org.mockito.Mockito.*;
 
 public class HttpServiceTest {
-    private static final String NOT_EXIST_URL = "http://bjcruiselablablab";
 
     private File folderToSaveDowloadFiles;
     private HttpService service;

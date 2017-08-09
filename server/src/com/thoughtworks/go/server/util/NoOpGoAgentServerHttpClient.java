@@ -14,16 +14,25 @@
  * limitations under the License.
  */
 
-package com.thoughtworks.go.agent.common.ssl;
+package com.thoughtworks.go.server.util;
 
+import com.thoughtworks.go.agent.common.ssl.GoAgentServerHttpClient;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.protocol.HttpContext;
+import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 
-public interface GoAgentServerHttpClient {
-    CloseableHttpResponse execute(HttpUriRequest request) throws IOException;
+@Component
+public class NoOpGoAgentServerHttpClient implements GoAgentServerHttpClient {
+    @Override
+    public CloseableHttpResponse execute(HttpUriRequest request) throws IOException {
+        return null;
+    }
 
-    CloseableHttpResponse execute(HttpUriRequest request, HttpContext context) throws IOException;
+    @Override
+    public CloseableHttpResponse execute(HttpUriRequest request, HttpContext context) throws IOException {
+        return null;
+    }
 }

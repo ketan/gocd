@@ -17,8 +17,8 @@
 package com.thoughtworks.go.agent.service;
 
 import com.thoughtworks.go.agent.AgentAutoRegistrationPropertiesImpl;
+import com.thoughtworks.go.agent.common.ssl.DefaultGoAgentServerHttpClient;
 import com.thoughtworks.go.agent.common.ssl.GoAgentServerClientBuilder;
-import com.thoughtworks.go.agent.common.ssl.GoAgentServerHttpClient;
 import com.thoughtworks.go.agent.common.ssl.GoAgentServerHttpClientBuilder;
 import com.thoughtworks.go.agent.testhelpers.AgentCertificateMother;
 import com.thoughtworks.go.config.AgentAutoRegistrationProperties;
@@ -27,7 +27,6 @@ import com.thoughtworks.go.config.GuidService;
 import com.thoughtworks.go.security.Registration;
 import com.thoughtworks.go.util.ClassMockery;
 import com.thoughtworks.go.util.SystemEnvironment;
-import org.slf4j.Logger;
 import org.jmock.Expectations;
 import org.jmock.Mockery;
 import org.jmock.integration.junit4.JMock;
@@ -37,6 +36,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import org.junit.runner.RunWith;
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
@@ -113,7 +113,7 @@ public class SslInfrastructureServiceTest {
     private SslInfrastructureService.RemoteRegistrationRequester requesterStub(final Registration registration) {
         final SslInfrastructureServiceTest me = this;
         final SystemEnvironment systemEnvironment = new SystemEnvironment();
-        return new SslInfrastructureService.RemoteRegistrationRequester(null, agentRegistryStub(), new GoAgentServerHttpClient(new GoAgentServerHttpClientBuilder(systemEnvironment))) {
+        return new SslInfrastructureService.RemoteRegistrationRequester(null, agentRegistryStub(), new DefaultGoAgentServerHttpClient(new GoAgentServerHttpClientBuilder(systemEnvironment))) {
             protected Registration requestRegistration(String agentHostName, AgentAutoRegistrationProperties agentAutoRegisterProperties)
                     throws IOException, ClassNotFoundException {
                 LOGGER.debug("Requesting remote registration");
@@ -123,8 +123,8 @@ public class SslInfrastructureServiceTest {
         };
     }
 
-    private GoAgentServerHttpClient httpClientStub() {
-        final GoAgentServerHttpClient client = context.mock(GoAgentServerHttpClient.class);
+    private DefaultGoAgentServerHttpClient httpClientStub() {
+        final DefaultGoAgentServerHttpClient client = context.mock(DefaultGoAgentServerHttpClient.class);
         context.checking(new Expectations() {
             {
                 try {

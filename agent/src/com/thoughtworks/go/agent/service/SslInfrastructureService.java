@@ -16,6 +16,7 @@
 
 package com.thoughtworks.go.agent.service;
 
+import com.thoughtworks.go.agent.common.ssl.DefaultGoAgentServerHttpClient;
 import com.thoughtworks.go.agent.common.ssl.GoAgentServerClientBuilder;
 import com.thoughtworks.go.agent.common.ssl.GoAgentServerHttpClient;
 import com.thoughtworks.go.agent.common.ssl.GoAgentServerHttpClientBuilder;
@@ -59,16 +60,16 @@ public class SslInfrastructureService {
     private static final Marker FATAL = MarkerFactory.getMarker("FATAL");
     private final RemoteRegistrationRequester remoteRegistrationRequester;
     private final KeyStoreManager keyStoreManager;
-    private final GoAgentServerHttpClient httpClient;
+    private final DefaultGoAgentServerHttpClient httpClient;
     private transient boolean registered = false;
 
     @Autowired
-    public SslInfrastructureService(URLService urlService, GoAgentServerHttpClient httpClient, AgentRegistry agentRegistry) throws Exception {
+    public SslInfrastructureService(URLService urlService, DefaultGoAgentServerHttpClient httpClient, AgentRegistry agentRegistry) throws Exception {
         this(new RemoteRegistrationRequester(urlService.getAgentRegistrationURL(), agentRegistry, httpClient), httpClient);
     }
 
     // For mocking out remote call
-    SslInfrastructureService(RemoteRegistrationRequester requester, GoAgentServerHttpClient httpClient)
+    SslInfrastructureService(RemoteRegistrationRequester requester, DefaultGoAgentServerHttpClient httpClient)
             throws Exception {
         this.remoteRegistrationRequester = requester;
         this.httpClient = httpClient;

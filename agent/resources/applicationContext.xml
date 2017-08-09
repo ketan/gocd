@@ -49,7 +49,7 @@
     <property name="systemPropertiesMode" value="2"/>
   </bean>
 
-  <bean id="httpClient" class="com.thoughtworks.go.agent.common.ssl.GoAgentServerHttpClient">
+  <bean id="httpClient" class="com.thoughtworks.go.agent.common.ssl.DefaultGoAgentServerHttpClient">
     <constructor-arg ref="httpClientBuilder"/>
   </bean>
 
