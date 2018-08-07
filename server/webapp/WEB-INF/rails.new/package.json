@@ -38,7 +38,7 @@
     "babel-plugin-transform-react-jsx": "^6.24.1",
     "babel-preset-env": "^1.7.0",
     "babel-preset-stage-2": "^6.24.1",
-    "eslint": "^4.19.1",
+    "eslint": "^5.3.0",
     "eslint-plugin-react": "^7.10.0",
     "fs-extra": "^6.0.1",
     "happypack": "^4.0.1",
