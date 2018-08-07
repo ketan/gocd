@@ -63,7 +63,7 @@
     "synchronize": "^2.0.0",
     "uglifyjs-webpack-plugin": "^1.2.2",
     "upath": "^1.1.0",
-    "webpack": "^3.6.0",
+    "webpack": "^4.16.5",
     "webpack-dev-server": "^2.4.5"
   }
 }
