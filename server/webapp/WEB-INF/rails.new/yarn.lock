@@ -3831,9 +3831,9 @@ isstream@~0.1.2:
   version "0.1.2"
   resolved "https://registry.yarnpkg.com/isstream/-/isstream-0.1.2.tgz#47e63f7af55afa6f92e1500e690eb8b8529c099a"
 
-jasmine-ajax@^3.3.1:
-  version "3.3.1"
-  resolved "https://registry.yarnpkg.com/jasmine-ajax/-/jasmine-ajax-3.3.1.tgz#f8cad9fd49dfd44f3cf798d36f4e857d125c75c5"
+jasmine-ajax@^3.4.0:
+  version "3.4.0"
+  resolved "https://registry.yarnpkg.com/jasmine-ajax/-/jasmine-ajax-3.4.0.tgz#8dce36c0e3f16b9b900adb1f2ef83e0cd87c6755"
 
 jasmine-core@^2.6.2, jasmine-core@~2.99.0:
   version "2.99.1"
