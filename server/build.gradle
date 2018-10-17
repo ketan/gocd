@@ -309,7 +309,7 @@ dependencies {
   compile(group: 'org.eclipse.jgit', name: 'org.eclipse.jgit.http.server', version: project.versions.jgit) {
     exclude(module: 'jsch')
   }
-  compile group: 'cglib', name: 'cglib-nodep', version: '2.2'
+  compile group: 'cglib', name: 'cglib-nodep', version: '3.2.8'
   compileOnly project(':app-server')
   compileOnly group: 'org.bouncycastle', name: 'bcprov-jdk15on', version: project.versions.bouncyCastle
   compileOnly group: 'org.bouncycastle', name: 'bcpkix-jdk15on', version: project.versions.bouncyCastle
