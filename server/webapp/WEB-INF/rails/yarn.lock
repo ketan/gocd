@@ -3409,11 +3409,6 @@ exit-hook@^1.0.0:
   resolved "https://registry.yarnpkg.com/exit-hook/-/exit-hook-1.1.1.tgz#f05ca233b48c05d54fff07765df8507e95c02ff8"
   integrity sha1-8FyiM7SMBdVP/wd2XfhQfpXAL/g=
 
-exit@^0.1.2:
-  version "0.1.2"
-  resolved "https://registry.yarnpkg.com/exit/-/exit-0.1.2.tgz#0632638f8d877cc82107d30a0fff1a17cba1cd0c"
-  integrity sha1-BjJjj42HfMghB9MKD/8aF8uhzQw=
-
 expand-braces@^0.1.1:
   version "0.1.2"
   resolved "https://registry.yarnpkg.com/expand-braces/-/expand-braces-0.1.2.tgz#488b1d1d2451cb3d3a6b192cfc030f44c5855fea"
@@ -5039,24 +5034,28 @@ jasmine-ajax@^3.3.1:
   resolved "https://registry.yarnpkg.com/jasmine-ajax/-/jasmine-ajax-3.3.1.tgz#f8cad9fd49dfd44f3cf798d36f4e857d125c75c5"
   integrity sha1-+MrZ/Unf1E8895jTb06FfRJcdcU=
 
-jasmine-core@^2.6.2, jasmine-core@~2.99.0:
+jasmine-core@^2.6.2:
   version "2.99.1"
   resolved "https://registry.yarnpkg.com/jasmine-core/-/jasmine-core-2.99.1.tgz#e6400df1e6b56e130b61c4bcd093daa7f6e8ca15"
   integrity sha1-5kAN8ea1bhMLYcS80JPap/boyhU=
+
+jasmine-core@~3.3.0:
+  version "3.3.0"
+  resolved "https://registry.yarnpkg.com/jasmine-core/-/jasmine-core-3.3.0.tgz#dea1cdc634bc93c7e0d4ad27185df30fa971b10e"
+  integrity sha512-3/xSmG/d35hf80BEN66Y6g9Ca5l/Isdeg/j6zvbTYlTzeKinzmaTM4p9am5kYqOmE05D7s1t8FGjzdSnbUbceA==
 
 jasmine-jquery@^2.1.1:
   version "2.1.1"
   resolved "https://registry.yarnpkg.com/jasmine-jquery/-/jasmine-jquery-2.1.1.tgz#d4095e646944a26763235769ab018d9f30f0d47b"
   integrity sha1-1AleZGlEomdjI1dpqwGNnzDw1Hs=
 
-jasmine@^2.6.0:
-  version "2.99.0"
-  resolved "https://registry.yarnpkg.com/jasmine/-/jasmine-2.99.0.tgz#8ca72d102e639b867c6489856e0e18a9c7aa42b7"
-  integrity sha1-jKctEC5jm4Z8ZImFbg4YqceqQrc=
+jasmine@^3.3.0:
+  version "3.3.0"
+  resolved "https://registry.yarnpkg.com/jasmine/-/jasmine-3.3.0.tgz#4f64e4aba2f9cbd30418957468c024c3b4c82551"
+  integrity sha512-haZzMvmoWSI2VCKfDgPqyEOPBQA7C1fgtIMgKNU4hVMcrVkWU5NPOWQqOTA6mVFyKcSUUrnkXu/ZEgY0bRnd6A==
   dependencies:
-    exit "^0.1.2"
     glob "^7.0.6"
-    jasmine-core "~2.99.0"
+    jasmine-core "~3.3.0"
 
 jquery-textcomplete@0.8.2:
   version "0.8.2"
