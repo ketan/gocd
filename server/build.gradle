@@ -266,7 +266,7 @@ dependencies {
     exclude(module: 'jms')
     exclude(module: 'servlet-api')
   }
-  compile(group: 'org.apache.activemq', name: 'activemq-core', version: '5.5.0') {
+  compile(group: 'org.apache.activemq', name: 'activemq-core', version: '5.7.0') {
     exclude(module: 'spring-context')
     exclude(module: 'org.osgi.core')
   }
