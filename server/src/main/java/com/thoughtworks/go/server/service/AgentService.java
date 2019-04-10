@@ -223,22 +223,6 @@ public class AgentService implements DatabaseEntityChangeListener<Agent> {
         return new Username(format("agent_%s_%s_%s", uuId, ipAddress, hostNameForDisplay));
     }
 
-    public Registration requestRegistration(AgentRuntimeInfo agentRuntimeInfo) {
-        LOGGER.debug("Agent is requesting registration {}", agentRuntimeInfo);
-
-        AgentInstance agentInstance = agentInstances.register(agentRuntimeInfo);
-        Registration registration = agentInstance.assignCertification();
-
-        Agent agent = agentInstance.getAgent();
-        if (agentInstance.isRegistered() && !agent.cookieAssigned()) {
-            generateAndAddCookie(agent);
-            saveOrUpdate(agentInstance.getAgent());
-            bombIfAgentHasErrors(agent);
-            LOGGER.debug("New Agent approved {}", agentRuntimeInfo);
-        }
-
-        return registration;
-    }
 
     @Deprecated
     public void approve(String uuid) {
@@ -320,6 +304,23 @@ public class AgentService implements DatabaseEntityChangeListener<Agent> {
     public void register(Agent agent) {
         generateAndAddCookie(agent);
         saveOrUpdate(agent);
+    }
+
+    public Registration requestRegistration(AgentRuntimeInfo agentRuntimeInfo) {
+        LOGGER.debug("Agent is requesting registration {}", agentRuntimeInfo);
+
+        AgentInstance agentInstance = agentInstances.register(agentRuntimeInfo);
+        Registration registration = agentInstance.assignCertification();
+
+        Agent agent = agentInstance.getAgent();
+        if (agentInstance.isRegistered() && !agent.cookieAssigned()) {
+            generateAndAddCookie(agent);
+            saveOrUpdate(agentInstance.getAgent());
+            bombIfAgentHasErrors(agent);
+            LOGGER.debug("New Agent approved {}", agentRuntimeInfo);
+        }
+
+        return registration;
     }
 
     public boolean isRegistered(String uuid) {

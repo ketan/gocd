@@ -21,14 +21,13 @@ import com.thoughtworks.go.plugin.infra.plugininfo.GoPluginDescriptor;
 import com.thoughtworks.go.util.SystemEnvironment;
 import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.commons.io.output.NullOutputStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
+import java.io.*;
 import java.nio.file.Files;
 import java.security.DigestOutputStream;
 import java.security.MessageDigest;
@@ -50,11 +49,13 @@ public class PluginsZip implements PluginChangeListener {
 
     private final Predicate<GoPluginDescriptor> predicate;
     private String md5DigestOfPlugins;
+    private String sha256DigestOfPlugins;
     private List<GoPluginDescriptor> agentPlugins = new CopyOnWriteArrayList<>();
     private final File destZipFile;
     private final File bundledPlugins;
     private final File externalPlugins;
     private final PluginManager pluginManager;
+
 
     @Autowired
     public PluginsZip(SystemEnvironment systemEnvironment, PluginManager pluginManager) {
@@ -74,7 +75,14 @@ public class PluginsZip implements PluginChangeListener {
         reset();
 
         MessageDigest md5Digest = DigestUtils.getMd5Digest();
-        try (ZipOutputStream zos = new ZipOutputStream(new DigestOutputStream(new BufferedOutputStream(new FileOutputStream(destZipFile)), md5Digest))) {
+        MessageDigest sha256Digest = DigestUtils.getSha256Digest();
+
+        try (
+                DigestOutputStream md5 = new DigestOutputStream(new NullOutputStream(), md5Digest);
+                DigestOutputStream sha256 = new DigestOutputStream(new NullOutputStream(), sha256Digest);
+                BufferedOutputStream file = new BufferedOutputStream(new FileOutputStream(destZipFile));
+                ZipOutputStream zos = new ZipOutputStream(new MultiOutputStream(md5, sha256, file));
+        ) {
             for (GoPluginDescriptor agentPlugins : agentPlugins()) {
                 String zipEntryPrefix = "external/";
 
@@ -91,6 +99,7 @@ public class PluginsZip implements PluginChangeListener {
         }
 
         md5DigestOfPlugins = Hex.encodeHexString(md5Digest.digest());
+        sha256DigestOfPlugins = Hex.encodeHexString(sha256Digest.digest());
     }
 
     private void reset() {
@@ -100,6 +109,10 @@ public class PluginsZip implements PluginChangeListener {
 
     public String md5() {
         return md5DigestOfPlugins;
+    }
+
+    public String sha256() {
+        return sha256DigestOfPlugins;
     }
 
     private List<GoPluginDescriptor> agentPlugins() {
@@ -139,6 +152,22 @@ public class PluginsZip implements PluginChangeListener {
     private void maybeUpdatePluginsZip(GoPluginDescriptor pluginDescriptor) {
         if (predicate.test(pluginDescriptor)) {
             create();
+        }
+    }
+
+    private class MultiOutputStream extends OutputStream {
+
+        private final OutputStream[] streams;
+
+        MultiOutputStream(OutputStream... streams) {
+            this.streams = streams;
+        }
+
+        @Override
+        public void write(int b) throws IOException {
+            for (OutputStream stream : streams) {
+                stream.write(b);
+            }
         }
     }
 }

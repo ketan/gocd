@@ -13,25 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.thoughtworks.go.domain;
 
-import java.io.BufferedInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
+package com.thoughtworks.go.api.agentservices.representers;
 
-public abstract class InputStreamSrc {
-    protected final URL jarURL;
+import com.thoughtworks.go.api.agentservices.Handler;
+import com.thoughtworks.go.api.base.OutputWriter;
 
-    protected InputStreamSrc(URL jarURL) {
-        this.jarURL = jarURL;
-    }
+import java.util.Map;
 
-    public InputStream invoke() throws IOException {
-        return new BufferedInputStream(jarURL.openStream());
-    }
-
-    public URL getJarURL() {
-        return jarURL;
+public class AgentManifestRepresenter {
+    public static void toJSON(OutputWriter outputWriter, Map<String, Handler> handlers) {
+        handlers.forEach((s, handler) -> {
+            outputWriter.addChild(s, child -> child.add("sha256", handler.getChecksum()));
+        });
     }
 }

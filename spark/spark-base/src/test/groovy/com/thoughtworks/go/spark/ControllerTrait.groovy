@@ -55,6 +55,14 @@ trait ControllerTrait<T extends SparkController> {
   Part part = mock(Part)
   Collection<Part> parts = Collections.singletonList(part)
 
+  void head(String path) {
+    sendRequest('head', path, [:], null)
+  }
+
+  void head(String path, Map headers) {
+    sendRequest('head', path, headers, null)
+  }
+
   void get(String path) {
     sendRequest('get', path, [:], null)
   }

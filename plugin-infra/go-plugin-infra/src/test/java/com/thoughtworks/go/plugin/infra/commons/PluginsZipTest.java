@@ -121,7 +121,7 @@ public class PluginsZipTest {
     }
 
     @After
-    public void tearDown()  {
+    public void tearDown() {
         temporaryFolder.delete();
     }
 
@@ -144,17 +144,21 @@ public class PluginsZipTest {
     @Test
     public void shouldGetChecksumIfFileWasCreated() {
         pluginsZip.create();
-        String md5 = pluginsZip.md5();
-        assertThat(md5, is(notNullValue()));
+        assertThat(pluginsZip.md5(), is(notNullValue()));
+        assertThat(pluginsZip.sha256(), is(notNullValue()));
     }
 
     @Test
     public void shouldUpdateChecksumIfFileIsReCreated() throws Exception {
         pluginsZip.create();
         String oldMd5 = pluginsZip.md5();
+        String oldSha256 = pluginsZip.sha256();
+
         FileUtils.writeStringToFile(new File(externalPluginsDir, "external-task-1.jar"), UUID.randomUUID().toString(), UTF_8);
         pluginsZip.create();
+
         assertThat(pluginsZip.md5(), is(not(oldMd5)));
+        assertThat(pluginsZip.sha256(), is(not(oldSha256)));
     }
 
     @Test(expected = FileAccessRightsCheckException.class)
@@ -198,7 +202,7 @@ public class PluginsZipTest {
 
 
     @Test
-    public void shouldCreatePluginsWhenTaskPluginsAreAdded()  {
+    public void shouldCreatePluginsWhenTaskPluginsAreAdded() {
         GoPluginDescriptor plugin = new GoPluginDescriptor("curl-task-plugin", null, null, null, null, false);
         when(pluginManager.isPluginOfType("task", plugin.id())).thenReturn(true);
         pluginsZip.pluginLoaded(plugin);
@@ -206,19 +210,19 @@ public class PluginsZipTest {
     }
 
     @Test
-    public void shouldCreatePluginsWhenTaskPluginsAreRemoved()  {
+    public void shouldCreatePluginsWhenTaskPluginsAreRemoved() {
         pluginsZip.pluginUnLoaded(externalTaskPlugin);
         verify(pluginsZip, times(1)).create();
     }
 
     @Test
-    public void shouldDoNothingWhenAPluginThatIsNotATaskOrScmOrPackageMaterialPluginPluginIsAdded()  {
+    public void shouldDoNothingWhenAPluginThatIsNotATaskOrScmOrPackageMaterialPluginPluginIsAdded() {
         pluginsZip.pluginLoaded(externalElasticAgentPlugin);
         verify(pluginsZip, never()).create();
     }
 
     @Test
-    public void shouldDoNothingWhenAPluginThatIsNotATaskOrScmOrPackageMaterialPluginPluginIsRemoved()  {
+    public void shouldDoNothingWhenAPluginThatIsNotATaskOrScmOrPackageMaterialPluginPluginIsRemoved() {
         pluginsZip.pluginUnLoaded(externalElasticAgentPlugin);
         verify(pluginsZip, never()).create();
     }

@@ -46,6 +46,7 @@ public class SparkPreFilter extends SparkFilter {
                 !request.getRequestURI().startsWith("/go/spark/api/plugin_images") &&
                 !request.getRequestURI().startsWith("/go/spark/api/support") &&
                 !request.getRequestURI().startsWith("/go/spark/api/v1/health") &&
+                !request.getRequestURI().startsWith("/go/spark/api/agent_services") &&
                 noApiVersionInAcceptHeader((HttpServletRequest) req)) {
             render404((HttpServletResponse) resp);
             return;
