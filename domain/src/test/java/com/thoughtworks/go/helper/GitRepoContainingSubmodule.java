@@ -21,6 +21,7 @@ import com.thoughtworks.go.config.materials.git.GitMaterialConfig;
 import com.thoughtworks.go.domain.materials.Modification;
 import com.thoughtworks.go.domain.materials.TestSubprocessExecutionContext;
 import com.thoughtworks.go.domain.materials.git.GitCommand;
+import com.thoughtworks.go.domain.materials.git.GitCommandFactory;
 import com.thoughtworks.go.domain.materials.mercurial.StringRevision;
 import com.thoughtworks.go.util.FileUtil;
 import org.apache.commons.io.FileUtils;
@@ -36,6 +37,7 @@ import java.util.List;
 import static com.thoughtworks.go.util.command.CommandLine.createCommandLine;
 import static com.thoughtworks.go.util.command.ProcessOutputStreamConsumer.inMemoryConsumer;
 import static com.thoughtworks.go.utils.CommandUtils.exec;
+import static com.thoughtworks.material.git.command.executors.GitProcessExecutor.SSH_CLI_JAR_FILE_PATH;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 public class GitRepoContainingSubmodule extends TestRepo {
@@ -45,6 +47,8 @@ public class GitRepoContainingSubmodule extends TestRepo {
 
     public GitRepoContainingSubmodule(TemporaryFolder temporaryFolder) throws Exception {
         super(temporaryFolder);
+        System.setProperty(SSH_CLI_JAR_FILE_PATH, "testdata/gen/ssh-cli.jar");
+
         this.workingDir = temporaryFolder.newFolder();
         remoteRepoDir = createRepo(NAME);
     }
@@ -60,7 +64,7 @@ public class GitRepoContainingSubmodule extends TestRepo {
         return submodule;
     }
 
-    public void removeSubmodule(String folderName) throws Exception {
+    public void removeSubmodule(String folderName) {
         git(remoteRepoDir).updateSubmoduleWithInit(inMemoryConsumer(), false);
         git(remoteRepoDir).submoduleRemove(folderName);
         git(remoteRepoDir).commit("Removed submodule " + folderName);
@@ -107,7 +111,7 @@ public class GitRepoContainingSubmodule extends TestRepo {
     }
 
     private GitCommand git(File workingDir) {
-        return new GitCommand(null, workingDir, GitMaterialConfig.DEFAULT_BRANCH, false, new HashMap<>(), null);
+        return GitCommandFactory.create(null, workingDir, GitMaterialConfig.DEFAULT_BRANCH, false, new HashMap<>(), null);
     }
 
     public GitMaterial mainRepo() {

@@ -247,6 +247,8 @@ dependencies {
   copyOnly project(path: ':tfs-impl:tfs-impl-14', configuration: 'fatJarConfig')
   copyOnly project(path: ':agent', configuration: 'fatJarConfig')
   copyOnly project(path: ':agent-launcher', configuration: 'fatJarConfig')
+  copyOnly project(path: ':ssh-cli', configuration: 'fatJarConfig')
+
   copyOnlyTestData project(':test:test-agent')
 
   compile group: 'org.apache.commons', name: 'commons-dbcp2', version: project.versions.commonsDbcp
@@ -333,6 +335,9 @@ dependencies {
   testCompile group: 'org.xmlunit', name: 'xmlunit-assertj', version: project.versions.xmlunitassertj
 
   testCompile project(':test:http-mocks')
+
+  testCompile group: 'org.apache.sshd', name: 'sshd-core', version: project.versions.sshd
+  testCompile group: 'org.apache.ant', name: 'ant', version: project.versions.ant
 
   testCompileOnly group: 'junit', name: 'junit', version: project.versions.junit
   testRuntimeOnly group: 'org.junit.vintage', name: 'junit-vintage-engine', version: project.versions.junit5
@@ -702,6 +707,7 @@ clean {
   delete 'tfs-impl-14.jar'
   delete 'agent-launcher.jar'
   delete 'agent.jar'
+  delete 'ssh-cli.jar'
   delete 'plugins_work'
   delete 'testdata/test-agent.jar'
   delete 'config/agentkeystore'
@@ -1118,7 +1124,8 @@ task licenseReportAggregate {
                                  'gocd-yaml-config-plugin.jar',
                                  'gocd-filebased-authentication-plugin.jar',
                                  'gocd-ldap-authentication-plugin.jar',
-                                 'gocd-yum-repository-poller-plugin.jar']
+                                 'gocd-yum-repository-poller-plugin.jar',
+                                 'ssh-cli.jar']
 
   def getAllJarDependencies = {
     // get a list of all dependencies from each gradle module

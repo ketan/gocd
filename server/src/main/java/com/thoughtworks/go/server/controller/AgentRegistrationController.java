@@ -29,7 +29,6 @@ import com.thoughtworks.go.security.RegistrationJSONizer;
 import com.thoughtworks.go.server.service.*;
 import com.thoughtworks.go.server.service.result.HttpOperationResult;
 import com.thoughtworks.go.util.SystemEnvironment;
-import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -74,12 +73,14 @@ public class AgentRegistrationController {
     private volatile String agentChecksum;
     private volatile String agentLauncherChecksum;
     private volatile String tfsSdkChecksum;
+    private volatile String sshCliChecksum;
     private volatile String agentExtraProperties;
     private Mac mac;
 
     private final InputStreamSrc agentJarSrc;
     private final InputStreamSrc agentLauncherSrc;
     private final InputStreamSrc tfsImplSrc;
+    private final InputStreamSrc sshCliSrc;
     private final InputStreamSrc agentPluginsZipSrc;
 
     @Autowired
@@ -93,6 +94,7 @@ public class AgentRegistrationController {
         this.agentLauncherSrc = JarDetector.create(systemEnvironment, "agent-launcher.jar");
         this.agentPluginsZipSrc = JarDetector.createFromFile(systemEnvironment.get(SystemEnvironment.ALL_PLUGINS_ZIP_PATH));
         this.tfsImplSrc = JarDetector.create(systemEnvironment, "tfs-impl-14.jar");
+        this.sshCliSrc = JarDetector.create(systemEnvironment, "ssh-cli.jar");
     }
 
     private Mac hmac() {
@@ -110,16 +112,18 @@ public class AgentRegistrationController {
 
     @RequestMapping(value = "/admin/latest-agent.status", method = {RequestMethod.HEAD, RequestMethod.GET})
     public void checkAgentStatus(HttpServletResponse response) {
-        LOG.debug("Processing '/admin/latest-agent.status' request with values [{}:{}], [{}:{}], [{}:{}], [{}:{}]",
+        LOG.debug("Processing '/admin/latest-agent.status' request with values [{}:{}], [{}:{}], [{}:{}], [{}:{}], [{}:{}]",
                 SystemEnvironment.AGENT_CONTENT_MD5_HEADER, agentChecksum,
                 SystemEnvironment.AGENT_LAUNCHER_CONTENT_MD5_HEADER, agentLauncherChecksum,
                 SystemEnvironment.AGENT_PLUGINS_ZIP_MD5_HEADER, pluginsZip.md5(),
-                SystemEnvironment.AGENT_TFS_SDK_MD5_HEADER, tfsSdkChecksum);
+                SystemEnvironment.AGENT_TFS_SDK_MD5_HEADER, tfsSdkChecksum,
+                SystemEnvironment.AGENT_SSH_CLI_MD5_HEADER, sshCliChecksum);
 
         response.setHeader(SystemEnvironment.AGENT_CONTENT_MD5_HEADER, agentChecksum);
         response.setHeader(SystemEnvironment.AGENT_LAUNCHER_CONTENT_MD5_HEADER, agentLauncherChecksum);
         response.setHeader(SystemEnvironment.AGENT_PLUGINS_ZIP_MD5_HEADER, pluginsZip.md5());
         response.setHeader(SystemEnvironment.AGENT_TFS_SDK_MD5_HEADER, tfsSdkChecksum);
+        response.setHeader(SystemEnvironment.AGENT_SSH_CLI_MD5_HEADER, sshCliChecksum);
         response.setHeader(SystemEnvironment.AGENT_EXTRA_PROPERTIES_HEADER, getAgentExtraProperties());
         setOtherHeaders(response);
     }
@@ -148,6 +152,18 @@ public class AgentRegistrationController {
         sendFile(tfsImplSrc, response);
     }
 
+    @RequestMapping(value = "/admin/ssh-cli.jar", method = RequestMethod.HEAD)
+    public void checkTfSshCliVersion(HttpServletResponse response) {
+        response.setHeader("Content-MD5", sshCliChecksum);
+        setOtherHeaders(response);
+    }
+
+    @RequestMapping(value = "/admin/ssh-cli.jar", method = RequestMethod.GET)
+    public void downloadTfSshCliJar(HttpServletResponse response) throws IOException {
+        checkTfSshCliVersion(response);
+        sendFile(sshCliSrc, response);
+    }
+
     @RequestMapping(value = "/admin/agent-plugins.zip", method = RequestMethod.HEAD)
     public void checkAgentPluginsZipStatus(HttpServletResponse response) {
         response.setHeader("Content-MD5", pluginsZip.md5());
@@ -172,6 +188,13 @@ public class AgentRegistrationController {
     public void populateTFSSDKChecksum() throws IOException {
         if (tfsSdkChecksum == null) {
             tfsSdkChecksum = getChecksumFor(tfsImplSrc);
+        }
+    }
+
+    @PostConstruct
+    public void populateSshCliChecksum() throws IOException {
+        if (sshCliChecksum == null) {
+            sshCliChecksum = getChecksumFor(sshCliSrc);
         }
     }
 

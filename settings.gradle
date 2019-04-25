@@ -86,6 +86,7 @@ include ':db'
 include ':development-utility:development-agent'
 include ':development-utility:development-server'
 include ':domain'
+include ':git-scm'
 include ':installers'
 include ':jar-class-loader'
 include ':javasysmon-wrapper'
@@ -104,6 +105,7 @@ include ':server'
 include ':server-launcher'
 include ':spark:spark-base'
 include ':spark:spark-spa'
+include ':ssh-cli'
 include ':test:http-mocks'
 include ':test:test-addon'
 include ':test:test-agent'
@@ -111,6 +113,7 @@ include ':test:test-utils'
 include ':tfs-impl:tfs-impl-14'
 include ':tw-go-plugins'
 include ':util'
+
 
 Distro.values().each { Distro distro ->
   distro.supportedVersions.each { DistroVersion version ->
@@ -120,3 +123,4 @@ Distro.values().each { Distro distro ->
 
 include ":docker:gocd-server:${Distro.centos.projectName(Distro.centos.getVersion('7'))}"
 include ":docker:gocd-server:${Distro.alpine.projectName(Distro.alpine.getVersion('3.9'))}"
+

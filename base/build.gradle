@@ -17,27 +17,27 @@
 description = 'GoCD Base'
 
 dependencies {
-  compile group: 'commons-io', name: 'commons-io', version: project.versions.commonsIO
-  compile group: 'org.apache.commons', name: 'commons-lang3', version: project.versions.commonsLang3
-  compile group: 'commons-codec', name: 'commons-codec', version: project.versions.commonsCodec
-  compile(group: 'org.apache.httpcomponents', name: 'httpclient', version: project.versions.apacheHttpComponents) {
-    exclude(module: 'commons-codec')
-    exclude(module: 'commons-logging')
-  }
-  compile group: 'joda-time', name: 'joda-time', version: project.versions.jodaTime
-  compile group: 'commons-logging', name: 'commons-logging', version: '1.2'
-  compile group: 'org.slf4j', name: 'slf4j-api', version: project.versions.slf4j
-  compile group: 'ch.qos.logback', name: 'logback-classic', version: project.versions.logback
-  testCompileOnly group: 'junit', name: 'junit', version: project.versions.junit
-  testRuntimeOnly group: 'org.junit.vintage', name: 'junit-vintage-engine', version: project.versions.junit5
-  testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: project.versions.junit5
-  testRuntimeOnly group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version: project.versions.junit5
-  testCompile group: 'com.googlecode', name: 'junit-ext', version: '1.0'
-  testCompile group: 'org.hamcrest', name: 'hamcrest-core', version: project.versions.hamcrest
-  testCompile group: 'org.hamcrest', name: 'hamcrest-library', version: project.versions.hamcrest
-  testCompile group: 'org.mockito', name: 'mockito-core', version: project.versions.mockito
-  testCompile group: 'org.junit.jupiter', name: 'junit-jupiter-migrationsupport', version: project.versions.junit5
-  testCompile group: 'org.assertj', name: 'assertj-core', version: project.versions.assertJ
+    compile group: 'commons-io', name: 'commons-io', version: project.versions.commonsIO
+    compile group: 'org.apache.commons', name: 'commons-lang3', version: project.versions.commonsLang3
+    compile group: 'commons-codec', name: 'commons-codec', version: project.versions.commonsCodec
+    compile(group: 'org.apache.httpcomponents', name: 'httpclient', version: project.versions.apacheHttpComponents) {
+        exclude(module: 'commons-codec')
+        exclude(module: 'commons-logging')
+    }
+    compile group: 'joda-time', name: 'joda-time', version: project.versions.jodaTime
+    compile group: 'commons-logging', name: 'commons-logging', version: '1.2'
+    compile group: 'org.slf4j', name: 'slf4j-api', version: project.versions.slf4j
+    compile group: 'ch.qos.logback', name: 'logback-classic', version: project.versions.logback
+    testCompileOnly group: 'junit', name: 'junit', version: project.versions.junit
+    testRuntimeOnly group: 'org.junit.vintage', name: 'junit-vintage-engine', version: project.versions.junit5
+    testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: project.versions.junit5
+    testRuntimeOnly group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version: project.versions.junit5
+    testCompile group: 'com.googlecode', name: 'junit-ext', version: '1.0'
+    testCompile group: 'org.hamcrest', name: 'hamcrest-core', version: project.versions.hamcrest
+    testCompile group: 'org.hamcrest', name: 'hamcrest-library', version: project.versions.hamcrest
+    testCompile group: 'org.mockito', name: 'mockito-core', version: project.versions.mockito
+    testCompile group: 'org.junit.jupiter', name: 'junit-jupiter-migrationsupport', version: project.versions.junit5
+    testCompile group: 'org.assertj', name: 'assertj-core', version: project.versions.assertJ
 
 }
 
@@ -45,45 +45,45 @@ def generatedResourcesOutput = file("resources-generated")
 def generatedResourcesInput = file('resource-templates')
 
 sourceSets {
-  main {
-    resources {
-      output.dir generatedResourcesOutput, builtBy: 'generateResources'
-      srcDirs += generatedResourcesOutput
+    main {
+        resources {
+            output.dir generatedResourcesOutput, builtBy: 'generateResources'
+            srcDirs += generatedResourcesOutput
+        }
     }
-  }
 }
 
 clean {
-  delete(generatedResourcesOutput)
+    delete(generatedResourcesOutput)
 }
 
 task generateResources {
-  inputs.dir(generatedResourcesInput)
-  outputs.dir(generatedResourcesOutput)
+    inputs.dir(generatedResourcesInput)
+    outputs.dir(generatedResourcesOutput)
 
-  def props = [
-    'goVersion': rootProject.goVersion,
-    'distVersion': rootProject.distVersion,
-    'fullVersion': rootProject.fullVersion,
-    'gitRevision': rootProject.gitRevision,
-    'copyrightYear': rootProject.copyrightYear,
-  ]
+    def props = [
+        'goVersion'    : rootProject.goVersion,
+        'distVersion'  : rootProject.distVersion,
+        'fullVersion'  : rootProject.fullVersion,
+        'gitRevision'  : rootProject.gitRevision,
+        'copyrightYear': rootProject.copyrightYear,
+    ]
 
-  inputs.properties(props)
+    inputs.properties(props)
 
-  doFirst {
-    project.delete(generatedResourcesOutput)
-    generatedResourcesOutput.mkdirs()
+    doFirst {
+        project.delete(generatedResourcesOutput)
+        generatedResourcesOutput.mkdirs()
 
-    project.copy {
-      into generatedResourcesOutput
-      from(generatedResourcesInput) {
-        expand(props)
-      }
+        project.copy {
+            into generatedResourcesOutput
+            from(generatedResourcesInput) {
+                expand(props)
+            }
+        }
     }
-  }
 }
 
 task prepare {
-  dependsOn generateResources
+    dependsOn generateResources
 }

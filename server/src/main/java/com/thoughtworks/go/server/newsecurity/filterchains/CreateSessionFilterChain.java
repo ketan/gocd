@@ -33,6 +33,7 @@ public class CreateSessionFilterChain extends FilterChainProxy {
         super(FilterChainBuilder.newInstance()
                 .addFilterChain("/admin/latest-agent.status", agentSessionReduceIdleTimeoutFilter, alwaysCreateSessionFilter)
                 .addFilterChain("/admin/tfs-impl.jar", agentSessionReduceIdleTimeoutFilter, alwaysCreateSessionFilter)
+                .addFilterChain("/admin/ssh-cli.jar", agentSessionReduceIdleTimeoutFilter, alwaysCreateSessionFilter)
                 .addFilterChain("/admin/agent", agentSessionReduceIdleTimeoutFilter, alwaysCreateSessionFilter)
                 .addFilterChain("/admin/agent/token", agentSessionReduceIdleTimeoutFilter, alwaysCreateSessionFilter)
                 .addFilterChain("/admin/agent-plugins.zip", agentSessionReduceIdleTimeoutFilter, alwaysCreateSessionFilter)

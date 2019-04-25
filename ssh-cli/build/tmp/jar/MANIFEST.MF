@@ -1,0 +1,7 @@
+Manifest-Version: 1.0
+Implementation-Revision: 981fdb508d61b3c626aee5a01c76ce282c19d158
+Implementation-Title: cli
+Target-Compatibility: 1.8
+Implementation-Version: 0.0.1
+Source-Compatibility: 1.8
+

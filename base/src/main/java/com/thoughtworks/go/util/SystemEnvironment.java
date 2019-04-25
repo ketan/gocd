@@ -64,6 +64,7 @@ public class SystemEnvironment implements Serializable, ConfigDirProvider {
 
     public static final String AGENT_PLUGINS_ZIP_MD5_HEADER = "Agent-Plugins-Content-MD5";
     public static final String AGENT_TFS_SDK_MD5_HEADER = "TFS-SDK-Content-MD5";
+    public static final String AGENT_SSH_CLI_MD5_HEADER = "SSH-CLI-Content-MD5";
     public static final String AGENT_EXTRA_PROPERTIES_HEADER = "GoCD-Agent-Extra-Properties";
 
     public static final String EMPTY_STRING = "";

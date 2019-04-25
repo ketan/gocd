@@ -33,6 +33,8 @@ public class DevelopmentAgent {
     public static void main(String[] args) throws Exception {
         new ProcessRunner().command("curl", "http://localhost:8153/go/admin/agent-plugins.zip", "--fail", "--silent", "--output", "agent-plugins.zip").failOnError(false).run();
         new ProcessRunner().command("curl", "http://localhost:8153/go/admin/tfs-impl.jar", "--fail", "--silent", "--output", "tfs-impl.jar").failOnError(false).run();
+        new ProcessRunner().command("curl", "http://localhost:8153/go/admin/ssh-cli.jar", "--fail", "--silent", "--output", "ssh-cli.jar").failOnError(false).run();
+
         new SystemEnvironment().set(SystemEnvironment.PLUGIN_ACTIVATOR_JAR_PATH, "go-plugin-activator.jar");
         assertActivationJarPresent();
         AgentMain.main("-serverUrl", "https://localhost:8154/go");

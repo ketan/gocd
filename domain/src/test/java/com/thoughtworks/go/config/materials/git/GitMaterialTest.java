@@ -32,6 +32,7 @@ import com.thoughtworks.go.util.SystemEnvironment;
 import com.thoughtworks.go.util.command.CommandLine;
 import com.thoughtworks.go.util.command.InMemoryStreamConsumer;
 import org.apache.commons.io.FileUtils;
+import org.eclipse.jetty.util.resource.Resource;
 import org.junit.Rule;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -48,6 +49,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.channels.FileLock;
+import java.nio.file.Path;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -57,6 +59,7 @@ import static com.thoughtworks.go.domain.materials.git.GitTestRepo.GIT_FOO_BRANC
 import static com.thoughtworks.go.matchers.FileExistsMatcher.exists;
 import static com.thoughtworks.go.util.JsonUtils.from;
 import static com.thoughtworks.go.util.command.ProcessOutputStreamConsumer.inMemoryConsumer;
+import static com.thoughtworks.material.git.command.executors.GitProcessExecutor.SSH_CLI_JAR_FILE_PATH;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
@@ -83,6 +86,8 @@ public class GitMaterialTest {
 
     @BeforeEach
     void setup() throws Exception {
+        System.setProperty(SSH_CLI_JAR_FILE_PATH, "testdata/gen/ssh-cli.jar");
+
         temporaryFolder.create();
         GitTestRepo gitRepo = new GitTestRepo(temporaryFolder);
         outputStreamConsumer = inMemoryConsumer();
@@ -94,7 +99,7 @@ public class GitMaterialTest {
     }
 
     @AfterEach
-    void teardown() throws Exception {
+    void teardown() {
         temporaryFolder.delete();
         TestRepo.internalTearDown();
     }
@@ -139,7 +144,7 @@ public class GitMaterialTest {
     }
 
     @Test
-    void shouldFindAllModificationsSinceARevision() throws Exception {
+    void shouldFindAllModificationsSinceARevision() {
         List<Modification> modifications = git.modificationsSince(workingDir, GitTestRepo.REVISION_0, new TestSubprocessExecutionContext());
         assertThat(modifications.size()).isEqualTo(4);
         assertThat(modifications.get(0).getRevision()).isEqualTo(GitTestRepo.REVISION_4.getRevision());
@@ -302,7 +307,7 @@ public class GitMaterialTest {
         git = new GitMaterial(badHost);
         validationBean = git.checkConnection(new TestSubprocessExecutionContext());
         assertThat(validationBean.isValid()).as("Connection should not be valid").isFalse();
-        assertThat(validationBean.getError()).contains("Error performing command");
+        assertThat(validationBean.getError()).contains("Error while executing the command");
         assertThat(validationBean.getError()).contains("git ls-remote http://nonExistantHost/git refs/heads/master");
     }
 
