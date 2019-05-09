@@ -46,7 +46,7 @@
   },
   "devDependencies": {
     "@types/awesomplete": "^1.1.9",
-    "@types/jasmine": "^2.8.11",
+    "@types/jasmine": "^3.3.12",
     "@types/jasmine-ajax": "^3.1.39",
     "@types/jasmine-jquery": "^1.5.33",
     "@types/lodash": "^4.14.119",
