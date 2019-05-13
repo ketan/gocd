@@ -155,7 +155,7 @@ public abstract class ScmMaterialConfig extends AbstractMaterialConfig implement
     }
 
     @PostConstruct
-    public final void ensureEncrypted() {
+    public void ensureEncrypted() {
         this.userName = StringUtils.stripToNull(this.userName);
         setPasswordIfNotBlank(password);
 

@@ -31,7 +31,6 @@ import org.zeroturnaround.exec.stream.LogOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.function.Function;
 
@@ -177,8 +176,7 @@ public class GitProcessExecutor {
 
     private ProcessExecutor createAndInitializeSystemProcessExecutor() {
         ProcessExecutor pe = new ProcessExecutor(getCompleteArgList()).readOutput(true)
-                .directory(this.gitConfig.getWorkingDir())
-                .timeout(30, TimeUnit.SECONDS);
+                .directory(this.gitConfig.getWorkingDir());
         if (!env.isEmpty()) {
             pe.environment(env);
         }

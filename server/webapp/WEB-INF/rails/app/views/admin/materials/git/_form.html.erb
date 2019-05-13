@@ -15,6 +15,7 @@
         <div class="fieldset">
             <%= render :partial => 'admin/materials/shared/material_name', :locals => {:scope => {:form => f}} %>
             <div class="form_item">
+
                 <div class="form_item_block required">
                     <%= required_label(f, com.thoughtworks.go.config.materials.git.GitMaterialConfig::URL, 'URL') -%>
                     <%= f.text_field com.thoughtworks.go.config.materials.git.GitMaterialConfig::URL, {:class => "form_input url", :id => nil} -%>
@@ -27,11 +28,14 @@
                   <%= error_message_on(scope[:material], com.thoughtworks.go.config.materials.svn.SvnMaterialConfig::USERNAME, :css_class => "form_error") %>
                 </div>
 
-
                 <% if scope[:edit_mode] %>
                   <%= render :partial => 'admin/materials/shared/password', :locals => {:scope => {:form => f}} %>
+                  <%= render :partial => 'admin/materials/shared/ssh_private_key', :locals => {:scope => {:form => f}} %>
+                  <%= render :partial => 'admin/materials/shared/ssh_passphrase', :locals => {:scope => {:form => f}} %>
                 <% else %>
                   <%= render :partial => 'admin/materials/shared/plain_password', :locals => {:scope => {:form => f}} %>
+                  <%= render :partial => 'admin/materials/shared/plain_ssh_private_key', :locals => {:scope => {:form => f}} %>
+                  <%= render :partial => 'admin/materials/shared/plain_ssh_passphrase', :locals => {:scope => {:form => f}} %>
                 <% end %>
 
                 <%= render :partial => "admin/materials/shared/options", :locals => {:scope => {:form => f}} %>

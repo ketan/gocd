@@ -27,16 +27,15 @@ public class GitCommandResult {
 
     private String stdOut;
     private String stdErr;
-    private Function<String, String> maskFn = (str) -> str;
+    private Function<String, String> maskSecretsFn = (str) -> str;
 
     private boolean failOnNonZeroReturn = true;
 
-    GitCommandResult(ProcessResult processResult, String stdOut, String stdErr, Function<String, String> maskFn, boolean failOnNonZeroReturn) {
+    GitCommandResult(ProcessResult processResult, String stdOut, String stdErr, Function<String, String> maskSecretsFn, boolean failOnNonZeroReturn) {
         this.processResult = processResult;
-
         this.stdOut = stdOut;
         this.stdErr = stdErr;
-        this.maskFn = maskFn;
+        this.maskSecretsFn = maskSecretsFn;
         this.failOnNonZeroReturn = failOnNonZeroReturn;
     }
 
@@ -52,15 +51,15 @@ public class GitCommandResult {
     }
 
     private String getStdOut() {
-        return maskFn.apply(stdOut);
+        return maskSecretsFn.apply(stdOut);
     }
 
     private String getStdErr() {
-        return maskFn.apply(stdErr);
+        return maskSecretsFn.apply(stdErr);
     }
 
-    public int returnValue(){
-        if(processResult != null) {
+    public int returnValue() {
+        if (processResult != null) {
             return processResult.getExitValue();
         }
         return 0;
@@ -68,16 +67,16 @@ public class GitCommandResult {
 
     public String describe() {
         return "--- EXIT CODE (" + returnValue() + ") ---\n"
-                    + "--- STANDARD OUT ---\n" + getStdOut() + "\n"
-                    + "--- STANDARD ERR ---\n" + getStdErr() + "\n"
-                    + "---\n";
+                + "--- STANDARD OUT ---\n" + getStdOut() + "\n"
+                + "--- STANDARD ERR ---\n" + getStdErr() + "\n"
+                + "---\n";
     }
 
-    public List<String> getOutputLines(){
+    public List<String> getOutputLines() {
         return processResult == null ? new ArrayList<>() : processResult.getOutput().getLines();
     }
 
-    public String outputString(){
+    public String outputString() {
         return processResult == null ? "" : processResult.outputString();
     }
 

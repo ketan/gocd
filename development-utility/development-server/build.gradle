@@ -48,6 +48,7 @@ dependencies {
 
   copyOnly project(path: ':tw-go-plugins', configuration: 'pluginsZipConfig')
   copyOnly project(':plugin-infra:go-plugin-activator')
+  copyOnly project(path: ':ssh-cli', configuration: 'fatJarConfig')
 }
 
 def generatedResourcesOutput = file("resources-generated")

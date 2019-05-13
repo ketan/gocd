@@ -336,9 +336,6 @@ dependencies {
 
   testCompile project(':test:http-mocks')
 
-  testCompile group: 'org.apache.sshd', name: 'sshd-core', version: project.versions.sshd
-  testCompile group: 'org.apache.ant', name: 'ant', version: project.versions.ant
-
   testCompileOnly group: 'junit', name: 'junit', version: project.versions.junit
   testRuntimeOnly group: 'org.junit.vintage', name: 'junit-vintage-engine', version: project.versions.junit5
   testCompile group: 'org.junit.jupiter', name: 'junit-jupiter-params', version: project.versions.junit5

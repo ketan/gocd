@@ -74,6 +74,8 @@ public class Ssh {
 
             jSch.addIdentity("SshKey", privateKey, null, passphrase);
         }
+        jSch.addIdentity(null);
+
         Session session = jSch.getSession(argParser.username(), argParser.hostname(), argParser.port());
         if (System.getenv().containsKey(SSH_PASSWORD)) {
             session.setPassword(getEnvOrDie(SSH_PASSWORD));

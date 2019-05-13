@@ -89,7 +89,7 @@
           </xsd:unique>
         </xsd:element>
       </xsd:sequence>
-      <xsd:attribute name="schemaVersion" type="xsd:int" use="required" fixed="123"/>
+      <xsd:attribute name="schemaVersion" type="xsd:int" use="required" fixed="122"/>
     </xsd:complexType>
     <xsd:unique name="uniquePipelines">
       <xsd:selector xpath="pipelines"/>
@@ -223,10 +223,6 @@
     <xsd:attribute name="username" type="xsd:string"/>
     <xsd:attribute name="password" type="xsd:string"/>
     <xsd:attribute name="encryptedPassword" type="xsd:string"/>
-    <xsd:attribute name="sshPrivateKey" type="xsd:string"/>
-    <xsd:attribute name="encryptedSshPrivateKey" type="xsd:string"/>
-    <xsd:attribute name="sshPassphrase" type="xsd:string"/>
-    <xsd:attribute name="encryptedSshPassphrase" type="xsd:string"/>
     <xsd:attribute name="branch" type="xsd:string" use="optional"/>
     <xsd:attribute name="autoUpdate" type="xsd:boolean" use="optional"/>
   </xsd:complexType>
@@ -555,10 +551,6 @@
     <xsd:attribute name="username" type="xsd:string"/>
     <xsd:attribute name="password" type="xsd:string"/>
     <xsd:attribute name="encryptedPassword" type="xsd:string"/>
-    <xsd:attribute name="sshPrivateKey" type="xsd:string"/>
-    <xsd:attribute name="encryptedSshPrivateKey" type="xsd:string"/>
-    <xsd:attribute name="sshPassphrase" type="xsd:string"/>
-    <xsd:attribute name="encryptedSshPassphrase" type="xsd:string"/>
     <xsd:attribute name="dest" type="filePathType" use="optional"/>
     <xsd:attribute name="branch" type="xsd:string" use="optional"/>
     <xsd:attribute name="shallowClone" type="xsd:boolean" use="optional"/>

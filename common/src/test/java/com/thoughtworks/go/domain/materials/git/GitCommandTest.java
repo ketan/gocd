@@ -229,11 +229,16 @@ public class GitCommandTest {
     @Test
     void shouldBombForFetchFailure() {
         executeOnGitRepo("git", "remote", "rm", "origin");
-        executeOnGitRepo("git", "remote", "add", "origin", "git://user:secret@foo.bar/baz");
+        executeOnGitRepo("git", "remote", "add", "origin", "https://user:secret@localhost/baz");
         InMemoryStreamConsumer output = new InMemoryStreamConsumer();
-        assertThatExceptionOfType(GitCommandExecutionException.class)
-                .isThrownBy(() -> git.fetch(output))
-                .withMessageContaining("Error while executing the command [git fetch");
+        try {
+            git.fetch(output);
+            fail("expecting an exception");
+        } catch(GitCommandExecutionException e) {
+            e.printStackTrace();
+            assertThat(e.getMessage()).contains("Error while executing the command [git fetch");
+            assertThat(e.getMessage()).doesNotContain("secret");
+        }
     }
 
     @Test

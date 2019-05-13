@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.thoughtworks.go.materials.git;
+package com.thoughtworks.material.git.command;
 
 import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;

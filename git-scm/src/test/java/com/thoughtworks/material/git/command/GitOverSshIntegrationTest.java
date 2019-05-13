@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.thoughtworks.go.materials.git;
+package com.thoughtworks.material.git.command;
 
 import com.thoughtworks.material.git.command.args.GitCommandId;
 import com.thoughtworks.material.git.command.config.GitConfig;
@@ -22,7 +22,7 @@ import com.thoughtworks.material.git.command.exceptions.GitCommandExecutionExcep
 import com.thoughtworks.material.git.command.executors.GitCommandResult;
 import com.thoughtworks.material.git.command.executors.GitProcessExecutor;
 import org.apache.commons.io.FileUtils;
-import org.apache.sshd.common.util.SecurityUtils;
+import org.apache.sshd.common.util.security.SecurityUtils;
 import org.apache.sshd.server.SshServer;
 import org.apache.sshd.server.auth.pubkey.KeySetPublickeyAuthenticator;
 import org.apache.sshd.server.keyprovider.AbstractGeneratorHostKeyProvider;
@@ -37,21 +37,21 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
+import org.junit.jupiter.migrationsupport.rules.EnableRuleMigrationSupport;
 import org.junit.rules.TemporaryFolder;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.StringWriter;
-import java.nio.file.Path;
 import java.security.*;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.UUID;
 
-import static com.thoughtworks.material.git.command.executors.GitProcessExecutor.SSH_CLI_JAR_FILE_PATH;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
+@EnableRuleMigrationSupport
 public class GitOverSshIntegrationTest {
     private static final String GIT_REMOTE_PATH = "git/my-project";
     private static final String LOGIN_PASSWORD = "p@ssw0rd";
@@ -67,11 +67,10 @@ public class GitOverSshIntegrationTest {
     private KeyPair keyPair2;
     private String encryptedPrivateKey2;
     private File gitRepositoriesRoot;
-    private Path sshCliPath = new File("ssh-cli.jar").toPath();
 
     @Before
     public void setUp() throws Exception {
-        System.setProperty(SSH_CLI_JAR_FILE_PATH, "testdata/gen/ssh-cli.jar");
+        System.setProperty(GitProcessExecutor.SSH_CLI_JAR_FILE_PATH, "testdata/gen/ssh-cli.jar");
 
         File basedir = temporaryFolder.newFolder("source-root");
         new GitRepository(basedir).initialize();
@@ -122,7 +121,7 @@ public class GitOverSshIntegrationTest {
         AbstractGeneratorHostKeyProvider generatorHostKeyProvider = SecurityUtils.createGeneratorHostKeyProvider(hostKeyFile.toPath());
         generatorHostKeyProvider.setAlgorithm("RSA");
         generatorHostKeyProvider.setKeySize(1024);
-        generatorHostKeyProvider.loadKeys();
+        generatorHostKeyProvider.loadKeys(null);
         return generatorHostKeyProvider;
     }
 
@@ -195,7 +194,7 @@ public class GitOverSshIntegrationTest {
 
     private static class UserPublickeyAuthenticator extends KeySetPublickeyAuthenticator {
         UserPublickeyAuthenticator(PublicKey... keys) {
-            super(Arrays.asList(keys));
+            super(null, Arrays.asList(keys));
         }
 
         @Override

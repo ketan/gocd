@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-package com.thoughtworks.go.materials.git;
+package com.thoughtworks.material.git.command;
 
+import com.thoughtworks.material.git.command.args.GitCommandId;
 import com.thoughtworks.material.git.command.config.GitConfig;
 import com.thoughtworks.material.git.command.exceptions.GitCommandExecutionException;
 import com.thoughtworks.material.git.command.executors.GitCommandResult;
@@ -27,24 +28,21 @@ import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.servlet.ServletHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.eclipse.jgit.http.server.GitServlet;
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.migrationsupport.rules.EnableRuleMigrationSupport;
 import org.junit.rules.TemporaryFolder;
 
 import javax.servlet.DispatcherType;
 import java.io.File;
-import java.nio.file.Path;
 import java.util.EnumSet;
 
-import static com.thoughtworks.go.materials.git.BasicAuthenticationFilter.LOGIN_PASSWORD;
-import static com.thoughtworks.go.materials.git.BasicAuthenticationFilter.LOGIN_USER;
-import static com.thoughtworks.material.git.command.args.GitCommandId.Check_Connection;
-import static com.thoughtworks.material.git.command.executors.GitProcessExecutor.SSH_CLI_JAR_FILE_PATH;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
+@EnableRuleMigrationSupport
 public class GitOverHttpIntegrationTest {
 
     @Rule
@@ -52,11 +50,10 @@ public class GitOverHttpIntegrationTest {
 
     private File gitRepositoriesRoot;
     private Server server;
-    private Path sshCliPath = new File("ssh-cli.jar").toPath();
 
-    @Before
+    @BeforeEach
     public void setUp() throws Exception {
-        System.setProperty(SSH_CLI_JAR_FILE_PATH, "testdata/gen/ssh-cli.jar");
+        System.setProperty(GitProcessExecutor.SSH_CLI_JAR_FILE_PATH, "testdata/gen/ssh-cli.jar");
 
         File basedir = temporaryFolder.newFolder("source-root");
         new GitRepository(basedir).initialize();
@@ -77,7 +74,7 @@ public class GitOverHttpIntegrationTest {
         server.start();
     }
 
-    @After
+    @AfterEach
     public void tearDown() throws Exception {
         server.stop();
         server.join();
@@ -99,7 +96,7 @@ public class GitOverHttpIntegrationTest {
     public void shouldConnectToRemoteHttpRepository() {
         GitConfig config = GitConfig.newBuilder().url(publicHttpUrl()).build();
 
-        GitCommandResult result = GitProcessExecutor.create(Check_Connection, config)
+        GitCommandResult result = GitProcessExecutor.create(GitCommandId.Check_Connection, config)
                                                   .execute();
         assertThat(result.returnValue()).isEqualTo(0);
     }
@@ -108,7 +105,7 @@ public class GitOverHttpIntegrationTest {
     public void shouldFailOnBadHttpRepositoryUrl() {
         GitConfig config = GitConfig.newBuilder().url(badHttpUrl()).build();
 
-        GitProcessExecutor git = GitProcessExecutor.create(Check_Connection, config);
+        GitProcessExecutor git = GitProcessExecutor.create(GitCommandId.Check_Connection, config);
 
         assertThatExceptionOfType(GitCommandExecutionException.class)
             .isThrownBy(git::execute)
@@ -119,11 +116,11 @@ public class GitOverHttpIntegrationTest {
     @Test
     public void shouldConnectToHttpUrlWithAuthorization() {
         GitConfig config = GitConfig.newBuilder().url(privateHttpUrl())
-                                                 .username(LOGIN_USER)
-                                                 .password(LOGIN_PASSWORD)
+                                                 .username(BasicAuthenticationFilter.LOGIN_USER)
+                                                 .password(BasicAuthenticationFilter.LOGIN_PASSWORD)
                                                  .build();
 
-        GitCommandResult result = GitProcessExecutor.create(Check_Connection, config)
+        GitCommandResult result = GitProcessExecutor.create(GitCommandId.Check_Connection, config)
                 .execute();
         assertThat(result.returnValue()).isEqualTo(0);
     }
@@ -135,7 +132,7 @@ public class GitOverHttpIntegrationTest {
                                                  .password("bad-password")
                                                  .build();
 
-        GitProcessExecutor git = GitProcessExecutor.create(Check_Connection, config);
+        GitProcessExecutor git = GitProcessExecutor.create(GitCommandId.Check_Connection, config);
 
         assertThatExceptionOfType(GitCommandExecutionException.class)
             .isThrownBy(git::execute)
@@ -148,7 +145,7 @@ public class GitOverHttpIntegrationTest {
     public void shouldFailWithBadAuthenticationOnHttpWhenCredentialsNotProvided() {
         GitConfig config = GitConfig.newBuilder().url(privateHttpUrl()).build();
 
-        GitProcessExecutor git = GitProcessExecutor.create(Check_Connection, config);
+        GitProcessExecutor git = GitProcessExecutor.create(GitCommandId.Check_Connection, config);
 
         assertThatExceptionOfType(GitCommandExecutionException.class)
                 .isThrownBy(git::execute)

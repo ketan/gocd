@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.thoughtworks.go.materials.git;
+package com.thoughtworks.material.git.command;
 
 import org.apache.commons.io.FileUtils;
 import org.eclipse.jgit.api.Git;
