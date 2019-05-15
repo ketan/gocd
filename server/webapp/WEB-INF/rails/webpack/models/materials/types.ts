@@ -147,7 +147,7 @@ export abstract class MaterialAttributes implements ValidatableMixin {
   autoUpdate: Stream<boolean>;
 
   protected constructor(name?: string, autoUpdate?: boolean) {
-    this.name = stream(name);
+    this.name       = stream(name);
     this.autoUpdate = stream(autoUpdate);
     ValidatableMixin.call(this);
     this.validateIdFormat("name");
@@ -173,23 +173,26 @@ export abstract class MaterialAttributes implements ValidatableMixin {
   }
 
   toJSON() {
-    const serialized                       = _.assign({}, this);
-    const password: Stream<EncryptedValue> = _.get(serialized, "password");
-
-    // remove the password field and setup the password serialization
-    if (password) {
-      // @ts-ignore
-      delete serialized.password;
-
-      if (password().isPlain() || password().isDirty()) {
-        return _.assign({}, serialized, {password: password().value()});
-      } else {
-        return _.assign({}, serialized, {encrypted_password: password().value()});
-      }
-    }
-
+    const serialized = _.assign({}, this);
+    this.setEncryptedField(serialized, "password", "encryptedPassword");
+    this.setEncryptedField(serialized, "sshPrivateKey", "encryptedSshPrivateKey");
+    this.setEncryptedField(serialized, "sshPassphrase", "encryptedSshPassphrase");
     return serialized;
   }
+
+  setEncryptedField(obj: any, fieldName: string, encryptedFieldName: string) {
+    const field: Stream<EncryptedValue> = _.get(obj, fieldName);
+    if (field) {
+      // @ts-ignore
+      delete obj[fieldName];
+      if (field().isPlain() || field().isDirty()) {
+        obj[fieldName] = field().value();
+      } else {
+        obj[encryptedFieldName] = field().value();
+      }
+    }
+  }
+
 }
 
 applyMixins(MaterialAttributes, ValidatableMixin);
@@ -232,14 +235,18 @@ class AuthNotSetInUrlAndUserPassFieldsValidator extends Validator {
 export class GitMaterialAttributes extends ScmMaterialAttributes {
   url: Stream<string>;
   branch: Stream<string>;
+  sshPrivateKey: Stream<EncryptedValue>;
+  sshPassphrase: Stream<EncryptedValue>;
 
   constructor(name?: string, autoUpdate?: boolean, url?: string, branch?: string,
-              username?: string,
-              password?: string,
-              encryptedPassword?: string) {
+              username?: string, password?: string, encryptedPassword?: string,
+              sshPrivateKey?: string, encryptedSshPrivateKey?: string,
+              sshPassphrase?: string, encryptedSshPassphrase?: string) {
     super(name, autoUpdate, username, password, encryptedPassword);
     this.url    = stream(url);
     this.branch = stream(branch);
+    this.sshPrivateKey = stream(plainOrCipherValue({plainText: sshPrivateKey, cipherText: encryptedSshPrivateKey}));
+    this.sshPassphrase = stream(plainOrCipherValue({plainText: sshPassphrase, cipherText: encryptedSshPassphrase}));
 
     this.validatePresenceOf("url");
     this.validateWith(new AuthNotSetInUrlAndUserPassFieldsValidator(), "url");
@@ -254,6 +261,10 @@ export class GitMaterialAttributes extends ScmMaterialAttributes {
       json.username,
       json.password,
       json.encrypted_password,
+      json.ssh_private_key,
+      json.encrypted_ssh_private_key,
+      json.ssh_passphrase,
+      json.encrypted_ssh_passphrase
     );
     if (undefined !== json.destination) {
       attrs.destination(json.destination);

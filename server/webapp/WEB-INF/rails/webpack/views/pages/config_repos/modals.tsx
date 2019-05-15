@@ -38,7 +38,7 @@ import {Form, FormBody, FormHeader} from "views/components/forms/form";
 import {
   CheckboxField,
   Option,
-  PasswordField,
+  PasswordField, SecureTextArea,
   SelectField,
   SelectFieldOptions,
   TextAreaField,
@@ -62,25 +62,25 @@ class MaterialEditWidget extends MithrilViewComponent<EditableMaterial> {
       [
         (<FormHeader>
           <Form>
-              <SelectField label="Plugin ID"
-                           property={vnode.attrs.repo.pluginId}
-                           required={true}
-                           errorText={vnode.attrs.repo.errors().errorsForDisplay("pluginId")}>
-                <SelectFieldOptions selected={vnode.attrs.repo.pluginId()}
-                                    items={pluginList}/>
-              </SelectField>
-              <SelectField label={"Material type"}
-                           property={vnode.attrs.repo.material().typeProxy.bind(vnode.attrs.repo.material())}
-                           required={true}
-                           errorText={vnode.attrs.repo.errors().errorsForDisplay("material")}>
-                <SelectFieldOptions selected={vnode.attrs.repo.material().type()}
-                                    items={this.materialSelectOptions()}/>
-              </SelectField>
-              <TextField label="Config repository ID"
-                         readonly={!vnode.attrs.isNew}
-                         property={vnode.attrs.repo.id}
-                         errorText={vnode.attrs.repo.errors().errorsForDisplay("id")}
-                         required={true}/>
+            <SelectField label="Plugin ID"
+                         property={vnode.attrs.repo.pluginId}
+                         required={true}
+                         errorText={vnode.attrs.repo.errors().errorsForDisplay("pluginId")}>
+              <SelectFieldOptions selected={vnode.attrs.repo.pluginId()}
+                                  items={pluginList}/>
+            </SelectField>
+            <SelectField label={"Material type"}
+                         property={vnode.attrs.repo.material().typeProxy.bind(vnode.attrs.repo.material())}
+                         required={true}
+                         errorText={vnode.attrs.repo.errors().errorsForDisplay("material")}>
+              <SelectFieldOptions selected={vnode.attrs.repo.material().type()}
+                                  items={this.materialSelectOptions()}/>
+            </SelectField>
+            <TextField label="Config repository ID"
+                       readonly={!vnode.attrs.isNew}
+                       property={vnode.attrs.repo.id}
+                       errorText={vnode.attrs.repo.errors().errorsForDisplay("id")}
+                       required={true}/>
           </Form>
         </FormHeader>),
         (<div>
@@ -90,7 +90,7 @@ class MaterialEditWidget extends MithrilViewComponent<EditableMaterial> {
                   {vnode.children}
                 </Form>
               </FormBody>
-              <TestConnection material={vnode.attrs.repo.material()} />
+              <TestConnection material={vnode.attrs.repo.material()}/>
             </div>
             <div class={styles.pluginFilePatternConfigWrapper}>
               <FormBody>
@@ -155,10 +155,20 @@ const MATERIAL_TO_COMPONENT_MAP: { [key: string]: MithrilViewComponent<EditableM
                      property={materialAttributes.branch}/>
 
           <TextField label={humanizedMaterialAttributeName("username")}
-                     property={materialAttributes.username}/>
+                     property={materialAttributes.username}
+                     errorText={materialAttributes.errors().errorsForDisplay("username")}/>
 
           <PasswordField label={humanizedMaterialAttributeName("password")}
-                         property={materialAttributes.password}/>
+                         property={materialAttributes.password}
+                         errorText={materialAttributes.errors().errorsForDisplay("password")}/>
+
+          <SecureTextArea label={humanizedMaterialAttributeName("sshPrivateKey")}
+                          property={materialAttributes.sshPrivateKey}
+                          errorText={materialAttributes.errors().errorsForDisplay("sshPrivateKey")}/>
+
+          <PasswordField label={humanizedMaterialAttributeName("sshPassphrase")}
+                         property={materialAttributes.sshPassphrase}
+                         errorText={materialAttributes.errors().errorsForDisplay("sshPassphrase")}/>
         </MaterialEditWidget>
       );
     }

@@ -29,7 +29,7 @@ import {EncryptedValue} from "views/components/forms/encrypted_value";
 import {Form} from "views/components/forms/form";
 import {
   CheckboxField, CopyField,
-  PasswordField, QuickAddField,
+  PasswordField, SecureTextArea, QuickAddField,
   SearchField, SearchFieldWithButton,
   Switch,
   TextField,
@@ -53,6 +53,9 @@ const checkboxField    = stream(false);
 
 const passwordValue          = stream(new EncryptedValue({clearText: "p@ssword"}));
 const encryptedPasswordValue = stream(new EncryptedValue({cipherText: "AES:junk:more-junk"}));
+
+const privateKeyValue          = stream(new EncryptedValue({clearText: "p@ssword"}));
+const encryptedPrivateKeyValue = stream(new EncryptedValue({cipherText: "AES:junk:more-junk"}));
 
 const triStateCheckbox = stream(new TriStateCheckbox());
 
@@ -262,6 +265,9 @@ export class KitchenSink extends MithrilViewComponent<null> {
         <CopyField property={formValue} buttonDisableReason={"Add text to enable quick add"}/>
 
         <SearchFieldWithButton property={formValue} buttonDisableReason={"Add text to enable search"}/>
+        <br/>
+        <SecureTextArea property={privateKeyValue} label="Editable Secure TextArea"/>
+        <SecureTextArea property={encryptedPrivateKeyValue} label="Locked Secure TextArea"/>
         <br/>
         <h3>Sortable Table</h3>
         <Table data={pipelineData()} headers={["Pipeline", "Stage", "Job"]}

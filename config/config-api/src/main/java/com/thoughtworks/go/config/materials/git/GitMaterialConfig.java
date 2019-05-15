@@ -259,6 +259,14 @@ public class GitMaterialConfig extends ScmMaterialConfig {
         this.submoduleFolder = submoduleFolder;
     }
 
+    public void setSshPrivateKey(String sshPrivateKey) {
+        resetSshPrivateKey(sshPrivateKey);;
+    }
+
+    public void setSshPassphrase(String sshPassphrase) {
+        resetSshPassphrase(sshPassphrase);
+    }
+
     @Override
     public boolean isCheckExternals() {
         return false;
@@ -392,11 +400,11 @@ public class GitMaterialConfig extends ScmMaterialConfig {
         }
     }
 
-    private void setEncryptedSshPassphrase(String encryptedSshPassphrase) {
+    public void setEncryptedSshPassphrase(String encryptedSshPassphrase) {
         this.encryptedSshPassphrase = encryptedSshPassphrase;
     }
 
-    private void setEncryptedSshPrivateKey(String encryptedSshPrivateKey) {
+    public void setEncryptedSshPrivateKey(String encryptedSshPrivateKey) {
         this.encryptedSshPrivateKey = encryptedSshPrivateKey;
     }
 

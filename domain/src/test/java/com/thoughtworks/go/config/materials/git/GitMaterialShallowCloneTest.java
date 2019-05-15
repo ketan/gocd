@@ -22,7 +22,6 @@ import com.thoughtworks.go.domain.materials.Modification;
 import com.thoughtworks.go.domain.materials.RevisionContext;
 import com.thoughtworks.go.domain.materials.TestSubprocessExecutionContext;
 import com.thoughtworks.go.domain.materials.git.GitCommand;
-import com.thoughtworks.go.domain.materials.git.GitCommandFactory;
 import com.thoughtworks.go.domain.materials.git.GitTestRepo;
 import com.thoughtworks.go.domain.materials.mercurial.StringRevision;
 import com.thoughtworks.go.helper.TestRepo;
@@ -42,7 +41,6 @@ import java.util.Map;
 
 import static com.thoughtworks.go.domain.materials.git.GitTestRepo.*;
 import static com.thoughtworks.go.util.command.ProcessOutputStreamConsumer.inMemoryConsumer;
-import static com.thoughtworks.material.git.command.executors.GitProcessExecutor.SSH_CLI_JAR_FILE_PATH;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -58,7 +56,6 @@ public class GitMaterialShallowCloneTest {
 
     @Before
     public void setup() throws Exception {
-        System.setProperty(SSH_CLI_JAR_FILE_PATH, "testdata/gen/ssh-cli.jar");
         repo = new GitTestRepo(temporaryFolder);
         workingDir = temporaryFolder.newFolder("working-dir");
     }
@@ -75,20 +72,20 @@ public class GitMaterialShallowCloneTest {
         assertThat(new GitMaterial(repo.projectRepositoryUrl()).isShallowClone(), is(false));
 
         GitMaterial gitMaterial = new GitMaterial(repo.projectRepositoryUrl(), true);
-        
+
         assertThat(gitMaterial.isShallowClone(), is(true));
 
 
         gitMaterial = new GitMaterial(new GitMaterialConfig(repo.projectRepositoryUrl()));
-        
+
         assertThat(gitMaterial.isShallowClone(), is(false));
 
         gitMaterial = new GitMaterial(new GitMaterialConfig(repo.projectRepositoryUrl(), GitMaterialConfig.DEFAULT_BRANCH, true));
-        
+
         assertThat(gitMaterial.isShallowClone(), is(true));
 
         gitMaterial = new GitMaterial(new GitMaterialConfig(repo.projectRepositoryUrl(), GitMaterialConfig.DEFAULT_BRANCH, false));
-        
+
         assertThat(gitMaterial.isShallowClone(), is(false));
 
         TestRepo.internalTearDown();
@@ -223,6 +220,6 @@ public class GitMaterialShallowCloneTest {
     }
 
     private GitCommand localRepoFor(GitMaterial material) {
-        return GitCommandFactory.create(material.getFingerprint(), workingDir, GitMaterialConfig.DEFAULT_BRANCH, false, new HashMap<>(), null);
+        return new GitCommand(material.getFingerprint(), workingDir, GitMaterialConfig.DEFAULT_BRANCH, false, new HashMap<>(), null);
     }
 }

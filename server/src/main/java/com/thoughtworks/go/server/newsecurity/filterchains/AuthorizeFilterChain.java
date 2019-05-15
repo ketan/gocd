@@ -54,7 +54,6 @@ public class AuthorizeFilterChain extends FilterChainProxy {
                 .addFilterChain("/admin/latest-agent.status", allowAllAccessFilter)
                 .addFilterChain("/admin/agent-launcher.jar", allowAllAccessFilter)
                 .addFilterChain("/admin/tfs-impl.jar", allowAllAccessFilter)
-                .addFilterChain("/admin/ssh-cli.jar", allowAllAccessFilter)
                 .addFilterChain("/admin/agent-plugins.zip", allowAllAccessFilter)
 
                 // some publicly available APIs

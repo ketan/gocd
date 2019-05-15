@@ -86,7 +86,6 @@ public class AgentUpgradeService {
             validateMd5(launcherMd5, response, AGENT_LAUNCHER_CONTENT_MD5_HEADER, "launcher");
             validateMd5(agentPluginsMd5, response, AGENT_PLUGINS_ZIP_MD5_HEADER, "plugins");
             validateMd5(tfsImplMd5, response, AGENT_TFS_SDK_MD5_HEADER, "tfs-impl jar");
-            validateMd5(tfsImplMd5, response, AGENT_SSH_CLI_MD5_HEADER, "ssh-cli jar");
             updateExtraProperties(response.getFirstHeader(AGENT_EXTRA_PROPERTIES_HEADER));
         } catch (IOException ioe) {
             String message = String.format("[Agent Upgrade] Couldn't connect to: %s: %s", urlService.getAgentLatestStatusUrl(), ioe.toString());

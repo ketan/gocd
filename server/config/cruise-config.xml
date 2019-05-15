@@ -1,47 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
 <cruise xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="cruise-config.xsd" schemaVersion="123">
-  <server artifactsdir="artifacts" agentAutoRegisterKey="323040d4-f2e4-4b8a-8394-7a2d122054d1" webhookSecret="3d5cd2f5-7fe7-43c0-ba34-7e01678ba8b6" commandRepositoryLocation="default" serverId="60f5f682-5248-4ba9-bb35-72c92841bd75" tokenGenerationKey="8c3c8dc9-08bf-4cd7-ac80-cecb3e7ae86c">
-    <security>
-      <authConfigs>
-        <authConfig id="9cad79b0-4d9e-4a62-829c-eb4d9488062f" pluginId="cd.go.authentication.passwordfile">
-          <property>
-            <key>PasswordFilePath</key>
-            <value>../manual-testing/ant_hg/password.properties</value>
-          </property>
-        </authConfig>
-      </authConfigs>
-      <roles>
-        <role name="xyz" />
-      </roles>
-      <admins>
-        <user>jez</user>
-        <user>admin</user>
-      </admins>
-    </security>
-    <backup emailOnSuccess="true" emailOnFailure="true" />
-  </server>
-  <pipelines group="first">
-    <authorization>
-      <view>
-        <user>operate</user>
-      </view>
-      <admins>
-        <user>operate</user>
-      </admins>
-    </authorization>
-    <pipeline name="up42">
-      <materials>
-        <git url="test-repo" />
-      </materials>
-      <stage name="up42_stage">
-        <jobs>
-          <job name="up42_job">
-            <tasks>
-              <exec command="ls" />
-            </tasks>
-          </job>
-        </jobs>
-      </stage>
-    </pipeline>
-  </pipelines>
+  <server artifactsdir="logs" agentAutoRegisterKey="1307e20f-faa5-4a7a-a1e1-c22cb22d9c48" webhookSecret="d21ca0f5-700b-4a3b-ae7a-3804b29cb22a" commandRepositoryLocation="default" serverId="1bf6e6b9-db3e-4f61-98a4-e985d9965aee" tokenGenerationKey="c4a777d8-fb3d-4efa-8f37-f6c2930b24f6" />
 </cruise>

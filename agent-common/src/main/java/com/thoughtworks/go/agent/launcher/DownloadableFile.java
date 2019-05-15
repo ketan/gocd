@@ -33,7 +33,6 @@ import static org.apache.commons.codec.binary.Hex.encodeHexString;
 public enum DownloadableFile {
     AGENT("admin/agent", Downloader.AGENT_BINARY),
     TFS_IMPL("admin/tfs-impl.jar", Downloader.TFS_IMPL),
-    SSH_CLI("admin/ssh-cli.jar", Downloader.SSH_CLI),
     LAUNCHER("admin/agent-launcher.jar", Downloader.AGENT_LAUNCHER),
     AGENT_PLUGINS("admin/agent-plugins.zip", Downloader.AGENT_PLUGINS);
 

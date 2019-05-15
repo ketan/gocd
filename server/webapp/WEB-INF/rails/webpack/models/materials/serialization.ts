@@ -33,11 +33,18 @@ export interface UsernamePasswordJSON {
   encrypted_password?: string;
 }
 
+export interface SshCredentialsJSON {
+  ssh_private_key?: string;
+  encrypted_ssh_private_key?: string;
+  ssh_passphrase?: string;
+  encrypted_ssh_passphrase?: string;
+}
+
 export interface ScmAttributesJSON extends BaseAttributesJSON, UsernamePasswordJSON {
   destination?: string;
 }
 
-export interface GitMaterialAttributesJSON extends ScmAttributesJSON {
+export interface GitMaterialAttributesJSON extends ScmAttributesJSON, SshCredentialsJSON {
   url: string;
   branch: string;
 }

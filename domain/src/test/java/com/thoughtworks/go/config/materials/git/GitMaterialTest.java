@@ -32,7 +32,6 @@ import com.thoughtworks.go.util.SystemEnvironment;
 import com.thoughtworks.go.util.command.CommandLine;
 import com.thoughtworks.go.util.command.InMemoryStreamConsumer;
 import org.apache.commons.io.FileUtils;
-import org.eclipse.jetty.util.resource.Resource;
 import org.junit.Rule;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -49,7 +48,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.channels.FileLock;
-import java.nio.file.Path;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -59,7 +57,6 @@ import static com.thoughtworks.go.domain.materials.git.GitTestRepo.GIT_FOO_BRANC
 import static com.thoughtworks.go.matchers.FileExistsMatcher.exists;
 import static com.thoughtworks.go.util.JsonUtils.from;
 import static com.thoughtworks.go.util.command.ProcessOutputStreamConsumer.inMemoryConsumer;
-import static com.thoughtworks.material.git.command.executors.GitProcessExecutor.SSH_CLI_JAR_FILE_PATH;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
@@ -67,8 +64,8 @@ import static org.mockito.Mockito.when;
 
 @EnableRuleMigrationSupport
 public class GitMaterialTest {
-    public static final GitVersion GIT_VERSION_1_9 = GitVersion.parse("git version 1.9.0");
-    public static final GitVersion GIT_VERSION_1_5 = GitVersion.parse("git version 1.5.4.3");
+    private static final GitVersion GIT_VERSION_1_9 = GitVersion.parse("git version 1.9.0");
+    private static final GitVersion GIT_VERSION_1_5 = GitVersion.parse("git version 1.5.4.3");
     @Rule
     public final TemporaryFolder temporaryFolder = new TemporaryFolder();
 
@@ -86,8 +83,6 @@ public class GitMaterialTest {
 
     @BeforeEach
     void setup() throws Exception {
-        System.setProperty(SSH_CLI_JAR_FILE_PATH, "testdata/gen/ssh-cli.jar");
-
         temporaryFolder.create();
         GitTestRepo gitRepo = new GitTestRepo(temporaryFolder);
         outputStreamConsumer = inMemoryConsumer();
@@ -307,7 +302,7 @@ public class GitMaterialTest {
         git = new GitMaterial(badHost);
         validationBean = git.checkConnection(new TestSubprocessExecutionContext());
         assertThat(validationBean.isValid()).as("Connection should not be valid").isFalse();
-        assertThat(validationBean.getError()).contains("Error while executing the command");
+        assertThat(validationBean.getError()).contains("Error performing command");
         assertThat(validationBean.getError()).contains("git ls-remote http://nonExistantHost/git refs/heads/master");
     }
 

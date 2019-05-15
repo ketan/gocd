@@ -22,7 +22,6 @@ import com.thoughtworks.go.domain.JobResult;
 import com.thoughtworks.go.domain.materials.Modification;
 import com.thoughtworks.go.domain.materials.RevisionContext;
 import com.thoughtworks.go.domain.materials.git.GitCommand;
-import com.thoughtworks.go.domain.materials.git.GitCommandFactory;
 import com.thoughtworks.go.domain.materials.git.GitMaterialUpdater;
 import com.thoughtworks.go.domain.materials.git.GitTestRepo;
 import com.thoughtworks.go.domain.materials.mercurial.StringRevision;
@@ -48,7 +47,6 @@ import static com.thoughtworks.go.domain.materials.git.GitTestRepo.*;
 import static com.thoughtworks.go.matchers.ConsoleOutMatcherJunit5.assertConsoleOut;
 import static com.thoughtworks.go.matchers.FileExistsMatcher.exists;
 import static com.thoughtworks.go.util.command.ProcessOutputStreamConsumer.inMemoryConsumer;
-import static com.thoughtworks.material.git.command.executors.GitProcessExecutor.SSH_CLI_JAR_FILE_PATH;
 import static java.lang.String.format;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static junit.framework.TestCase.assertTrue;
@@ -63,7 +61,6 @@ class GitMaterialUpdaterTest extends BuildSessionBasedTestCase {
     @BeforeEach
     void setup() {
         workingDir = new File(sandbox, "working");
-        System.setProperty(SSH_CLI_JAR_FILE_PATH, "testdata/gen/ssh-cli.jar");
     }
 
     @AfterEach
@@ -269,7 +266,7 @@ class GitMaterialUpdaterTest extends BuildSessionBasedTestCase {
         FileUtils.deleteDirectory(submoduleFolder);
         assertThat(submoduleFolder.exists()).isEqualTo(false);
         updateTo(material, new RevisionContext(new StringRevision("origin/HEAD")), JobResult.Failed);
-        assertConsoleOut(console.output()).matchUsingRegex(String.format("[Cc]lone of '%s' into submodule path '((.*)[\\/])?sub1' failed",
+        assertConsoleOut(console.output()).matchUsingRegex(format("[Cc]lone of '%s' into submodule path '((.*)[\\/])?sub1' failed",
                 Pattern.quote(FileUtil.toFileURI(submoduleFolder.getAbsolutePath()) + "/")));
     }
 
@@ -280,7 +277,7 @@ class GitMaterialUpdaterTest extends BuildSessionBasedTestCase {
     }
 
     private GitCommand localRepoFor(GitMaterial material) {
-        return GitCommandFactory.create(material.getFingerprint(), workingDir, GitMaterialConfig.DEFAULT_BRANCH, false, new HashMap<>(), null);
+        return new GitCommand(material.getFingerprint(), workingDir, GitMaterialConfig.DEFAULT_BRANCH, false, new HashMap<>(), null);
     }
 
     private List<File> allFilesIn(File directory, String prefixOfFiles) {

@@ -85,7 +85,6 @@ agent/agent-plugins.zip
 agent/plugins/
 agent/felix-cache/
 agent/tfs-impl.jar
-agent/ssh-cli.jar
 agent/target/
 api/api-admins-config-v1/logs/
 api/api-admins-config-v1/out/
@@ -319,7 +318,6 @@ server/target/
 server/test-repo/
 server/testdata/test-agent.jar
 server/tfs-impl-14.jar
-server/ssh-cli.jar
 server/webapp/WEB-INF/rails/.bundle/
 server/webapp/WEB-INF/rails/db/config.git/
 server/webapp/WEB-INF/rails/logs/
@@ -345,10 +343,6 @@ test/test-utils/target/
 tfs-impl/tfs-impl-14/logs/
 tfs-impl/tfs-impl-14/out/
 tfs-impl/tfs-impl-14/target/
-ssh-cli/target/
-ssh-cli/out/
-git-scm/out/
-git-scm/target/
 javasysmon-wrapper/logs/
 javasysmon-wrapper/out/
 javasysmon-wrapper/target/
@@ -393,3 +387,7 @@ api/api-dependency-material-autocomplete-v1/out/
 api/api-dependency-material-autocomplete-v1/target/
 api/api-dependency-material-autocomplete-v1/logs/
 
+api/api-config-repos-v3/out/
+api/api-config-repos-v3/target/
+api/api-config-repos-v3/logs/
+api/api-config-repos-v3/config/

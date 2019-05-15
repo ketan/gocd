@@ -26,7 +26,6 @@ dependencies {
   compile project(':agent')
   compile project(':util')
   copyOnly project(':plugin-infra:go-plugin-activator')
-  copyOnly project(path: ':ssh-cli', configuration: 'fatJarConfig')
 }
 
 def generatedResourcesOutput = file("resources-generated")

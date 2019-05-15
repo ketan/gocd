@@ -98,7 +98,6 @@ clean {
   delete 'plugins_work'
   delete 'agent-plugins.zip'
   delete 'tfs-impl.jar'
-  delete 'ssh-cli.jar'
 }
 
 task fatJar(type: Jar) {

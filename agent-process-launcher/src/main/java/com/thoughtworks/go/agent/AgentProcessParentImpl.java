@@ -33,7 +33,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Stream;
 
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static org.apache.commons.lang3.StringUtils.join;
@@ -65,9 +64,6 @@ public class AgentProcessParentImpl implements AgentProcessParent {
 
             ServerBinaryDownloader tfsImplDownloader = new ServerBinaryDownloader(urlGenerator, rootCertFile, sslVerificationMode);
             tfsImplDownloader.downloadIfNecessary(DownloadableFile.TFS_IMPL);
-
-            ServerBinaryDownloader sshCliDownloader = new ServerBinaryDownloader(urlGenerator, rootCertFile, sslVerificationMode);
-            sshCliDownloader.downloadIfNecessary(DownloadableFile.SSH_CLI);
 
             command = agentInvocationCommand(agentDownloader.getMd5(), launcherMd5, pluginZipDownloader.getMd5(), tfsImplDownloader.getMd5(),
                     env, context, agentDownloader.getSslPort(), agentDownloader.getExtraProperties());

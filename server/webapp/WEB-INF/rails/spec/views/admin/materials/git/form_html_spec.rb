@@ -46,7 +46,7 @@ describe "_form.html.erb" do
 
     # Git SSH related field's assertion
     expect(response.body).to have_selector(".popup_form textarea[name='material[#{GitMaterialConfig::SSH_PRIVATE_KEY}]']")
-    expect(response.body).to have_selector(".popup_form input[type='text'][name='material[#{GitMaterialConfig::SSH_PASSPHRASE}]']")
+    expect(response.body).to have_selector(".popup_form input[type='password'][name='material[#{GitMaterialConfig::SSH_PASSPHRASE}]']")
     expect(response.body).to have_selector(".popup_form input[type='checkbox'][name='material[#{GitMaterialConfig::SSH_PRIVATE_KEY_CHANGED}]'][value='1']")
     expect(response.body).to have_selector(".popup_form input[type='checkbox'][name='material[#{GitMaterialConfig::SSH_PASSPHRASE_CHANGED}]'][value='1']")
 
@@ -100,7 +100,7 @@ describe "_form.html.erb" do
       expect(popup_form).to have_selector("div.field_with_errors textarea[name='material[#{GitMaterialConfig::SSH_PRIVATE_KEY}]']")
       expect(popup_form).to have_selector("div.form_error", :text => "Private Key is absolutely wrong")
 
-      expect(popup_form).to have_selector("div.field_with_errors input[type='text'][name='material[#{GitMaterialConfig::SSH_PASSPHRASE}]']")
+      expect(popup_form).to have_selector("div#ssh_passphrase_div input[type='password'][name='material[#{GitMaterialConfig::SSH_PASSPHRASE}]']")
       expect(popup_form).to have_selector("div.form_error", :text => "Passphrase is equally wrong")
 
       #Have skipped asserting on the div fieldWithError thats rendered around the text area , since the keys mismatch (pattern vs filter). Div around the actual text area is currently

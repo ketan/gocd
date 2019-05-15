@@ -23,7 +23,6 @@ public interface Downloader {
     String AGENT_LAUNCHER = "agent-launcher.jar";
     String AGENT_PLUGINS = "agent-plugins.zip";
     String TFS_IMPL = "tfs-impl.jar";
-    String SSH_CLI = "ssh-cli.jar";
 
     File AGENT_BINARY_JAR = new File(AGENT_BINARY);
     File AGENT_LAUNCHER_JAR = new File(AGENT_LAUNCHER);

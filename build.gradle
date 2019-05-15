@@ -167,7 +167,7 @@ rootProject.ext.versions = [
   ant                 : '1.10.5',
   apacheHttpComponents: '4.5.6',
   assertJ             : '3.11.1',
-  bouncyCastle        : '1.59', // bouncycastle version has to be compatible with the jruby version
+  bouncyCastle        : '1.61', // bouncycastle version has to be compatible with the jruby version
   cloning             : '1.9.11',
   commonsCodec        : '1.12',
   commonsCollections  : '3.2.2',

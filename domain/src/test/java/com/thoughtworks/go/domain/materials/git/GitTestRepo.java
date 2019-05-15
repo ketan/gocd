@@ -37,7 +37,6 @@ import java.util.UUID;
 
 import static com.thoughtworks.go.util.command.CommandLine.createCommandLine;
 import static com.thoughtworks.go.util.command.ProcessOutputStreamConsumer.inMemoryConsumer;
-import static com.thoughtworks.material.git.command.executors.GitProcessExecutor.SSH_CLI_JAR_FILE_PATH;
 
 public class GitTestRepo extends TestRepo {
     private static final String GIT_3_REVISIONS_BUNDLE = "../common/src/test/resources/data/git/git-3-revisions.git";
@@ -59,7 +58,6 @@ public class GitTestRepo extends TestRepo {
     public static GitTestRepo testRepoAtBranch(String gitBundleFilePath, String branch, TemporaryFolder temporaryFolder) throws IOException {
         GitTestRepo testRepo = new GitTestRepo(gitBundleFilePath, temporaryFolder);
         testRepo.checkoutRemoteBranchToLocal(branch);
-        System.setProperty(SSH_CLI_JAR_FILE_PATH, "testdata/gen/ssh-cli.jar");
         return testRepo;
     }
 
@@ -116,7 +114,7 @@ public class GitTestRepo extends TestRepo {
     }
 
     private GitCommand git(File workingDir) {
-        return GitCommandFactory.create(null, workingDir, GitMaterialConfig.DEFAULT_BRANCH, false, new HashMap<>(), null);
+        return new GitCommand(null, workingDir, GitMaterialConfig.DEFAULT_BRANCH, false, new HashMap<>(), null);
     }
 
     public GitMaterial createMaterial() {
@@ -128,7 +126,7 @@ public class GitTestRepo extends TestRepo {
     }
 
     private void checkoutRemoteBranchToLocal(String branch) {
-        GitCommandFactory.create(null, gitRepo, branch, false, new HashMap<>(), null).checkoutRemoteBranchToLocal();
+        new GitCommand(null, gitRepo, branch, false, new HashMap<>(), null).checkoutRemoteBranchToLocal();
     }
 
     public List<Modification> addFileAndPush(String fileName, String message) throws IOException {
@@ -138,20 +136,20 @@ public class GitTestRepo extends TestRepo {
     }
 
     public List<Modification> addFileAndPush(File newFile, String message) throws IOException {
-        GitCommandFactory.create(null, gitRepo, GitMaterialConfig.DEFAULT_BRANCH, false, new HashMap<>(), null).add(newFile);
-        GitCommandFactory.create(null, gitRepo, GitMaterialConfig.DEFAULT_BRANCH, false, new HashMap<>(), null).commit(message);
+        new GitCommand(null, gitRepo, GitMaterialConfig.DEFAULT_BRANCH, false, new HashMap<>(), null).add(newFile);
+        new GitCommand(null, gitRepo, GitMaterialConfig.DEFAULT_BRANCH, false, new HashMap<>(), null).commit(message);
         return createMaterial().latestModification(temporaryFolder.newFolder(), new TestSubprocessExecutionContext());
     }
 
     public List<Modification> addFileAndAmend(String fileName, String message) throws IOException {
         File newFile = new File(gitRepo, fileName);
         newFile.createNewFile();
-        GitCommandFactory.create(null, gitRepo, GitMaterialConfig.DEFAULT_BRANCH, false, new HashMap<>(), null).add(newFile);
+        new GitCommand(null, gitRepo, GitMaterialConfig.DEFAULT_BRANCH, false, new HashMap<>(), null).add(newFile);
         new GitCommandWithAmend(null, gitRepo, GitMaterialConfig.DEFAULT_BRANCH, false, new HashMap<>()).commitWithAmend(message, gitRepo);
         return createMaterial().latestModification(temporaryFolder.newFolder(), new TestSubprocessExecutionContext());
     }
 
-    private static class GitCommandWithAmend extends GitCommandNew {
+    private static class GitCommandWithAmend extends GitCommand {
 
         public GitCommandWithAmend(String materialFingerprint, File workingDir, String branch, boolean isSubmodule, Map<String, String> environment) {
             super(materialFingerprint, workingDir, branch, isSubmodule, environment, null);

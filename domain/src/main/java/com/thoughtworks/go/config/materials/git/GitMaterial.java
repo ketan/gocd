@@ -23,7 +23,6 @@ import com.thoughtworks.go.config.migration.UrlDenormalizerXSLTMigration121;
 import com.thoughtworks.go.domain.MaterialInstance;
 import com.thoughtworks.go.domain.materials.*;
 import com.thoughtworks.go.domain.materials.git.GitCommand;
-import com.thoughtworks.go.domain.materials.git.GitCommandFactory;
 import com.thoughtworks.go.domain.materials.git.GitMaterialInstance;
 import com.thoughtworks.go.domain.materials.git.GitVersion;
 import com.thoughtworks.go.domain.materials.svn.MaterialUrl;
@@ -68,6 +67,8 @@ public class GitMaterial extends ScmMaterial {
     public static final String TYPE = "GitMaterial";
     private static final String ERR_GIT_NOT_FOUND = "Failed to find 'git' on your PATH. Please ensure 'git' is executable by the Go Server and on the Go Agents where this material will be used.";
     public static final String ERR_GIT_OLD_VERSION = "Please install Git-core 1.6 or above. ";
+    private String sshPrivateKey;
+    private String sshPassphrase;
 
     public GitMaterial(String url) {
         super(TYPE, new GoCipher());
@@ -103,6 +104,8 @@ public class GitMaterial extends ScmMaterial {
         this.autoUpdate = config.getAutoUpdate();
         this.filter = config.rawFilter();
         this.name = config.getName();
+        this.sshPrivateKey = config.getSshPrivateKey();
+        this.sshPassphrase = config.getSshPassphrase();
         this.submoduleFolder = config.getSubmoduleFolder();
         this.invertFilter = config.getInvertFilter();
     }
@@ -165,7 +168,7 @@ public class GitMaterial extends ScmMaterial {
     }
 
     public ValidationBean checkConnection(final SubprocessExecutionContext execCtx) {
-        GitCommand gitCommand = GitCommandFactory.create(null, null, null, false, null, secrets());
+        GitCommand gitCommand = new GitCommand(null, null, null, false, null, secrets());
         try {
             gitCommand.checkConnection(url, branch, execCtx.getDefaultEnvironmentVariables());
             return ValidationBean.valid();
@@ -202,10 +205,10 @@ public class GitMaterial extends ScmMaterial {
 
     private GitCommand git(ConsoleOutputStreamConsumer outputStreamConsumer, final File workingFolder, int preferredCloneDepth, SubprocessExecutionContext executionContext) throws Exception {
         if (isSubmoduleFolder()) {
-            return GitCommandFactory.create(getFingerprint(), new File(workingFolder.getPath()), GitMaterialConfig.DEFAULT_BRANCH, true, executionContext.getDefaultEnvironmentVariables(), secrets());
+            return new GitCommand(getFingerprint(), new File(workingFolder.getPath()), GitMaterialConfig.DEFAULT_BRANCH, true, executionContext.getDefaultEnvironmentVariables(), secrets());
         }
 
-        GitCommand gitCommand = GitCommandFactory.create(getFingerprint(), workingFolder, getBranch(), false, executionContext.getDefaultEnvironmentVariables(), secrets());
+        GitCommand gitCommand = new GitCommand(getFingerprint(), workingFolder, getBranch(), false, executionContext.getDefaultEnvironmentVariables(), secrets());
         if (!isGitRepository(workingFolder) || isRepositoryChanged(gitCommand, workingFolder)) {
             LOG.debug("Invalid git working copy or repository changed. Delete folder: {}", workingFolder);
             deleteDirectoryNoisily(workingFolder);

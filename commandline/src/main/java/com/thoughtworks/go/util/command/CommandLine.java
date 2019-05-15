@@ -337,6 +337,11 @@ public class CommandLine {
         return this;
     }
 
+    public CommandLine withEnv(String key, String value) {
+        this.env.put(key, value);
+        return this;
+    }
+
     public CommandLine withArg(CommandArgument argument) {
         arguments.add(argument);
         return this;
