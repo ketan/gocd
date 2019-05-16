@@ -64,6 +64,8 @@ public class GitMaterial extends ScmMaterial implements PasswordAwareMaterial {
     public static final String TYPE = "GitMaterial";
     private static final String ERR_GIT_NOT_FOUND = "Failed to find 'git' on your PATH. Please ensure 'git' is executable by the Go Server and on the Go Agents where this material will be used.";
     public static final String ERR_GIT_OLD_VERSION = "Please install Git-core 1.6 or above. ";
+    private String sshPrivateKey;
+    private String sshPassphrase;
 
     public GitMaterial(String url) {
         super(TYPE, new GoCipher());
@@ -99,6 +101,8 @@ public class GitMaterial extends ScmMaterial implements PasswordAwareMaterial {
         this.autoUpdate = config.getAutoUpdate();
         this.filter = config.rawFilter();
         this.name = config.getName();
+        this.sshPrivateKey = config.getSshPrivateKey();
+        this.sshPassphrase = config.getSshPassphrase();
         this.submoduleFolder = config.getSubmoduleFolder();
         this.invertFilter = config.getInvertFilter();
         this.userName = config.getUserName();

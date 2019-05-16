@@ -29,7 +29,6 @@ import com.thoughtworks.go.security.RegistrationJSONizer;
 import com.thoughtworks.go.server.service.*;
 import com.thoughtworks.go.server.service.result.HttpOperationResult;
 import com.thoughtworks.go.util.SystemEnvironment;
-import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;

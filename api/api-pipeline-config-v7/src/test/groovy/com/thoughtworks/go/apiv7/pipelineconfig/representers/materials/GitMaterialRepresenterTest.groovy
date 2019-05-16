@@ -103,6 +103,36 @@ class GitMaterialRepresenterTest implements MaterialRepresenterTrait {
       assertNull(deserializedObject.getName())
       assertEquals(expected, deserializedObject)
     }
+
+    @Test
+    void "should deserialize material with ssh credentials in attributes"() {
+      def url = "http://funk.com/blank"
+
+      def jsonReader = GsonTransformer.instance.jsonReaderFrom([
+        type      : 'git',
+        attributes:
+          [
+            url     : url,
+            branch  : "master",
+            ssh_private_key: "this_is_test_ssh_private_key",
+            ssh_passphrase: "this_is_test_passphrase"
+          ]
+      ])
+
+      def deserializedObject = (GitMaterialConfig)MaterialsRepresenter.fromJSON(jsonReader, getOptions())
+      def expected = new GitMaterialConfig(url)
+
+      expected.setSshPrivateKey("this_is_test_ssh_private_key")
+      expected.setSshPassphrase("this_is_test_passphrase")
+
+      assertEquals(expected.isAutoUpdate(), deserializedObject.isAutoUpdate())
+      assertNull(deserializedObject.getName())
+
+      assertEquals(expected.getEncryptedSshPrivateKey(), deserializedObject.getEncryptedSshPrivateKey())
+      assertEquals(expected.getEncryptedSshPassphrase(), deserializedObject.getEncryptedSshPassphrase())
+
+      assertEquals(expected, deserializedObject)
+    }
   }
 
   @Test

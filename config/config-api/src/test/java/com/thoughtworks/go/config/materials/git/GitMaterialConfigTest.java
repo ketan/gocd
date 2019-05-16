@@ -23,7 +23,6 @@ import com.thoughtworks.go.config.rules.Rules;
 import com.thoughtworks.go.domain.materials.MaterialConfig;
 import com.thoughtworks.go.security.GoCipher;
 import com.thoughtworks.go.util.ReflectionUtil;
-import com.thoughtworks.go.util.command.UrlArgument;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
@@ -32,8 +31,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static com.thoughtworks.go.config.rules.SupportedEntity.PIPELINE_GROUP;
-import static com.thoughtworks.go.helper.PipelineConfigMother.createGroup;
 import static com.thoughtworks.go.helper.MaterialConfigsMother.git;
+import static com.thoughtworks.go.helper.MaterialConfigsMother.gitMaterialConfig;
+import static com.thoughtworks.go.helper.PipelineConfigMother.createGroup;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
@@ -56,6 +56,11 @@ class GitMaterialConfigTest {
         map.put(ScmMaterialConfig.FILTER, "/root,/**/*.help");
         map.put(AbstractMaterialConfig.MATERIAL_NAME, "material-name");
 
+        map.put(GitMaterialConfig.SSH_PRIVATE_KEY, "this_is_the_test_private_key_content");
+        map.put(GitMaterialConfig.SSH_PRIVATE_KEY_CHANGED, "1");
+        map.put(GitMaterialConfig.SSH_PASSPHRASE, "this_is_test_passphrase");
+        map.put(GitMaterialConfig.SSH_PASSPHRASE_CHANGED, "1");
+
         gitMaterialConfig.setConfigAttributes(map);
 
         assertThat(gitMaterialConfig.getUrl()).isEqualTo("url");
@@ -65,14 +70,19 @@ class GitMaterialConfigTest {
         assertThat(gitMaterialConfig.isAutoUpdate()).isFalse();
         assertThat(gitMaterialConfig.isShallowClone()).isTrue();
         assertThat(gitMaterialConfig.filter()).isEqualTo(new Filter(new IgnoredFiles("/root"), new IgnoredFiles("/**/*.help")));
+
+        assertThat(gitMaterialConfig.getEncryptedSshPrivateKey()).isNotBlank();
+        assertThat(gitMaterialConfig.getSshPrivateKey()).isNull();
+        assertThat(gitMaterialConfig.getEncryptedSshPassphrase()).isNotBlank();
+        assertThat(gitMaterialConfig.getSshPassphrase()).isNull();
     }
 
     @Test
-    void setConfigAttributes_shouldUpdatePasswordWhenPasswordChangedBooleanChanged() throws Exception {
+    void setConfigAttributes_shouldUpdatePasswordOnlyWhenItsChangedFlagIsSet() throws Exception {
         GitMaterialConfig gitMaterialConfig = git("");
         Map<String, String> map = new HashMap<>();
-        map.put(GitMaterialConfig.PASSWORD, "secret");
-        map.put(GitMaterialConfig.PASSWORD_CHANGED, "1");
+        map.put(ScmMaterialConfig.PASSWORD, "secret");
+        map.put(ScmMaterialConfig.PASSWORD_CHANGED, "1");
 
         gitMaterialConfig.setConfigAttributes(map);
         assertThat(ReflectionUtil.getField(gitMaterialConfig, "password")).isNull();
@@ -80,20 +90,83 @@ class GitMaterialConfigTest {
         assertThat(gitMaterialConfig.getEncryptedPassword()).isEqualTo(new GoCipher().encrypt("secret"));
 
         //Dont change
-        map.put(GitMaterialConfig.PASSWORD, "Hehehe");
-        map.put(GitMaterialConfig.PASSWORD_CHANGED, "0");
+        map.put(ScmMaterialConfig.PASSWORD, "Hehehe");
+        map.put(ScmMaterialConfig.PASSWORD_CHANGED, "0");
         gitMaterialConfig.setConfigAttributes(map);
 
         assertThat(ReflectionUtil.getField(gitMaterialConfig, "password")).isNull();
         assertThat(gitMaterialConfig.getPassword()).isEqualTo("secret");
         assertThat(gitMaterialConfig.getEncryptedPassword()).isEqualTo(new GoCipher().encrypt("secret"));
 
-        map.put(GitMaterialConfig.PASSWORD, "");
-        map.put(GitMaterialConfig.PASSWORD_CHANGED, "1");
+        map.put(ScmMaterialConfig.PASSWORD, "");
+        map.put(ScmMaterialConfig.PASSWORD_CHANGED, "1");
         gitMaterialConfig.setConfigAttributes(map);
 
         assertThat(gitMaterialConfig.getPassword()).isNull();
         assertThat(gitMaterialConfig.getEncryptedPassword()).isNull();
+    }
+
+    @Test
+    void setConfigAttributes_shouldUpdatePrivateKeyOnlyWhenItsChangedFlagIsSet() {
+        // Should change
+        GitMaterialConfig gitMaterialConfig = git("");
+        Map<String, String> map = new HashMap<>();
+        map.put(GitMaterialConfig.SSH_PRIVATE_KEY, "this_is_my_secret_private_key");
+        map.put(GitMaterialConfig.SSH_PRIVATE_KEY_CHANGED, "1");
+
+        gitMaterialConfig.setConfigAttributes(map);
+        assertThat(gitMaterialConfig.getSshPrivateKey()).isBlank();
+        assertThat(gitMaterialConfig.getEncryptedSshPrivateKey()).isNotBlank();
+        assertThat(gitMaterialConfig.currentSshPrivateKey()).isEqualTo("this_is_my_secret_private_key");
+
+        // Should not change
+        map.put(GitMaterialConfig.SSH_PRIVATE_KEY, "this_is_my_another_secret_private_key");
+        map.put(GitMaterialConfig.SSH_PRIVATE_KEY_CHANGED, "0");
+        gitMaterialConfig.setConfigAttributes(map);
+
+        assertThat(gitMaterialConfig.getSshPrivateKey()).isBlank();
+        assertThat(gitMaterialConfig.getEncryptedSshPrivateKey()).isNotBlank();
+        assertThat(gitMaterialConfig.currentSshPrivateKey()).isEqualTo("this_is_my_secret_private_key");
+
+        map.put(GitMaterialConfig.SSH_PRIVATE_KEY, "");
+        map.put(GitMaterialConfig.SSH_PRIVATE_KEY_CHANGED, "1");
+        gitMaterialConfig.setConfigAttributes(map);
+
+        assertThat(gitMaterialConfig.getSshPrivateKey()).isNull();
+        assertThat(gitMaterialConfig.getEncryptedSshPrivateKey()).isNull();
+        assertThat(gitMaterialConfig.currentSshPrivateKey()).isNull();
+    }
+
+
+    @Test
+    void setConfigAttributes_shouldUpdatePassphraseOnlyWhenItsChangedFlagIsSet() {
+        // Should change
+        GitMaterialConfig gitMaterialConfig = git("");
+        Map<String, String> map = new HashMap<>();
+        map.put(GitMaterialConfig.SSH_PASSPHRASE, "this_is_my_passphrase");
+        map.put(GitMaterialConfig.SSH_PASSPHRASE_CHANGED, "1");
+
+        gitMaterialConfig.setConfigAttributes(map);
+        assertThat(gitMaterialConfig.getSshPassphrase()).isBlank();
+        assertThat(gitMaterialConfig.getEncryptedSshPassphrase()).isNotBlank();
+        assertThat(gitMaterialConfig.currentSshPassphrase()).isEqualTo("this_is_my_passphrase");
+
+        // Should not change
+        map.put(GitMaterialConfig.SSH_PASSPHRASE, "this_is_my_another_passphrase");
+        map.put(GitMaterialConfig.SSH_PASSPHRASE_CHANGED, "0");
+        gitMaterialConfig.setConfigAttributes(map);
+
+        assertThat(gitMaterialConfig.getSshPassphrase()).isBlank();
+        assertThat(gitMaterialConfig.getEncryptedSshPassphrase()).isNotBlank();
+        assertThat(gitMaterialConfig.currentSshPassphrase()).isEqualTo("this_is_my_passphrase");
+
+        map.put(GitMaterialConfig.SSH_PASSPHRASE, "");
+        map.put(GitMaterialConfig.SSH_PASSPHRASE_CHANGED, "1");
+        gitMaterialConfig.setConfigAttributes(map);
+
+        assertThat(gitMaterialConfig.getSshPassphrase()).isNull();
+        assertThat(gitMaterialConfig.getEncryptedSshPassphrase()).isNull();
+        assertThat(gitMaterialConfig.currentSshPassphrase()).isNull();
     }
 
     @Test
@@ -204,6 +277,71 @@ class GitMaterialConfigTest {
             gitMaterialConfig.validate(new ConfigSaveValidationContext(null));
 
             assertThat(gitMaterialConfig.errors().on(GitMaterialConfig.URL)).isNull();
+        }
+
+        @Test
+        void shouldFailWhenBothUsernamePasswordAndSecretKeyPassphraseAreProvided() {
+            final GitMaterialConfig gitMaterialConfig = gitMaterialConfig("https://username:{{SECRET:[secret_config_id][pass]}}@host/foo.git");
+
+            Map<String, String> map = new HashMap<>();
+            map.put(ScmMaterialConfig.USERNAME, "admin");
+            map.put(ScmMaterialConfig.PASSWORD, "secret");
+            map.put(ScmMaterialConfig.PASSWORD_CHANGED, "1");
+
+            map.put(GitMaterialConfig.SSH_PRIVATE_KEY, "this_is_my_private_key");
+            map.put(GitMaterialConfig.SSH_PRIVATE_KEY_CHANGED, "1");
+
+            gitMaterialConfig.setConfigAttributes(map);
+            assertThat(gitMaterialConfig.validateTree(mockValidationContextForSecretParams())).isFalse();
+            assertThat(gitMaterialConfig.errors().on("sshPrivateKey"))
+                                                 .isEqualTo("Only username/password or private-key/passphrase is allowed");
+
+            map.put(GitMaterialConfig.SSH_PRIVATE_KEY, "");
+            map.put(GitMaterialConfig.SSH_PRIVATE_KEY_CHANGED, "1");
+            map.put(GitMaterialConfig.SSH_PASSPHRASE, "this_is_my_passphrase");
+            map.put(GitMaterialConfig.SSH_PASSPHRASE_CHANGED, "1");
+            gitMaterialConfig.setConfigAttributes(map);
+
+            assertThat(gitMaterialConfig.validateTree(mockValidationContextForSecretParams())).isFalse();
+            assertThat(gitMaterialConfig.errors().on("sshPassphrase"))
+                                                 .isEqualTo("Only username/password or private-key/passphrase is allowed");
+        }
+
+        @Test
+        void shouldNotFailWhenUsernamePasswordAreSpecifiedAndSecretKeyPassphraseAreNotSpecified() {
+            final SecretConfig secretConfig = new SecretConfig("secret_config_id", "cd.go.secret.file");
+            final ValidationContext validationContext = mockValidationContextForSecretParams(secretConfig);
+
+            final GitMaterialConfig gitMaterialConfig = gitMaterialConfig("https://username:{{SECRET:[secret_config_id][pass]}}@host/foo.git");
+
+            Map<String, String> map = new HashMap<>();
+            map.put(ScmMaterialConfig.USERNAME, "admin");
+            map.put(ScmMaterialConfig.PASSWORD, "secret");
+            map.put(ScmMaterialConfig.PASSWORD_CHANGED, "1");
+
+            gitMaterialConfig.setConfigAttributes(map);
+            assertThat(gitMaterialConfig.validateTree(validationContext)).isTrue();
+        }
+
+        @Test
+        void shouldNotFailWhenSecretKetOrPassphraseAreSpecifiedAndUsernamePasswordAreNotSpecified() {
+            final SecretConfig secretConfig = new SecretConfig("secret_config_id", "cd.go.secret.file");
+            final ValidationContext validationContext = mockValidationContextForSecretParams(secretConfig);
+            final GitMaterialConfig gitMaterialConfig = gitMaterialConfig("https://username:{{SECRET:[secret_config_id][pass]}}@host/foo.git");
+
+            Map<String, String> map = new HashMap<>();
+            map.put(GitMaterialConfig.SSH_PRIVATE_KEY, "this_is_my_private_key");
+            map.put(GitMaterialConfig.SSH_PRIVATE_KEY_CHANGED, "1");
+            gitMaterialConfig.setConfigAttributes(map);
+
+            assertThat(gitMaterialConfig.validateTree(validationContext)).isTrue();
+
+            map = new HashMap<>();
+            map.put(GitMaterialConfig.SSH_PASSPHRASE, "this_is_my_passphrase");
+            map.put(GitMaterialConfig.SSH_PASSPHRASE_CHANGED, "1");
+            gitMaterialConfig.setConfigAttributes(map);
+
+            assertThat(gitMaterialConfig.validateTree(validationContext)).isTrue();
         }
 
         @Test

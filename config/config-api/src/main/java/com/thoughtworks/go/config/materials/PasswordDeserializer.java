@@ -15,12 +15,14 @@
  */
 package com.thoughtworks.go.config.materials;
 
+import com.thoughtworks.go.config.materials.git.GitMaterialConfig;
 import com.thoughtworks.go.security.CryptoException;
 import com.thoughtworks.go.security.GoCipher;
 import org.springframework.stereotype.Component;
 
 import static com.thoughtworks.go.config.materials.ScmMaterialConfig.ENCRYPTED_PASSWORD;
 import static com.thoughtworks.go.config.materials.ScmMaterialConfig.PASSWORD;
+import static com.thoughtworks.go.config.materials.git.GitMaterialConfig.*;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 @Component
@@ -32,25 +34,38 @@ public class PasswordDeserializer {
     }
 
     public String deserialize(String password, String encryptedPassword, AbstractMaterialConfig materialConfig) {
-        if (isNotBlank(password) && isNotBlank(encryptedPassword)) {
-            materialConfig.addError(PASSWORD, "You may only specify `password` or `encrypted_password`, not both!");
-            materialConfig.addError(ScmMaterialConfig.ENCRYPTED_PASSWORD, "You may only specify `password` or `encrypted_password`, not both!");
+        return this.deserialize(password, encryptedPassword, PASSWORD, ENCRYPTED_PASSWORD, materialConfig);
+    }
+
+    public String deserializeSshPrivateKey(String sshPrivateKey, String encryptedSshPrivateKey, GitMaterialConfig materialConfig) {
+        return this.deserialize(sshPrivateKey, encryptedSshPrivateKey, SSH_PRIVATE_KEY, ENCRYPTED_SSH_PRIVATE_KEY, materialConfig);
+    }
+
+    public String deserializeSshPassphrase(String sshPassphrase, String encryptedSshPassphrase, GitMaterialConfig materialConfig) {
+        return this.deserialize(sshPassphrase, encryptedSshPassphrase, SSH_PASSPHRASE, ENCRYPTED_SSH_PASSPHRASE, materialConfig);
+    }
+
+    public String deserialize(String value, String encryptedValue, String fieldName, String encryptedFieldName, AbstractMaterialConfig materialConfig) {
+        if (isNotBlank(value) && isNotBlank(encryptedValue)) {
+            String message = String.format("You may only specify `%s` or `encrypted_%s`, not both!", fieldName, fieldName);
+            materialConfig.addError(fieldName, message);
+            materialConfig.addError(encryptedFieldName, message);
         }
 
-        if (isNotBlank(password)) {
+        if (isNotBlank(value)) {
             try {
-                return goCipher.encrypt(password);
+                return goCipher.encrypt(value);
             } catch (CryptoException e) {
-                materialConfig.addError(PASSWORD, "Could not encrypt the password. This usually happens when the cipher text is invalid");
+                materialConfig.addError(fieldName, String.format("Could not encrypt the %s. This usually happens when the cipher text is invalid", fieldName));
             }
-        } else if (isNotBlank(encryptedPassword)) {
+        } else if (isNotBlank(encryptedValue)) {
             try {
-                goCipher.decrypt(encryptedPassword);
+                goCipher.decrypt(encryptedValue);
             } catch (Exception e) {
-                materialConfig.addError(ENCRYPTED_PASSWORD, "Encrypted value for password is invalid. This usually happens when the cipher text is invalid.");
+                materialConfig.addError(encryptedFieldName, String.format("Encrypted value for %s is invalid. This usually happens when the cipher text is invalid.", fieldName));
             }
 
-            return goCipher.maybeReEncryptForPostConstructWithoutExceptions(encryptedPassword);
+            return goCipher.maybeReEncryptForPostConstructWithoutExceptions(encryptedValue);
         }
         return null;
     }

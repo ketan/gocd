@@ -21,8 +21,24 @@ dependencies {
   compile project(':commandline')
   compile group: 'org.springframework', name: 'spring-tx', version: project.versions.spring
   compile group: 'de.skuzzle', name: 'semantic-version', version: project.versions.semanticVersion
+
   testCompile project(path: ':config:config-api', configuration: 'testOutput')
   testCompile project(':test:test-utils')
+
+  // for generating ssh private keys
+  testCompile group: 'org.bouncycastle', name: 'bcpkix-jdk15on', version: project.versions.bouncyCastle
+
+  // for testing git over ssh
+  testCompile group: 'org.apache.sshd', name: 'sshd-core', version: project.versions.sshd
+
+  // for testing git over http
+  testCompile group: 'org.eclipse.jetty', name: 'jetty-server', version: versions.jetty
+  testCompile group: 'org.eclipse.jetty', name: 'jetty-servlet', version: versions.jetty
+  testCompile(group: 'org.eclipse.jgit', name: 'org.eclipse.jgit.http.server', version: project.versions.jgit) {
+    exclude(module: 'jsch')
+    exclude(module: 'jzlib')
+  }
+
   testCompileOnly group: 'junit', name: 'junit', version: project.versions.junit
   testRuntimeOnly group: 'org.junit.vintage', name: 'junit-vintage-engine', version: project.versions.junit5
   testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: project.versions.junit5

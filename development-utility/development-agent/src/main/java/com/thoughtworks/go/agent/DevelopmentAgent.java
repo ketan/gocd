@@ -18,8 +18,6 @@ package com.thoughtworks.go.agent;
 import com.thoughtworks.go.util.SystemEnvironment;
 import com.thoughtworks.go.util.command.ProcessRunner;
 
-import java.io.IOException;
-
 /**
  * @understands how to run a local development mode agent so we can develop live
  * Set the following before running the main method:
@@ -32,6 +30,7 @@ public class DevelopmentAgent {
     public static void main(String[] args) throws Exception {
         new ProcessRunner().command("curl", "http://localhost:8153/go/admin/agent-plugins.zip", "--fail", "--silent", "--output", "agent-plugins.zip").failOnError(false).run();
         new ProcessRunner().command("curl", "http://localhost:8153/go/admin/tfs-impl.jar", "--fail", "--silent", "--output", "tfs-impl.jar").failOnError(false).run();
+
         new SystemEnvironment().set(SystemEnvironment.PLUGIN_ACTIVATOR_JAR_PATH, "go-plugin-activator.jar");
         assertActivationJarPresent();
         AgentMain.main("-serverUrl", "https://localhost:8154/go");

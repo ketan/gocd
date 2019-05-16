@@ -16,6 +16,7 @@
 package com.thoughtworks.go.domain.materials.git;
 
 import com.thoughtworks.go.config.materials.git.GitMaterialConfig;
+import com.thoughtworks.go.config.migration.UrlCredentials;
 import com.thoughtworks.go.domain.materials.Modification;
 import com.thoughtworks.go.domain.materials.Revision;
 import com.thoughtworks.go.domain.materials.SCMCommand;
@@ -28,7 +29,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.io.IOException;
+import java.io.UncheckedIOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.attribute.PosixFilePermissions;
 import java.util.*;
+import java.util.function.Supplier;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -39,6 +46,16 @@ import static com.thoughtworks.go.util.ExceptionUtils.bomb;
 import static com.thoughtworks.go.util.command.ProcessOutputStreamConsumer.inMemoryConsumer;
 
 public class GitCommand extends SCMCommand {
+    private static final File TEMP_DIR = new File("data/tmp-scripts");
+
+    static {
+        FileUtils.deleteQuietly(TEMP_DIR);
+        // cleanup temp dir on exit, if there are any files left behind
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> FileUtils.deleteQuietly(TEMP_DIR)));
+    }
+
+    private static final ScriptGenerator SCRIPT_GENERATOR = new ScriptGenerator();
+
     private static final Logger LOG = LoggerFactory.getLogger(GitCommand.class);
 
     private static final Pattern GIT_SUBMODULE_STATUS_PATTERN = Pattern.compile("^.[0-9a-fA-F]{40} (.+?)( \\(.+\\))?$");
@@ -79,9 +96,13 @@ public class GitCommand extends SCMCommand {
         if (depth < Integer.MAX_VALUE) {
             gitClone.withArg(String.format("--depth=%s", depth));
         }
-        gitClone.withArg(new UrlArgument(url)).withArg(workingDir.getAbsolutePath());
 
-        return run(gitClone, outputStreamConsumer);
+        String urlWithoutCredentials = UrlCredentials.urlWithoutCredentials(url);
+        String username = UrlCredentials.getUsername(url);
+        String password = UrlCredentials.getPassword(url);
+
+        gitClone.withArg(new UrlArgument(urlWithoutCredentials)).withArg(workingDir.getAbsolutePath());
+        return configuringPassPrompts(gitClone, username, password, () -> run(gitClone, outputStreamConsumer));
     }
 
     private CommandLine cloneCommand() {
@@ -305,11 +326,19 @@ public class GitCommand extends SCMCommand {
     }
 
     public void checkConnection(UrlArgument repoUrl, String branch) {
-        CommandLine commandLine = git().withArgs("ls-remote").withArg(repoUrl).withArg("refs/heads/" + branch);
-        ConsoleResult result = commandLine.runOrBomb(new NamedProcessTag(repoUrl.forDisplay()));
-        if (!hasOnlyOneMatchingBranch(result)) {
-            throw new CommandLineException(String.format("The branch %s could not be found.", branch));
-        }
+        String urlWithoutCredentials = UrlCredentials.urlWithoutCredentials(repoUrl.forCommandLine());
+        String username = UrlCredentials.getUsername(repoUrl.forCommandLine());
+        String pass = UrlCredentials.getPassword(repoUrl.forCommandLine());
+
+        CommandLine commandLine = git().withArgs("ls-remote").withArg(urlWithoutCredentials).withArg("refs/heads/" + branch);
+
+        configuringPassPrompts(commandLine, username, pass, () -> {
+            ConsoleResult result = commandLine.runOrBomb(new NamedProcessTag(urlWithoutCredentials));
+            if (!hasOnlyOneMatchingBranch(result)) {
+                throw new CommandLineException(String.format("The branch %s could not be found.", branch));
+            }
+            return null;
+        });
     }
 
     private static boolean hasOnlyOneMatchingBranch(ConsoleResult branchList) {
@@ -519,4 +548,52 @@ public class GitCommand extends SCMCommand {
         outputStreamConsumer.stdOutput(String.format("[GIT] " + message, args));
     }
 
+    private <T> T configuringPassPrompts(CommandLine commandLine, String username, String password, Supplier<T> operation) {
+        File usernameFile = null;
+        File passwordFile = null;
+        File askPassScript = null;
+        try {
+            usernameFile = createTempFile("user-", ".txt");
+            passwordFile = createTempFile("pass-", ".txt");
+            askPassScript = createTempFile("askpass", ".sh");
+
+            FileUtils.writeStringToFile(usernameFile, username + "\n", StandardCharsets.UTF_8);
+            FileUtils.writeStringToFile(passwordFile, password + "\n", StandardCharsets.UTF_8);
+            FileUtils.writeStringToFile(askPassScript, SCRIPT_GENERATOR.askpassUnixScript(commandLine, usernameFile, passwordFile), StandardCharsets.UTF_8);
+
+            askPassScript.setExecutable(true, true);
+
+            // enable git debugging
+            // commandLine.withEnv("GIT_TRACE", "/tmp/git-trace.log");
+            commandLine.withEnv("GIT_ASKPASS", askPassScript.getAbsolutePath());
+            commandLine.withEnv("SSH_ASKPASS", askPassScript.getAbsolutePath());
+            return operation.get();
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        } finally {
+            deleteFilesWithWarning(askPassScript, usernameFile, passwordFile);
+        }
+    }
+
+    private File createTempFile(String prefix, String extension) throws IOException {
+        TEMP_DIR.mkdirs();
+
+        if (!TEMP_DIR.exists()) {
+            throw new IOException("Unable to create temp directory: " + TEMP_DIR);
+        }
+
+        return Files.createTempFile(TEMP_DIR.toPath(), prefix, extension, PosixFilePermissions.asFileAttribute(PosixFilePermissions.fromString("rw-------"))).toFile();
+    }
+
+    private void deleteFileWithWarning(File file) {
+        if (file != null && !file.delete() && file.exists()) {
+            LOG.warn("[WARNING] Temp file {} not deleted", file);
+        }
+    }
+
+    private void deleteFilesWithWarning(File... files) {
+        for (File file : files) {
+            deleteFileWithWarning(file);
+        }
+    }
 }

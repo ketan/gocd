@@ -316,6 +316,7 @@ export abstract class FormField<T, V = {}> extends MithrilViewComponent<BaseAttr
 }
 
 export type TextFieldAttrs = BaseAttrs<string> & RequiredFieldAttr & PlaceholderAttr;
+
 export class TextField extends FormField<string, RequiredFieldAttr & PlaceholderAttr> {
 
   renderInputField(vnode: m.Vnode<TextFieldAttrs>) {
@@ -354,6 +355,14 @@ type TextAreaFieldAttrs =
   & ResizableAttrs
   & InitialTextAreaSizeAttrs;
 
+type SecureTextAreaAttrs =
+  BaseAttrs<EncryptedValue>
+  & RequiredFieldAttr
+  & PlaceholderAttr
+  & ResizableAttrs
+  & InitialTextAreaSizeAttrs;
+
+
 export class TextAreaField extends FormField<string, TextAreaFieldAttrs> {
   renderInputField(vnode: m.Vnode<TextAreaFieldAttrs>) {
 
@@ -383,6 +392,59 @@ export class TextAreaField extends FormField<string, TextAreaFieldAttrs> {
     return _.assign(defaultAttributes, textInputFieldDefaultAttrs);
   }
 
+}
+
+export class SecureTextArea extends FormField<EncryptedValue, SecureTextAreaAttrs> {
+  renderInputField(vnode: m.Vnode<BaseAttrs<EncryptedValue> & SecureTextAreaAttrs>) {
+    let value = "";
+    if(vnode.attrs.property().isEditing()) {
+      value = vnode.attrs.property().value();
+    } else {
+      value = "************";
+    }
+
+    const input = <textarea
+      className={classnames(styles.formControl,
+                            styles.textArea)}
+      rows={vnode.attrs.rows}
+      disabled={!vnode.attrs.property().isEditing()}
+      {...this.defaultAttributes(vnode.attrs)}
+      {...this.bindingAttributes(vnode.attrs, "oninput", "value")}>{value}</textarea>;
+
+    return [input, SecureTextArea.resetOrOverride(vnode)];
+  }
+
+  protected defaultAttributes(attrs: BaseAttrs<EncryptedValue> & SecureTextAreaAttrs): any {
+    return _.assign({}, super.defaultAttributes(attrs), {
+      readonly: !attrs.property().isEditing()
+    });
+  }
+
+  protected bindingAttributes(attrs: BaseAttrs<EncryptedValue>,
+                              eventName: string,
+                              propertyAttribute: string): any {
+    if (attrs.property().isEditing()) {
+      return {
+        [eventName]: (evt: any) => attrs.property().value(evt.currentTarget.value),
+        [propertyAttribute]: attrs.property().value()
+      };
+    } else {
+      return {
+        value: "************"
+      };
+    }
+
+  }
+
+  private static resetOrOverride(vnode: m.Vnode<BaseAttrs<EncryptedValue> & SecureTextAreaAttrs>) {
+    if (vnode.attrs.property().isEditing()) {
+      return <FormResetButton
+        onclick={vnode.attrs.property().resetToOriginal.bind(vnode.attrs.property())}>Reset</FormResetButton>;
+    } else {
+      return <FormResetButton
+        onclick={vnode.attrs.property().edit.bind(vnode.attrs.property())}>Change</FormResetButton>;
+    }
+  }
 }
 
 export class PasswordField extends FormField<EncryptedValue, RequiredFieldAttr & PlaceholderAttr> {

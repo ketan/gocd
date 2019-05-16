@@ -35,7 +35,7 @@ describe "_form.html.erb" do
   it "should render all git material attributes" do
     in_params(:pipeline_name => "pipeline_name")
 
-    render :partial => "admin/materials/git/form.html", :locals => {:scope => {:material => @material_config, :url => "http://google.com", :method => "POST", :submit_label => "FOO"}}
+    render :partial => "admin/materials/git/form.html", :locals => {:scope => {:material => @material_config, :url => "http://google.com", :method => "POST", :submit_label => "FOO", :edit_mode => true}}
 
     expect(response.body).to have_selector("input[type='hidden'][name='current_tab'][value='materials']", {visible: :hidden})
     expect(response.body).to have_selector(".popup_form input[type='hidden'][name='material_type'][value='#{@material_config.getType()}']", {visible: :hidden})
@@ -43,9 +43,17 @@ describe "_form.html.erb" do
     expect(response.body).to have_selector(".popup_form input[type='text'][name='material[#{GitMaterialConfig::URL}]'][value='git://foo']")
     expect(response.body).to have_selector(".popup_form input[type='text'][name='material[#{GitMaterialConfig::BRANCH}]'][value='master']")
     expect(response.body).to have_selector(".popup_form input[type='text'][name='material[#{ScmMaterialConfig::FOLDER}]'][value='dest']")
+
+    # Git SSH related field's assertion
+    expect(response.body).to have_selector(".popup_form textarea[name='material[#{GitMaterialConfig::SSH_PRIVATE_KEY}]']")
+    expect(response.body).to have_selector(".popup_form input[type='password'][name='material[#{GitMaterialConfig::SSH_PASSPHRASE}]']")
+    expect(response.body).to have_selector(".popup_form input[type='checkbox'][name='material[#{GitMaterialConfig::SSH_PRIVATE_KEY_CHANGED}]'][value='1']")
+    expect(response.body).to have_selector(".popup_form input[type='checkbox'][name='material[#{GitMaterialConfig::SSH_PASSPHRASE_CHANGED}]'][value='1']")
+
     expect(response.body).to have_selector(".popup_form input[type='checkbox'][name='material[#{ScmMaterialConfig::AUTO_UPDATE}]'][checked='checked']")
     expect(response.body).to have_selector(".popup_form textarea[name='material[#{ScmMaterialConfig::FILTER}]']", :text => "/sugar,/jaggery")
     expect(response.body).to have_selector(".form_buttons button[type='submit'] span", :text => "FOO")
+
   end
 
   it "should display check connection button" do
@@ -59,19 +67,23 @@ describe "_form.html.erb" do
   end
 
   it "should display new git material view with errors" do
-    error = config_error(GitMaterialConfig::URL, "Url is wrong")
-    error.add(ScmMaterialConfig::MATERIAL_NAME, "Material Name is so wrong")
-    error.add(GitMaterialConfig::BRANCH, "Branch is wrong")
-    error.add(GitMaterialConfig::AUTO_UPDATE, "AUTO_UPDATE is wrong")
-    error.add(GitMaterialConfig::FOLDER, "Folder is wrong")
-    set(@material_config, "errors", error)
+    errors = config_error(GitMaterialConfig::URL, "Url is wrong")
+    errors.add(ScmMaterialConfig::MATERIAL_NAME, "Material Name is so wrong")
+    errors.add(GitMaterialConfig::BRANCH, "Branch is wrong")
+    errors.add(GitMaterialConfig::AUTO_UPDATE, "AUTO_UPDATE is wrong")
+    errors.add(GitMaterialConfig::FOLDER, "Folder is wrong")
+    errors.add(GitMaterialConfig::SSH_PRIVATE_KEY, "Private Key is absolutely wrong")
+    errors.add(GitMaterialConfig::SSH_PASSPHRASE, "Passphrase is equally wrong")
+
+    set(@material_config, "errors", errors)
     set(@ignored_file, "configErrors", config_error(com.thoughtworks.go.config.materials.IgnoredFiles::PATTERN, "Filter is wrong"))
 
     in_params(:pipeline_name => "pipeline_name")
 
-    render :partial => "admin/materials/git/form.html", :locals => {:scope => {:material => @material_config, :url => "http://google.com", :method => "POST", :submit_label => "foo"}}
+    render :partial => "admin/materials/git/form.html", :locals => {:scope => {:material => @material_config, :url => "http://google.com", :method => "POST", :submit_label => "foo", :edit_mode => true}}
 
     Capybara.string(response.body).find('.popup_form').tap do |popup_form|
+
       expect(popup_form).to have_selector("div.field_with_errors input[type='text'][name='material[#{AbstractMaterialConfig::MATERIAL_NAME}]'][value='Git Material Name']")
       expect(popup_form).to have_selector("div.form_error", :text => "Material Name is so wrong")
 
@@ -84,6 +96,12 @@ describe "_form.html.erb" do
       expect(popup_form).to have_selector("div.form_error", :text => "Folder is wrong")
       expect(popup_form).to have_selector("div.field_with_errors input[type='checkbox'][name='material[#{ScmMaterialConfig::AUTO_UPDATE}]'][checked='checked']")
       expect(popup_form).to have_selector("div.form_error", :text => "AUTO_UPDATE is wrong")
+
+      expect(popup_form).to have_selector("div.field_with_errors textarea[name='material[#{GitMaterialConfig::SSH_PRIVATE_KEY}]']")
+      expect(popup_form).to have_selector("div.form_error", :text => "Private Key is absolutely wrong")
+
+      expect(popup_form).to have_selector("div#ssh_passphrase_div input[type='password'][name='material[#{GitMaterialConfig::SSH_PASSPHRASE}]']")
+      expect(popup_form).to have_selector("div.form_error", :text => "Passphrase is equally wrong")
 
       #Have skipped asserting on the div fieldWithError thats rendered around the text area , since the keys mismatch (pattern vs filter). Div around the actual text area is currently
       #not affecting functionality in any way.

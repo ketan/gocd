@@ -247,6 +247,7 @@ dependencies {
   copyOnly project(path: ':tfs-impl:tfs-impl-14', configuration: 'fatJarConfig')
   copyOnly project(path: ':agent', configuration: 'fatJarConfig')
   copyOnly project(path: ':agent-launcher', configuration: 'fatJarConfig')
+
   copyOnlyTestData project(':test:test-agent')
 
   compile group: 'org.apache.commons', name: 'commons-dbcp2', version: project.versions.commonsDbcp
@@ -1118,7 +1119,8 @@ task licenseReportAggregate {
                                  'gocd-yaml-config-plugin.jar',
                                  'gocd-filebased-authentication-plugin.jar',
                                  'gocd-ldap-authentication-plugin.jar',
-                                 'gocd-yum-repository-poller-plugin.jar']
+                                 'gocd-yum-repository-poller-plugin.jar'
+  ]
 
   def getAllJarDependencies = {
     // get a list of all dependencies from each gradle module

@@ -265,7 +265,7 @@ class GitMaterialUpdaterTest extends BuildSessionBasedTestCase {
         FileUtils.deleteDirectory(submoduleFolder);
         assertThat(submoduleFolder.exists()).isEqualTo(false);
         updateTo(material, new RevisionContext(new StringRevision("origin/HEAD")), JobResult.Failed);
-        assertConsoleOut(console.output()).matchUsingRegex(String.format("[Cc]lone of '%s' into submodule path '((.*)[\\/])?sub1' failed",
+        assertConsoleOut(console.output()).matchUsingRegex(format("[Cc]lone of '%s' into submodule path '((.*)[\\/])?sub1' failed",
                 Pattern.quote(FileUtil.toFileURI(submoduleFolder.getAbsolutePath()) + "/")));
     }
 

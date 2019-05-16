@@ -147,6 +147,10 @@ public class Boot {
     }
 
     private static String defaultMainClassName(JarFile jarFile) throws IOException {
-        return jarFile.getManifest().getMainAttributes().getValue("GoCD-Main-Class");
+        String value = jarFile.getManifest().getMainAttributes().getValue("GoCD-Main-Class");
+        if (value == null) {
+            throw new RuntimeException("GoCD-Main-Class not specified in manifest file.");
+        }
+        return value;
     }
 }

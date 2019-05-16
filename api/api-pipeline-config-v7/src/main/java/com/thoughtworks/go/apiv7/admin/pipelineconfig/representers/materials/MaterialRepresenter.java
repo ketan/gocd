@@ -19,9 +19,12 @@ package com.thoughtworks.go.apiv7.admin.pipelineconfig.representers.materials;
 import com.thoughtworks.go.api.base.OutputWriter;
 import com.thoughtworks.go.api.representers.JsonReader;
 import com.thoughtworks.go.apiv7.admin.shared.representers.stages.ConfigHelperOptions;
+import com.thoughtworks.go.config.materials.PasswordDeserializer;
 import com.thoughtworks.go.domain.materials.MaterialConfig;
 
 public interface MaterialRepresenter<T extends MaterialConfig> {
+    PasswordDeserializer PASSWORD_DESERIALIZER = new PasswordDeserializer();
+
     void toJSON(OutputWriter jsonWriter, T gitMaterialConfig);
 
     T fromJSON(JsonReader jsonReader, ConfigHelperOptions configHelperOptions);

@@ -15,6 +15,7 @@
  */
 
 import {Hg} from "models/materials/spec/material_test_data";
+import stream = require("mithril/stream");
 import {
   GitMaterialAttributes,
   HgMaterialAttributes,
@@ -24,6 +25,7 @@ import {
   SvnMaterialAttributes,
   TfsMaterialAttributes
 } from "models/materials/types";
+import {EncryptedValue} from "views/components/forms/encrypted_value";
 
 describe("Material Types", () => {
   describe("Deserialize", () => {
@@ -174,6 +176,22 @@ describe("Material Types", () => {
       expect(material.attributes().errors().keys()).toEqual(["url"]);
       expect(material.attributes().errors().errorsForDisplay("url"))
         .toBe("URL credentials must be set in either the URL or the username+password fields, but not both.");
+    });
+  });
+
+  describe("Serialization", () => {
+    it("should serialize encrypted fields", () => {
+      let gitMaterialAttributes           = new GitMaterialAttributes();
+      gitMaterialAttributes.sshPrivateKey = stream(new EncryptedValue({cipherText: "AES:some-junk"}));
+      gitMaterialAttributes.sshPassphrase = stream(new EncryptedValue({clearText: "passphraseValue"}));
+
+      let json: any = gitMaterialAttributes.toJSON();
+
+      expect(json.encryptedSshPrivateKey).toEqual("AES:some-junk");
+      expect(json.sshPassphrase).toEqual("passphraseValue");
+
+      expect(json.sshPrivateKey).toBeUndefined();
+      expect(json.encryptedSshPassphrase).toBeUndefined();
     });
   });
 });

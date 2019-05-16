@@ -26,9 +26,13 @@ public class GitMaterialRepresenter extends ScmMaterialRepresenter<GitMaterialCo
     @Override
     public void toJSON(OutputWriter jsonWriter, GitMaterialConfig gitMaterialConfig) {
         super.toJSON(jsonWriter, gitMaterialConfig);
+
         jsonWriter.addWithDefaultIfBlank("branch", gitMaterialConfig.getBranch(), "master");
         jsonWriter.add("submodule_folder", gitMaterialConfig.getSubmoduleFolder());
         jsonWriter.add("shallow_clone", gitMaterialConfig.isShallowClone());
+
+        jsonWriter.addIfNotNull("encrypted_ssh_private_key", gitMaterialConfig.getEncryptedSshPrivateKey());
+        jsonWriter.addIfNotNull("encrypted_ssh_passphrase", gitMaterialConfig.getEncryptedSshPassphrase());
     }
 
     @Override
@@ -36,6 +40,7 @@ public class GitMaterialRepresenter extends ScmMaterialRepresenter<GitMaterialCo
         GitMaterialConfig gitMaterialConfig = new GitMaterialConfig();
         jsonReader.readStringIfPresent("url", gitMaterialConfig::setUrl);
         super.fromJSON(jsonReader, gitMaterialConfig, options);
+
         jsonReader.optString("branch").ifPresent(branch -> {
             if (StringUtils.isNotBlank(branch)) {
                 gitMaterialConfig.setBranch(branch);
@@ -43,8 +48,17 @@ public class GitMaterialRepresenter extends ScmMaterialRepresenter<GitMaterialCo
                 gitMaterialConfig.setBranch("master");
             }
         });
+
         jsonReader.readStringIfPresent("submodule_folder", gitMaterialConfig::setSubmoduleFolder);
         jsonReader.optBoolean("shallow_clone").ifPresent(gitMaterialConfig::setShallowClone);
+
+        String sshPrivateKey = jsonReader.getStringOrDefault("ssh_private_key", null);
+        String encryptedSshPrivateKey = jsonReader.getStringOrDefault("encrypted_ssh_private_key", null);
+        gitMaterialConfig.setEncryptedSshPrivateKey(PASSWORD_DESERIALIZER.deserializeSshPrivateKey(sshPrivateKey, encryptedSshPrivateKey, gitMaterialConfig));
+
+        String sshPassphrase = jsonReader.getStringOrDefault("ssh_passphrase", null);
+        String encryptedSshPassphrase = jsonReader.getStringOrDefault("encrypted_ssh_passphrase", null);
+        gitMaterialConfig.setEncryptedSshPassphrase(PASSWORD_DESERIALIZER.deserializeSshPassphrase(sshPassphrase, encryptedSshPassphrase, gitMaterialConfig));
 
         return gitMaterialConfig;
     }

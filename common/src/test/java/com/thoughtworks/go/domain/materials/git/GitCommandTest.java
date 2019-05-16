@@ -146,7 +146,7 @@ public class GitCommandTest {
     }
 
     @Test
-    void shouldOnlyCloneLimitedRevisionsIfDepthSpecified() throws Exception {
+    void shouldOnlyCloneLimitedRevisionsIfDepthSpecified() {
         FileUtils.deleteQuietly(this.gitLocalRepoDir);
         git.clone(inMemoryConsumer(), repoUrl, 2);
         assertThat(git.isShallow()).isTrue();
@@ -160,7 +160,7 @@ public class GitCommandTest {
     }
 
     @Test
-    void unshallowALocalRepoWithArbitraryDepth() throws Exception {
+    void unshallowALocalRepoWithArbitraryDepth() {
         FileUtils.deleteQuietly(this.gitLocalRepoDir);
         git.clone(inMemoryConsumer(), repoUrl, 2);
         git.unshallow(inMemoryConsumer(), 3);
@@ -206,7 +206,7 @@ public class GitCommandTest {
     }
 
     @Test
-    void shouldBombForFetchFailure() throws IOException {
+    void shouldBombForFetchFailure() {
         executeOnGitRepo("git", "remote", "rm", "origin");
         executeOnGitRepo("git", "remote", "add", "origin", "git://user:secret@foo.bar/baz");
         try {
@@ -219,7 +219,7 @@ public class GitCommandTest {
     }
 
     @Test
-    void shouldBombForResettingFailure() throws IOException {
+    void shouldBombForResettingFailure() {
         try {
             git.resetWorkingDir(new SysOutStreamConsumer(), new StringRevision("abcdef"), false);
             fail("should have failed for non 0 return code");
@@ -260,7 +260,7 @@ public class GitCommandTest {
     }
 
     @Test
-    void shouldRetrieveLatestModification() throws Exception {
+    void shouldRetrieveLatestModification() {
         Modification mod = git.latestModification().get(0);
         assertThat(mod.getUserName()).isEqualTo("Chris Turner <cturner@thoughtworks.com>");
         assertThat(mod.getComment()).isEqualTo("Added 'run-till-file-exists' ant target");
@@ -274,7 +274,7 @@ public class GitCommandTest {
     }
 
     @Test
-    void shouldRetrieveLatestModificationWhenColoringIsSetToAlways() throws Exception {
+    void shouldRetrieveLatestModificationWhenColoringIsSetToAlways() {
         setColoring();
         Modification mod = git.latestModification().get(0);
         assertThat(mod.getUserName()).isEqualTo("Chris Turner <cturner@thoughtworks.com>");
@@ -304,13 +304,13 @@ public class GitCommandTest {
     }
 
     @Test
-    void retrieveLatestModificationShouldNotResultInWorkingCopyCheckOut() throws Exception {
+    void retrieveLatestModificationShouldNotResultInWorkingCopyCheckOut() {
         git.latestModification();
         assertWorkingCopyNotCheckedOut();
     }
 
     @Test
-    void getModificationsSinceShouldNotResultInWorkingCopyCheckOut() throws Exception {
+    void getModificationsSinceShouldNotResultInWorkingCopyCheckOut() {
         git.modificationsSince(GitTestRepo.REVISION_2);
         assertWorkingCopyNotCheckedOut();
     }
@@ -784,11 +784,11 @@ public class GitCommandTest {
         executeOnGitRepo("git", "config", "color.branch", "always");
     }
 
-    private void setLogDecoration() throws IOException {
+    private void setLogDecoration() {
         executeOnGitRepo("git", "config", "log.decorate", "true");
     }
 
-    private void unsetLogDecoration() throws IOException {
+    private void unsetLogDecoration() {
         executeOnGitRepo("git", "config", "log.decorate", "off");
     }
 

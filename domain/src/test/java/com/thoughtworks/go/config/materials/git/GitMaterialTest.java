@@ -68,8 +68,8 @@ import static org.mockito.Mockito.when;
 
 @EnableRuleMigrationSupport
 public class GitMaterialTest {
-    public static final GitVersion GIT_VERSION_1_9 = GitVersion.parse("git version 1.9.0");
-    public static final GitVersion GIT_VERSION_1_5 = GitVersion.parse("git version 1.5.4.3");
+    private static final GitVersion GIT_VERSION_1_9 = GitVersion.parse("git version 1.9.0");
+    private static final GitVersion GIT_VERSION_1_5 = GitVersion.parse("git version 1.5.4.3");
     @Rule
     public final TemporaryFolder temporaryFolder = new TemporaryFolder();
 
@@ -82,6 +82,12 @@ public class GitMaterialTest {
     @BeforeEach
     void setUp() {
         outputStreamConsumer = inMemoryConsumer();
+    }
+
+    @AfterEach
+    void teardown() {
+        temporaryFolder.delete();
+        TestRepo.internalTearDown();
     }
 
     @Nested

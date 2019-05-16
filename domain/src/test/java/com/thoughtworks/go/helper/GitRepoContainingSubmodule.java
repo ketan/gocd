@@ -44,6 +44,7 @@ public class GitRepoContainingSubmodule extends TestRepo {
 
     public GitRepoContainingSubmodule(TemporaryFolder temporaryFolder) throws Exception {
         super(temporaryFolder);
+
         this.workingDir = temporaryFolder.newFolder();
         remoteRepoDir = createRepo(NAME);
     }
@@ -59,7 +60,7 @@ public class GitRepoContainingSubmodule extends TestRepo {
         return submodule;
     }
 
-    public void removeSubmodule(String folderName) throws Exception {
+    public void removeSubmodule(String folderName) {
         git(remoteRepoDir).updateSubmoduleWithInit(inMemoryConsumer(), false);
         git(remoteRepoDir).submoduleRemove(folderName);
         git(remoteRepoDir).commit("Removed submodule " + folderName);

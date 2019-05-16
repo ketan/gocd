@@ -42,7 +42,6 @@ public abstract class JarDetector {
         return create(env, "tfs-impl-14.jar");
     }
 
-
     private static boolean runningOnAgent() {
         return "agent".equals(System.getProperty("go.process.type"));
     }
@@ -57,6 +56,5 @@ public abstract class JarDetector {
         FileInputStreamSource(String file) throws IOException {
             super(new File(file).toURI().toURL());
         }
-
     }
 }

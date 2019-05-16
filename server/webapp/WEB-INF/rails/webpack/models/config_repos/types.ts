@@ -213,6 +213,8 @@ const HUMAN_NAMES_FOR_MATERIAL_ATTRIBUTES: { [index: string]: string } = {
   url: "URL",
   username: "Username",
   password: "Password",
+  sshPrivateKey: "SSH Private Key",
+  sshPassphrase: "SSH Passphrase",
   port: "Host and port",
   useTickets: "Use tickets",
   view: "View",

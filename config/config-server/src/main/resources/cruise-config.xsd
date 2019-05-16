@@ -223,6 +223,10 @@
     <xsd:attribute name="username" type="xsd:string"/>
     <xsd:attribute name="password" type="xsd:string"/>
     <xsd:attribute name="encryptedPassword" type="xsd:string"/>
+    <xsd:attribute name="sshPrivateKey" type="xsd:string"/>
+    <xsd:attribute name="encryptedSshPrivateKey" type="xsd:string"/>
+    <xsd:attribute name="sshPassphrase" type="xsd:string"/>
+    <xsd:attribute name="encryptedSshPassphrase" type="xsd:string"/>
     <xsd:attribute name="branch" type="xsd:string" use="optional"/>
     <xsd:attribute name="autoUpdate" type="xsd:boolean" use="optional"/>
   </xsd:complexType>
@@ -552,6 +556,10 @@
     <xsd:attribute name="username" type="xsd:string"/>
     <xsd:attribute name="password" type="xsd:string"/>
     <xsd:attribute name="encryptedPassword" type="xsd:string"/>
+    <xsd:attribute name="sshPrivateKey" type="xsd:string"/>
+    <xsd:attribute name="encryptedSshPrivateKey" type="xsd:string"/>
+    <xsd:attribute name="sshPassphrase" type="xsd:string"/>
+    <xsd:attribute name="encryptedSshPassphrase" type="xsd:string"/>
     <xsd:attribute name="dest" type="filePathType" use="optional"/>
     <xsd:attribute name="branch" type="xsd:string" use="optional"/>
     <xsd:attribute name="shallowClone" type="xsd:boolean" use="optional"/>

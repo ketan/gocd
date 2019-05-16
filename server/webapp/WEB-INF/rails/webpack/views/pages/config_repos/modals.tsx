@@ -37,7 +37,7 @@ import {Form, FormBody, FormHeader} from "views/components/forms/form";
 import {
   CheckboxField,
   Option,
-  PasswordField,
+  PasswordField, SecureTextArea,
   SelectField,
   SelectFieldOptions,
   TextAreaField,
@@ -160,10 +160,20 @@ const MATERIAL_TO_COMPONENT_MAP: { [key: string]: MithrilViewComponent<EditableM
                      property={materialAttributes.branch}/>
 
           <TextField label={humanizedMaterialAttributeName("username")}
-                     property={materialAttributes.username}/>
+                     property={materialAttributes.username}
+                     errorText={materialAttributes.errors().errorsForDisplay("username")}/>
 
           <PasswordField label={humanizedMaterialAttributeName("password")}
-                         property={materialAttributes.password}/>
+                         property={materialAttributes.password}
+                         errorText={materialAttributes.errors().errorsForDisplay("password")}/>
+
+          <SecureTextArea label={humanizedMaterialAttributeName("sshPrivateKey")}
+                          property={materialAttributes.sshPrivateKey}
+                          errorText={materialAttributes.errors().errorsForDisplay("sshPrivateKey")}/>
+
+          <PasswordField label={humanizedMaterialAttributeName("sshPassphrase")}
+                         property={materialAttributes.sshPassphrase}
+                         errorText={materialAttributes.errors().errorsForDisplay("sshPassphrase")}/>
         </MaterialEditWidget>
       );
     }

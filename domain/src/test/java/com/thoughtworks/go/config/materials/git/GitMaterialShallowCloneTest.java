@@ -57,14 +57,13 @@ public class GitMaterialShallowCloneTest {
         workingDir = temporaryFolder.newFolder("working-dir");
     }
 
-
     @After
     public void teardown() throws Exception {
         TestRepo.internalTearDown();
     }
 
     @Test
-    public void defaultShallowFlagIsOff() throws Exception {
+    public void defaultShallowFlagIsOff() {
         assertThat(new GitMaterial(repo.projectRepositoryUrl()).isShallowClone(), is(false));
         assertThat(new GitMaterial(repo.projectRepositoryUrl(), null).isShallowClone(), is(false));
         assertThat(new GitMaterial(repo.projectRepositoryUrl(), true).isShallowClone(), is(true));
@@ -75,7 +74,7 @@ public class GitMaterialShallowCloneTest {
     }
 
     @Test
-    public void shouldGetLatestModificationWithShallowClone() throws IOException {
+    public void shouldGetLatestModificationWithShallowClone() {
         GitMaterial material = new GitMaterial(repo.projectRepositoryUrl(), true);
         List<Modification> mods = material.latestModification(workingDir, context());
         assertThat(mods.size(), is(1));
@@ -117,7 +116,7 @@ public class GitMaterialShallowCloneTest {
     public void configShouldIncludesShallowFlag() {
         GitMaterialConfig shallowConfig = (GitMaterialConfig) new GitMaterial(repo.projectRepositoryUrl(), true).config();
         assertThat(shallowConfig.isShallowClone(), is(true));
-        GitMaterialConfig normalConfig = (GitMaterialConfig) new GitMaterial(repo.projectRepositoryUrl(), null).config();
+        GitMaterialConfig normalConfig = (GitMaterialConfig) new GitMaterial(repo.projectRepositoryUrl()).config();
         assertThat(normalConfig.isShallowClone(), is(false));
     }
 

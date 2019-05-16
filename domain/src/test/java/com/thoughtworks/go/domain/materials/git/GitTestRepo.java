@@ -61,7 +61,6 @@ public class GitTestRepo extends TestRepo {
         return testRepo;
     }
 
-
     public GitTestRepo(TemporaryFolder temporaryFolder) throws IOException {
         this(GIT_3_REVISIONS_BUNDLE, temporaryFolder);
     }
