@@ -42,6 +42,8 @@ describe("AddPipeline: SCM Material Fields", () => {
       "password":                "Password",
       "alternate-checkout-path": "Alternate Checkout Path",
       "material-name":           "Material Name",
+      "ssh-private-key":         "SSH Private Key",
+      "ssh-passphrase":          "SSH Passphrase",
     });
 
     expect(helper.byTestId("test-connection-button")).toBeTruthy();

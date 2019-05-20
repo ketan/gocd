@@ -26,7 +26,7 @@ import {
   SvnMaterialAttributes,
   TfsMaterialAttributes
 } from "models/materials/types";
-import {CheckboxField, PasswordField, TextField} from "views/components/forms/input_fields";
+import {CheckboxField, PasswordField, SecureTextArea, TextField} from "views/components/forms/input_fields";
 import {TestConnection} from "views/components/materials/test_connection";
 import {TooltipSize} from "views/components/tooltip";
 import * as Tooltip from "views/components/tooltip";
@@ -73,8 +73,10 @@ export class GitFields extends ScmFields {
     const mat = attrs as GitMaterialAttributes;
     return [
       <TextField label="Repository Branch" property={mat.branch} placeholder="master"/>,
-      <TextField label="Username" property={mat.username}/>,
-      <PasswordField label="Password" property={mat.password}/>,
+      <TextField label="Username" property={mat.username} errorText={this.errs(attrs, "username")}/>,
+      <PasswordField label="Password" property={mat.password} errorText={this.errs(attrs, "password")}/>,
+      <SecureTextArea label="SSH Private Key" property={mat.sshPrivateKey} errorText={this.errs(attrs, "sshPrivateKey")}/>,
+      <SecureTextArea label="SSH Passphrase" property={mat.sshPassphrase} errorText={this.errs(attrs, "sshPassphrase")}/>
     ];
   }
 }

@@ -16,7 +16,6 @@
 package com.thoughtworks.go.domain.materials.git;
 
 import com.thoughtworks.go.config.materials.git.GitMaterialConfig;
-import com.thoughtworks.go.config.migration.UrlCredentials;
 import com.thoughtworks.go.domain.materials.Modification;
 import com.thoughtworks.go.domain.materials.Revision;
 import com.thoughtworks.go.domain.materials.SCMCommand;
@@ -43,6 +42,7 @@ import static com.thoughtworks.go.config.materials.git.GitMaterial.UNSHALLOW_TRY
 import static com.thoughtworks.go.domain.materials.ModifiedAction.parseGitAction;
 import static com.thoughtworks.go.util.DateUtils.formatRFC822;
 import static com.thoughtworks.go.util.ExceptionUtils.bomb;
+import static com.thoughtworks.go.util.UrlUtil.*;
 import static com.thoughtworks.go.util.command.ProcessOutputStreamConsumer.inMemoryConsumer;
 
 public class GitCommand extends SCMCommand {
@@ -97,9 +97,9 @@ public class GitCommand extends SCMCommand {
             gitClone.withArg(String.format("--depth=%s", depth));
         }
 
-        String urlWithoutCredentials = UrlCredentials.urlWithoutCredentials(url);
-        String username = UrlCredentials.getUsername(url);
-        String password = UrlCredentials.getPassword(url);
+        String urlWithoutCredentials = urlWithoutCredentials(url);
+        String username = getUsername(url);
+        String password = getPassword(url);
 
         gitClone.withArg(new UrlArgument(urlWithoutCredentials)).withArg(workingDir.getAbsolutePath());
         return configuringPassPrompts(gitClone, username, password, () -> run(gitClone, outputStreamConsumer));
@@ -326,9 +326,9 @@ public class GitCommand extends SCMCommand {
     }
 
     public void checkConnection(UrlArgument repoUrl, String branch) {
-        String urlWithoutCredentials = UrlCredentials.urlWithoutCredentials(repoUrl.forCommandLine());
-        String username = UrlCredentials.getUsername(repoUrl.forCommandLine());
-        String pass = UrlCredentials.getPassword(repoUrl.forCommandLine());
+        String urlWithoutCredentials = urlWithoutCredentials(repoUrl.forCommandLine());
+        String username = getUsername(repoUrl.forCommandLine());
+        String pass = getPassword(repoUrl.forCommandLine());
 
         CommandLine commandLine = git().withArgs("ls-remote").withArg(urlWithoutCredentials).withArg("refs/heads/" + branch);
 

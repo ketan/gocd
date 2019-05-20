@@ -16,7 +16,6 @@
 
 package com.thoughtworks.go.domain.materials.git;
 
-import com.thoughtworks.go.config.migration.UrlCredentials;
 import com.thoughtworks.go.util.command.UrlArgument;
 import org.apache.commons.io.FileUtils;
 import org.assertj.core.api.Assertions;
@@ -36,6 +35,8 @@ import org.junit.rules.TemporaryFolder;
 import javax.servlet.DispatcherType;
 import java.io.File;
 import java.util.EnumSet;
+
+import static com.thoughtworks.go.util.UrlUtil.urlWithCredentials;
 
 @EnableRuleMigrationSupport
 class GitCommandOverHttpTest {
@@ -110,7 +111,7 @@ class GitCommandOverHttpTest {
         GitCommand gitCommand = new GitCommand(null, null, null, false, null);
 
         Assertions.assertThatCode(() -> {
-            String urlWithCredentials = UrlCredentials.urlWithCredentials(privateHttpUrl(), BasicAuthenticationFilter.LOGIN_USER, BasicAuthenticationFilter.LOGIN_PASSWORD);
+            String urlWithCredentials = urlWithCredentials(privateHttpUrl(), BasicAuthenticationFilter.LOGIN_USER, BasicAuthenticationFilter.LOGIN_PASSWORD);
             gitCommand.checkConnection(new UrlArgument(urlWithCredentials), "master");
         }).doesNotThrowAnyException();
     }
@@ -120,7 +121,7 @@ class GitCommandOverHttpTest {
         GitCommand gitCommand = new GitCommand(null, null, null, false, null);
 
         Assertions.assertThatCode(() -> {
-            String urlWithCredentials = UrlCredentials.urlWithCredentials(privateHttpUrl(), "bad", "hacker");
+            String urlWithCredentials = urlWithCredentials(privateHttpUrl(), "bad", "hacker");
             gitCommand.checkConnection(new UrlArgument(urlWithCredentials), "master");
         })
                 .hasMessageContaining("fatal")

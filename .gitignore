@@ -126,6 +126,10 @@ api/api-config-repo-operations-v1/out/
 api/api-config-repo-operations-v1/target/
 api/api-config-repos-v1/config/
 api/api-config-repos-v1/out/
+api/api-config-repos-v3/config/
+api/api-config-repos-v3/out/
+api/api-config-repos-v3/target/
+api/api-config-repos-v3/logs/
 api/api-version-v1/out/
 api/api-version-v1/logs/
 api/api-version-v1/target/
