@@ -86,7 +86,14 @@ public class HgMaterial extends ScmMaterial implements PasswordAwareMaterial {
         this.name = config.getName();
         this.userName = config.getUserName();
         this.branch = config.getBranch();
-        setPassword(config.getPassword());
+
+        if (isNotBlank(config.getPassword())) {
+            setPassword(config.getPassword());
+        }
+
+        if(isNotBlank(config.getUserName())) {
+            setUserName(config.getUserName());
+        }
     }
 
     @Override

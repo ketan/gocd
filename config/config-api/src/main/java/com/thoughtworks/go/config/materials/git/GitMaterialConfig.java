@@ -72,7 +72,7 @@ public class GitMaterialConfig extends ScmMaterialConfig implements PasswordAwar
     public static final String ENCRYPTED_SSH_PASSPHRASE = "encryptedSshPassphrase";
     public static final String SSH_PASSPHRASE_CHANGED = "sshPassphraseChanged";
 
-    public String getSshPrivateKey(){
+    public String getSshPrivateKey() {
         return sshPrivateKey;
     }
 

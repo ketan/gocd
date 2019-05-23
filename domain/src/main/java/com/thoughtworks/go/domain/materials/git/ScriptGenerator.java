@@ -31,6 +31,7 @@ public class ScriptGenerator {
             ByteArrayOutputStream baos = new ByteArrayOutputStream(1024);
             try (PrintWriter printWriter = new PrintWriter(new OutputStreamWriter(baos, StandardCharsets.UTF_8))) {
                 printWriter.println("#!/bin/sh");
+//                printWriter.println("echo \"Invoked askpass script with args $@\" >> /tmp/git-ssh-trace.log 2>&1");
                 printWriter.println("case \"$1\" in");
                 printWriter.println("  Username*) cat \"${GO_USERNAME_FILE}\" ;;");
                 printWriter.println("  Password*) cat \"${GO_PASSWORD_FILE}\" ;;");
@@ -63,27 +64,25 @@ public class ScriptGenerator {
 
     }
 
-    /*
-     * Escape all single quotes in filename, then surround filename in single quotes (to avoid interpolation)
-     * Only useful use filename references in shell scripts.
-     */
-    private String escapeFilenameUnix(File file) {
-        String filename = file.getAbsolutePath();
-        if (filename.contains("'")) {
-            filename = filename.replaceAll("'", "\\\'");
+    public String sshUnixScript(CommandLine commandLine, File sshPrivateKeyFile) {
+        try {
+            ByteArrayOutputStream baos = new ByteArrayOutputStream(1024);
+            try (PrintWriter printWriter = new PrintWriter(new OutputStreamWriter(baos, StandardCharsets.UTF_8))) {
+                printWriter.println("#!/bin/sh");
+                // ${SSH_ASKPASS} might be ignored if ${DISPLAY} is not set
+//                printWriter.println("echo \"Invoked ssh script with args $@\" >> /tmp/git-ssh-trace.log 2>&1");
+                printWriter.println("if [ -z \"${DISPLAY}\" ]; then");
+                printWriter.println("  DISPLAY=:123.456");
+                printWriter.println("  export DISPLAY");
+                printWriter.println("fi");
+                printWriter.println(String.format("ssh -vvv -i \"%s\" -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no \"$@\"", sshPrivateKeyFile.getAbsolutePath()));
+            }
+            commandLine.withEnv("GO_PRIVATE_KEY_FILE", sshPrivateKeyFile.getAbsolutePath());
+            return baos.toString("utf-8");
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
-        return "'" + filename + "'";
     }
 
-    /*
-     * Escape all double quotes in filename, then surround filename in double quotes
-     * Only useful use filename references in DOS batch files.
-     */
-    private String escapeFilenameWindows(File file) {
-        String filename = file.getAbsolutePath();
-        if (filename.contains("\"")) {
-            filename = filename.replaceAll("\"", "^\"");
-        }
-        return "\"" + filename + "\"";
-    }
+
 }

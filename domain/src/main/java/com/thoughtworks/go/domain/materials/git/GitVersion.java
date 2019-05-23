@@ -29,7 +29,7 @@ public class GitVersion {
             "git version (\\d+)\\.(\\d+)(?:\\.(\\d+))?(?:\\.(\\d+))?(.*)", Pattern.CASE_INSENSITIVE);
 
     private final Version version;
-    private final static Version MINIMUM_SUPPORTED_VERSION = Version.create(1,9,0);
+    public final static Version MINIMUM_SUPPORTED_VERSION = Version.create(1,9,0);
     private final static Version SUBMODULE_DEPTH_SUPPORT = Version.create(2, 10, 0);
 
     private GitVersion(Version parsedVersion) {

@@ -88,7 +88,7 @@ class GitCommandOverHttpTest {
 
     @Test
     void shouldConnectToRemoteHttpRepository() {
-        GitCommand gitCommand = new GitCommand(null, null, null, false, null);
+        GitCommand gitCommand = new GitCommand(null, null, null, false, null, null, null);
 
         Assertions.assertThatCode(() -> {
             gitCommand.checkConnection(new UrlArgument(publicHttpUrl()), "master");
@@ -97,7 +97,7 @@ class GitCommandOverHttpTest {
 
     @Test
     void shouldFailOnBadHttpRepositoryUrl() {
-        GitCommand gitCommand = new GitCommand(null, null, null, false, null);
+        GitCommand gitCommand = new GitCommand(null, null, null, false, null, null, null);
 
         Assertions.assertThatCode(() -> {
             gitCommand.checkConnection(new UrlArgument(badHttpUrl()), "master");
@@ -108,7 +108,7 @@ class GitCommandOverHttpTest {
 
     @Test
     void shouldConnectToHttpUrlWithAuthorization() {
-        GitCommand gitCommand = new GitCommand(null, null, null, false, null);
+        GitCommand gitCommand = new GitCommand(null, null, null, false, null, null, null);
 
         Assertions.assertThatCode(() -> {
             String urlWithCredentials = urlWithCredentials(privateHttpUrl(), BasicAuthenticationFilter.LOGIN_USER, BasicAuthenticationFilter.LOGIN_PASSWORD);
@@ -118,7 +118,7 @@ class GitCommandOverHttpTest {
 
     @Test
     void shouldFailWithBadAuthenticationOnHttp() {
-        GitCommand gitCommand = new GitCommand(null, null, null, false, null);
+        GitCommand gitCommand = new GitCommand(null, null, null, false, null, null, null);
 
         Assertions.assertThatCode(() -> {
             String urlWithCredentials = urlWithCredentials(privateHttpUrl(), "bad", "hacker");
@@ -130,13 +130,13 @@ class GitCommandOverHttpTest {
 
     @Test
     void shouldFailWithBadAuthenticationOnHttpWhenCredentialsNotProvided() {
-        GitCommand gitCommand = new GitCommand(null, null, null, false, null);
+        GitCommand gitCommand = new GitCommand(null, null, null, false, null, null, null);
 
         Assertions.assertThatCode(() -> {
             gitCommand.checkConnection(new UrlArgument(privateHttpUrl()), "master");
         })
                 .hasMessageContaining("fatal")
-                .hasMessageContaining("Authentication failed for 'http://localhost:" + getServerPort() + "/git/private/my-project/'");
+                .hasMessageContaining("could not read Username for 'http://localhost:" + getServerPort() + "': Device not configured");
     }
 
     private int getServerPort() {

@@ -36,7 +36,7 @@ public class EnabledOnGitVersionCondition implements ExecutionCondition {
         if (annotation.isPresent()) {
             String version = annotation.get().value();
             Version requiredVersion = Version.parseVersion(version);
-            GitCommand git = new GitCommand(null, new File(""), GitMaterialConfig.DEFAULT_BRANCH, false, null);
+            GitCommand git = new GitCommand(null, new File(""), GitMaterialConfig.DEFAULT_BRANCH, false, null, null, null);
             Version gitVersion = git.version().getVersion();
             if (gitVersion.compareTo(requiredVersion) >= 0) {
                 return ConditionEvaluationResult.enabled(String.format(

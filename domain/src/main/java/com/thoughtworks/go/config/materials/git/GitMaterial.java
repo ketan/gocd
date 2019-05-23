@@ -26,9 +26,11 @@ import com.thoughtworks.go.domain.materials.git.GitCommand;
 import com.thoughtworks.go.domain.materials.git.GitMaterialInstance;
 import com.thoughtworks.go.domain.materials.git.GitVersion;
 import com.thoughtworks.go.domain.materials.svn.MaterialUrl;
+import com.thoughtworks.go.security.CryptoException;
 import com.thoughtworks.go.security.GoCipher;
 import com.thoughtworks.go.server.transaction.TransactionSynchronizationManager;
 import com.thoughtworks.go.util.GoConstants;
+import com.thoughtworks.go.util.UrlUtil;
 import com.thoughtworks.go.util.command.*;
 import org.apache.commons.io.FileUtils;
 import org.apache.http.client.utils.URIBuilder;
@@ -47,8 +49,7 @@ import static com.thoughtworks.go.util.FileUtil.createParentFolderIfNotExist;
 import static com.thoughtworks.go.util.FileUtil.deleteDirectoryNoisily;
 import static com.thoughtworks.go.util.command.ProcessOutputStreamConsumer.inMemoryConsumer;
 import static java.lang.String.format;
-import static org.apache.commons.lang3.StringUtils.isAllBlank;
-import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.*;
 
 public class GitMaterial extends ScmMaterial implements PasswordAwareMaterial {
     private static final Logger LOG = LoggerFactory.getLogger(GitMaterial.class);
@@ -63,19 +64,26 @@ public class GitMaterial extends ScmMaterial implements PasswordAwareMaterial {
     //TODO: use iBatis to set the type for us, and we can get rid of this field.
     public static final String TYPE = "GitMaterial";
     private static final String ERR_GIT_NOT_FOUND = "Failed to find 'git' on your PATH. Please ensure 'git' is executable by the Go Server and on the Go Agents where this material will be used.";
-    public static final String ERR_GIT_OLD_VERSION = "Please install Git-core 1.6 or above. ";
+    public static final String ERR_GIT_OLD_VERSION = "Please install git version " + GitVersion.MINIMUM_SUPPORTED_VERSION + " or above. ";
     private String sshPrivateKey;
     private String sshPassphrase;
 
     public GitMaterial(String url) {
         super(TYPE, new GoCipher());
         this.url = new UrlArgument(url);
+
+        if (isNotBlank(UrlUtil.getUsername(url))) {
+            this.userName = UrlUtil.getUsername(url);
+        }
+
+        if (isNotBlank(UrlUtil.getPassword(url))) {
+            this.password = UrlUtil.getPassword(url);
+        }
     }
 
     public GitMaterial(String url, boolean shallowClone) {
         this(url, null, null, shallowClone);
     }
-
 
     public GitMaterial(String url, String branch) {
         this(url);
@@ -106,7 +114,14 @@ public class GitMaterial extends ScmMaterial implements PasswordAwareMaterial {
         this.submoduleFolder = config.getSubmoduleFolder();
         this.invertFilter = config.getInvertFilter();
         this.userName = config.getUserName();
-        setPassword(config.getPassword());
+
+        if (isNotBlank(config.getPassword())) {
+            setPassword(config.getPassword());
+        }
+
+        if (isNotBlank(config.getUserName())) {
+            setUserName(config.getUserName());
+        }
     }
 
     @Override
@@ -175,9 +190,9 @@ public class GitMaterial extends ScmMaterial implements PasswordAwareMaterial {
     }
 
     public ValidationBean checkConnection(final SubprocessExecutionContext execCtx) {
-        GitCommand gitCommand = new GitCommand(null, null, null, false, secrets());
+        GitCommand gitCommand = new GitCommand(null, null, null, false, secrets(), sshPrivateKey, sshPassphrase);
         try {
-            gitCommand.checkConnection(new UrlArgument(urlForCommandLine()), branch);
+            gitCommand.checkConnection(new UrlArgument(urlForCommandLine()), branch, userName, getPassword());
             return ValidationBean.valid();
         } catch (Exception e) {
             try {
@@ -212,10 +227,10 @@ public class GitMaterial extends ScmMaterial implements PasswordAwareMaterial {
 
     private GitCommand git(ConsoleOutputStreamConsumer outputStreamConsumer, final File workingFolder, int preferredCloneDepth, SubprocessExecutionContext executionContext) throws Exception {
         if (isSubmoduleFolder()) {
-            return new GitCommand(getFingerprint(), new File(workingFolder.getPath()), GitMaterialConfig.DEFAULT_BRANCH, true, secrets());
+            return new GitCommand(getFingerprint(), new File(workingFolder.getPath()), GitMaterialConfig.DEFAULT_BRANCH, true, secrets(), null, null);
         }
 
-        GitCommand gitCommand = new GitCommand(getFingerprint(), workingFolder, getBranch(), false, secrets());
+        GitCommand gitCommand = new GitCommand(getFingerprint(), workingFolder, getBranch(), false, secrets(), null, null);
         if (!isGitRepository(workingFolder) || isRepositoryChanged(gitCommand, workingFolder)) {
             LOG.debug("Invalid git working copy or repository changed. Delete folder: {}", workingFolder);
             deleteDirectoryNoisily(workingFolder);
@@ -432,6 +447,13 @@ public class GitMaterial extends ScmMaterial implements PasswordAwareMaterial {
     public void updateFromConfig(MaterialConfig materialConfig) {
         super.updateFromConfig(materialConfig);
         this.shallowClone = ((GitMaterialConfig) materialConfig).isShallowClone();
+        try {
+            this.sshPassphrase = goCipher.decrypt(((GitMaterialConfig) materialConfig).getSshPassphrase());
+            this.sshPrivateKey = goCipher.decrypt(((GitMaterialConfig) materialConfig).getSshPrivateKey());
+            this.userName = ((GitMaterialConfig) materialConfig).getUserName();
+        } catch (CryptoException e) {
+            throw new RuntimeException(e);
+        }
     }
 
 

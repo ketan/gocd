@@ -107,7 +107,7 @@ public class GitRepoContainingSubmodule extends TestRepo {
     }
 
     private GitCommand git(File workingDir) {
-        return new GitCommand(null, workingDir, GitMaterialConfig.DEFAULT_BRANCH, false, null);
+        return new GitCommand(null, workingDir, GitMaterialConfig.DEFAULT_BRANCH, false, null, null, null);
     }
 
     public GitMaterial mainRepo() {
