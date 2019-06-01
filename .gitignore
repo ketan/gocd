@@ -403,3 +403,7 @@ api/api-dashboard-v4/out/
 api/api-dashboard-v4/target/
 api/api-dashboard-v4/logs/
 api/api-dashboard-v4/config/
+scm/git-cli/out/
+scm/git-cli/target/
+scm/git-cli/config/
+scm/git-cli/logs/

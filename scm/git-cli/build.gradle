@@ -1,0 +1,35 @@
+/*
+ * Copyright 2019 ThoughtWorks, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+dependencies {
+  compile group: 'org.zeroturnaround', name: 'zt-exec', version: '1.10'
+  compile group: 'org.apache.commons', name: 'commons-lang3', version: project.versions.commonsLang3
+  compile group: 'commons-io', name: 'commons-io', version: project.versions.commonsIO
+  compile group: 'com.google.guava', name: 'guava', version: project.versions.guava
+
+  compileOnly group: 'org.projectlombok', name: 'lombok', version: project.versions.lombok
+  annotationProcessor group: 'org.projectlombok', name: 'lombok', version: project.versions.lombok
+
+  testCompile group: 'org.assertj', name: 'assertj-core', version: project.versions.assertJ
+  testCompile(group: 'org.eclipse.jgit', name: 'org.eclipse.jgit', version: project.versions.jgit) {
+    transitive = false
+  }
+
+  testCompile group: 'ch.qos.logback', name: 'logback-classic', version: project.versions.logback
+  testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: project.versions.junit5
+  testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-params', version: project.versions.junit5
+  testRuntimeOnly group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version: project.versions.junit5
+}
