@@ -15,13 +15,12 @@
  */
 package com.thoughtworks.go.domain;
 
-import java.util.Date;
-
 import com.thoughtworks.go.domain.materials.Modification;
+
+import java.util.Date;
 
 public class ModificationSummary {
     Modification modification;
-    public static final ModificationSummary NEVER = new ModificationSummary(Modification.NEVER);
 
     public ModificationSummary(Modification modification) {
         this.modification = modification;

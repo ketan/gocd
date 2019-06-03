@@ -67,7 +67,6 @@ class EnsureClonedTest extends AbstractGitTest {
     @Test
     void shouldRemoveTargetDirIfRepoDoesPointsToIncorrectBranch_Aka_Branch_Changed() throws Exception {
         File targetDir = tempDirectory.resolve("temp-clone").toFile();
-        targetDir.mkdir();
 
         CloneCLI cloneCLI = new CloneCLI()
                 .url(gitRepository.getUrl())
@@ -88,7 +87,6 @@ class EnsureClonedTest extends AbstractGitTest {
     @Test
     void shouldRemoveTargetDirIfRepoShallowCloneOptionChanged() {
         File targetDir = tempDirectory.resolve("temp-clone").toFile();
-        targetDir.mkdir();
 
         new CloneCLI()
                 .url(gitRepository.getUrl())

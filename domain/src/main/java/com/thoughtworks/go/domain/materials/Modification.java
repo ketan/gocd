@@ -19,12 +19,9 @@ import com.thoughtworks.go.domain.MaterialInstance;
 import com.thoughtworks.go.domain.ModificationVisitor;
 import com.thoughtworks.go.domain.PersistentObject;
 import com.thoughtworks.go.domain.materials.mercurial.StringRevision;
-import com.thoughtworks.go.util.GoConstants;
 import com.thoughtworks.go.util.json.JsonHelper;
 import org.apache.commons.lang3.StringUtils;
 
-import java.io.IOException;
-import java.io.ObjectStreamException;
 import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -46,7 +43,6 @@ public class Modification extends PersistentObject implements Comparable, Serial
 
     private static final long serialVersionUID = 6102576575583133520L;
 
-    public static final Modification NEVER = new Modification(GoConstants.NEVER);
     public static final String ANONYMOUS = "anonymous";
 
     private String userName;
@@ -303,49 +299,6 @@ public class Modification extends PersistentObject implements Comparable, Serial
         ArrayList<Modification> modifications = new ArrayList<>();
         modifications.add(modification);
         return modifications;
-    }
-
-    /**
-     * @deprecated Remove this when we do not need to serialize these to the db and agent
-     */
-    private void writeObject(java.io.ObjectOutputStream out) throws IOException {
-        out.writeObject(userName);
-        out.writeObject(comment);
-        out.writeObject(emailAddress);
-        out.writeObject(revision);
-        out.writeObject(additionalData);
-        out.writeObject(additionalDataMap);
-        out.writeObject(modifiedTime);
-        out.writeObject(pipelineLabel);
-        out.writeObject(materialInstance);
-        out.writeObject(new LinkedHashSet(files));
-    }
-
-    /**
-     * @deprecated Remove this when we do not need to serialize these to the db and agent
-     */
-    private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
-        userName = (String) in.readObject();
-        comment = (String) in.readObject();
-        emailAddress = (String) in.readObject();
-        revision = (String) in.readObject();
-        additionalData = (String) in.readObject();
-        additionalDataMap = (HashMap) in.readObject();
-        modifiedTime = (Date) in.readObject();
-        pipelineLabel = (String) in.readObject();
-        materialInstance = (MaterialInstance) in.readObject();
-        Set files = (Set) in.readObject();
-        if (files == null) {
-            this.files = new LinkedHashSet<>();
-        } else {
-            this.files = new LinkedHashSet<>(files);
-        }
-    }
-
-    /**
-     * @deprecated Remove this when we do not need to serialize these to the db and agent
-     */
-    private void readObjectNoData() {
     }
 
     public boolean isSameRevision(Modification that) {

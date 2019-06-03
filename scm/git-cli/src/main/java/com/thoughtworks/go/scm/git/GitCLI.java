@@ -16,11 +16,16 @@
 
 package com.thoughtworks.go.scm.git;
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 import org.zeroturnaround.exec.stream.ExecuteStreamHandler;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.attribute.PosixFilePermissions;
 
+@Slf4j
 public class GitCLI {
 
     private static final File TEMP_DIR = new File("data/git-cli");
@@ -38,5 +43,26 @@ public class GitCLI {
     }
 
 
+    public static File createTempFile(String prefix, String extension) throws IOException {
+        TEMP_DIR.mkdirs();
+
+        if (!TEMP_DIR.exists()) {
+            throw new IOException("Unable to create temp directory: " + TEMP_DIR);
+        }
+
+        return Files.createTempFile(TEMP_DIR.toPath(), prefix, extension, PosixFilePermissions.asFileAttribute(PosixFilePermissions.fromString("rw-------"))).toFile();
+    }
+
+    public static void deleteFilesWithWarning(File... files) {
+        for (File file : files) {
+            deleteFileWithWarning(file);
+        }
+    }
+
+    private static void deleteFileWithWarning(File file) {
+        if (file != null && !file.delete() && file.exists()) {
+            log.warn("[WARNING] Temp file {} not deleted", file);
+        }
+    }
 
 }

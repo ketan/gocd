@@ -19,6 +19,7 @@ description = 'GoCD Domain Module'
 dependencies {
   compile project(':db')
   compile project(':commandline')
+  compile project(':scm:scm-base')
   compile group: 'org.springframework', name: 'spring-tx', version: project.versions.spring
   compile group: 'de.skuzzle', name: 'semantic-version', version: project.versions.semanticVersion
   compileOnly group: 'org.bouncycastle', name: 'bcpkix-jdk15on', version: project.versions.bouncyCastle

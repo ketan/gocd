@@ -16,10 +16,9 @@
 
 package com.thoughtworks.go.scm.git.cli;
 
-import com.google.common.collect.Lists;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Iterables;
 import com.thoughtworks.go.scm.git.CLI;
-import com.thoughtworks.go.scm.git.Credentials;
-import com.thoughtworks.go.scm.git.Shell;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
@@ -27,42 +26,45 @@ import org.zeroturnaround.exec.ProcessResult;
 import org.zeroturnaround.exec.stream.ExecuteStreamHandler;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 
-import static com.thoughtworks.go.scm.git.UrlUtil.*;
+import static com.thoughtworks.go.scm.git.Shell.sh;
 
 @Accessors(chain = true, fluent = true)
 @Getter
 @Setter
-public class CloneCLI implements CLI {
-    private String url;
-    private File targetDir;
-    private String branch;
-    private Integer depth;
-    private Credentials credentials;
+public class LogCLI implements CLI {
+    private File workingDir;
+    private final List<String> args = new ArrayList<>();
+
+    public LogCLI() {
+    }
+
+    public LogCLI(LogCLI logCLI) {
+        this.workingDir = logCLI.workingDir;
+        this.args.addAll(logCLI.args);
+    }
 
     @Override
     public ProcessResult execute(ExecuteStreamHandler streamPumper) {
-        ProcessResult processResult = null;
-        String urlWithoutCredentials = urlWithoutCredentials(url);
-        String username = extractUsername(url, credentials);
-        String password = extractPassword(url, credentials);
-
-        String branchOption = "--branch=" + GitDefaults.defaultBranch(branch);
-
-        List<String> args = Lists.newArrayList("git", "clone", branchOption, url, targetDir.getAbsolutePath());
-
-        if (isShallowClone()) {
-            args.add("--depth=" + depth.toString());
-        }
-
-        return Shell.sh(streamPumper, null, null, args);
+        return sh(streamPumper, workingDir, null, Iterables.concat(defaultArgs(), args));
     }
 
-    public boolean isShallowClone() {
-        return depth != null && depth >= 1;
+    private List<String> defaultArgs() {
+        return ImmutableList.of("git", "log", "--date=iso", "--no-decorate", "--pretty=medium", "--no-color");
     }
+
+    public LogCLI args(String... args) {
+        return args(Arrays.asList(args));
+    }
+
+    public LogCLI args(Collection<String> args) {
+        this.args.addAll(args);
+        return this;
+    }
+
 
 }
-
-

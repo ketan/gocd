@@ -23,22 +23,29 @@ import org.zeroturnaround.exec.stream.ExecuteStreamHandler;
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 public final class Shell {
     public static ProcessResult sh(ExecuteStreamHandler streamPumper, File workingDir, Map<String, String> environment, String... args) {
-        return sh(streamPumper, workingDir, environment, Arrays.asList(args));
+        return sh(streamPumper, workingDir, environment, true, Arrays.asList(args));
     }
 
-    public static ProcessResult sh(ExecuteStreamHandler streamPumper, File workingDir, Map<String, String> environment, List<String> args) {
+    public static ProcessResult sh(ExecuteStreamHandler streamPumper, File workingDir, Map<String, String> environment, Iterable<String> args) {
+        return sh(streamPumper, workingDir, environment, true, args);
+    }
+
+    public static ProcessResult sh(ExecuteStreamHandler streamPumper, File workingDir, Map<String, String> environment, boolean bufferOutput, String... args) {
+        return sh(streamPumper, workingDir, environment, bufferOutput, Arrays.asList(args));
+    }
+
+    public static ProcessResult sh(ExecuteStreamHandler streamPumper, File workingDir, Map<String, String> environment, boolean bufferOutput, Iterable<String> args) {
         ProcessExecutor processExecutor = new DefaultProcessExecutor()
                 .command(args)
                 .directory(workingDir)
                 .timeout(600, TimeUnit.SECONDS)
-                .readOutput(true);
+                .readOutput(bufferOutput);
 
         if (streamPumper != null) {
             processExecutor.streams(streamPumper);

@@ -19,8 +19,6 @@ import com.thoughtworks.go.util.TimeProvider;
 
 import java.util.Date;
 
-import static com.thoughtworks.go.util.GoConstants.NEVER;
-
 public class NullJobInstance extends JobInstance {
     public NullJobInstance(String name) {
         super(name, new TimeProvider());
@@ -45,7 +43,7 @@ public class NullJobInstance extends JobInstance {
 
     @Override
     public Date getStartedDateFor(JobState jobState) {
-        return NEVER;
+        return new Date(0);
     }
 
     public JobState currentStatus() {

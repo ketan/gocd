@@ -17,6 +17,7 @@
 package com.thoughtworks.go.scm.git.operations;
 
 import com.thoughtworks.go.scm.git.cli.CloneCLI;
+import com.thoughtworks.go.scm.git.cli.LogCLI;
 import org.zeroturnaround.exec.stream.ExecuteStreamHandler;
 
 public class GitOperations {
@@ -30,4 +31,13 @@ public class GitOperations {
         new EnsureCloned(cli, executeStreamHandler).execute();
     }
 
+    public void latestModification(LogCLI logCLI) {
+        new GetModifications(logCLI, executeStreamHandler).latestModification();
+    }
+
+    public void modificationsSince(LogCLI logCLI, String revision) {
+        logCLI = new LogCLI(logCLI).args("-1");
+
+        new GetModifications(logCLI, executeStreamHandler).modificationsSince(revision);
+    }
 }

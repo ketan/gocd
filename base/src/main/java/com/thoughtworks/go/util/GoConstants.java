@@ -15,19 +15,8 @@
  */
 package com.thoughtworks.go.util;
 
-import java.util.Calendar;
-import java.util.Date;
-
 public class GoConstants {
-    public static final Date NEVER;
     public static final String GO_PLUGIN_MANIFEST_HEADER_PREFIX = "GoPlugin-";
-
-    static {
-        Calendar calendar = Calendar.getInstance();
-        calendar.set(1900, Calendar.JANUARY, 1, 0, 0, 0);
-        calendar.set(Calendar.MILLISECOND, 0);
-        NEVER = calendar.getTime();
-    }
 
     /**
      * This will force the browser to clear the cache only for this page.
