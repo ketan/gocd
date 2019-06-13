@@ -21,7 +21,7 @@ dependencies {
   compile project(':base')
   compile group: 'javax.servlet', name: 'javax.servlet-api', version: project.versions.servletApi
   compile group: 'ch.qos.logback', name: 'logback-classic', version: project.versions.logback
-  compile(group: 'commons-beanutils', name: 'commons-beanutils-core', version: '1.7.0') {
+  compile(group: 'commons-beanutils', name: 'commons-beanutils-core', version: '1.8.3') {
     exclude(module: 'commons-logging')
     exclude(module: 'commons-collections')
   }
