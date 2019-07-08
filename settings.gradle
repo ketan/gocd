@@ -121,4 +121,8 @@ include ':tfs-impl:tfs-impl-14'
 include ':tw-go-plugins'
 include ':util'
 
+include ':kotlin:config-to-protobuf'
+include ':kotlin:protobufs'
+include ':kotlin:agent'
+
 apply from: 'settings-docker.gradle'
