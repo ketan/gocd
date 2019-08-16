@@ -38,7 +38,7 @@
     "normalize-scss": "^7.0.1",
     "opensans": "file:vendor/assets/fonts/opensans",
     "prismjs": "^1.16.0",
-    "shellwords-ts": "^2.0.2",
+    "shellwords-ts": "^2.0.4",
     "underscore.string": "^3.3.5",
     "url-parse": "^1.4.7",
     "uuid": "^3.3.2"
