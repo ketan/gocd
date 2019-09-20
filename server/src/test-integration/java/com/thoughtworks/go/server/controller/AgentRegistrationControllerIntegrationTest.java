@@ -19,7 +19,6 @@ import com.rits.cloning.Cloner;
 import com.thoughtworks.go.config.Agent;
 import com.thoughtworks.go.domain.AgentConfigStatus;
 import com.thoughtworks.go.domain.AgentInstance;
-import com.thoughtworks.go.security.RegistrationJSONizer;
 import com.thoughtworks.go.server.service.AgentRuntimeInfo;
 import com.thoughtworks.go.server.service.AgentService;
 import com.thoughtworks.go.server.service.GoConfigService;
@@ -30,7 +29,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.test.context.ContextConfiguration;
@@ -46,7 +44,8 @@ import java.util.UUID;
 
 import static com.thoughtworks.go.util.SystemEnvironment.AUTO_REGISTER_LOCAL_AGENT_ENABLED;
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 import static org.springframework.http.HttpStatus.*;
 
 @ExtendWith(SpringExtension.class)
@@ -90,8 +89,6 @@ public class AgentRegistrationControllerIntegrationTest {
 
         assertThat(agent.getHostname(), is("hostname"));
         assertThat(responseEntity.getStatusCode(), is(HttpStatus.OK));
-        assertThat(responseEntity.getHeaders().getContentType(), is(MediaType.APPLICATION_JSON));
-        assertTrue(RegistrationJSONizer.fromJson(responseEntity.getBody().toString()).isValid());
     }
 
     @Test
@@ -117,8 +114,6 @@ public class AgentRegistrationControllerIntegrationTest {
 
         assertTrue(agent.isElastic());
         assertThat(responseEntity.getStatusCode(), is(HttpStatus.OK));
-        assertThat(responseEntity.getHeaders().getContentType(), is(MediaType.APPLICATION_JSON));
-        assertTrue(RegistrationJSONizer.fromJson(responseEntity.getBody().toString()).isValid());
     }
 
     @Test
@@ -172,8 +167,6 @@ public class AgentRegistrationControllerIntegrationTest {
 
         assertTrue(agentInstance.isPending());
         assertThat(responseEntity.getStatusCode(), is(HttpStatus.ACCEPTED));
-        assertThat(responseEntity.getHeaders().getContentType(), is(MediaType.APPLICATION_JSON));
-        assertFalse(RegistrationJSONizer.fromJson(responseEntity.getBody().toString()).isValid());
     }
 
     @Test
@@ -186,8 +179,6 @@ public class AgentRegistrationControllerIntegrationTest {
 
         assertTrue(agentInstance.isIdle());
         assertThat(responseEntity.getStatusCode(), is(HttpStatus.OK));
-        assertThat(responseEntity.getHeaders().getContentType(), is(MediaType.APPLICATION_JSON));
-        assertTrue(RegistrationJSONizer.fromJson(responseEntity.getBody().toString()).isValid());
     }
 
     @Test
@@ -274,7 +265,6 @@ public class AgentRegistrationControllerIntegrationTest {
 
         assertTrue(agentInstance.isIdle());
         assertThat(responseEntity.getStatusCode(), is(HttpStatus.OK));
-        assertTrue(RegistrationJSONizer.fromJson(responseEntity.getBody().toString()).isValid());
     }
 
     @Test
@@ -290,7 +280,6 @@ public class AgentRegistrationControllerIntegrationTest {
 
         assertTrue(agentInstance.isIdle());
         assertThat(responseEntity.getStatusCode(), is(HttpStatus.OK));
-        assertTrue(RegistrationJSONizer.fromJson(responseEntity.getBody().toString()).isValid());
     }
 
     private String token(String uuid, String tokenGenerationKey) {

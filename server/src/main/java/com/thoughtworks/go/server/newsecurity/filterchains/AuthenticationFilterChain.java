@@ -27,7 +27,7 @@ public class AuthenticationFilterChain extends FilterChainProxy {
 
     @Autowired
     public AuthenticationFilterChain(
-            @Qualifier("x509AuthenticationFilter") Filter x509AuthenticationFilter,
+            @Qualifier("agentAuthenticationFilter") Filter agentAuthenticationFilter,
             @Qualifier("invalidateAuthenticationOnSecurityConfigChangeFilter") Filter invalidateAuthenticationOnSecurityConfigChangeFilter,
             @Qualifier("reAuthenticationWithRedirectToLoginFilter") Filter reAuthenticationWithRedirectToLoginPage,
             @Qualifier("reAuthenticationWithChallengeFilter") Filter reAuthenticationWithChallenge,
@@ -36,8 +36,8 @@ public class AuthenticationFilterChain extends FilterChainProxy {
             @Qualifier("accessTokenAuthenticationFilter") Filter accessTokenAuthenticationFilter,
             @Qualifier("assumeAnonymousUserFilter") Filter assumeAnonymousUserFilter) {
         super(FilterChainBuilder.newInstance()
-                // X509 for agent remoting
-                .addFilterChain("/remoting/**", x509AuthenticationFilter)
+                // authentication for agent remoting
+                .addFilterChain("/remoting/**", agentAuthenticationFilter)
 
                 // For addons
                 .addFilterChain("/add-on/**", assumeAnonymousUserFilter)

@@ -15,14 +15,19 @@
  */
 package com.thoughtworks.go.server.util;
 
+import org.bouncycastle.asn1.x500.X500Name;
+import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
+import org.bouncycastle.cert.X509CertificateHolder;
+import org.bouncycastle.cert.X509v3CertificateBuilder;
+import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.bouncycastle.x509.X509V1CertificateGenerator;
+import org.bouncycastle.operator.ContentSigner;
+import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
 import org.eclipse.jetty.server.*;
 import org.eclipse.jetty.server.session.SessionHandler;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
 import org.eclipse.jetty.webapp.WebAppContext;
 
-import javax.security.auth.x500.X500Principal;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -46,7 +51,7 @@ import static com.thoughtworks.go.util.TestFileUtil.createTempFile;
 
 /**
  * @understands test http server that is used to test http client code end-to-end
- *
+ * <p>
  * Flicked from https://github.com/test-load-balancer/tlb (pre http-components) e19d4911b089eeaf1a2c
  */
 public class HttpTestUtil {
@@ -57,19 +62,22 @@ public class HttpTestUtil {
     private Thread blocker;
     private File serverKeyStore;
 
-	private static final int MAX_IDLE_TIME = 30000;
-	private static final int RESPONSE_BUFFER_SIZE = 32768;
+    private static final int MAX_IDLE_TIME = 30000;
+    private static final int RESPONSE_BUFFER_SIZE = 32768;
 
     public static class EchoServlet extends HttpServlet {
-        @Override protected void doGet(HttpServletRequest request, HttpServletResponse resp) throws ServletException, IOException {
+        @Override
+        protected void doGet(HttpServletRequest request, HttpServletResponse resp) throws ServletException, IOException {
             handleRequest(request, resp);
         }
 
-        @Override protected void doPost(HttpServletRequest request, HttpServletResponse resp) throws ServletException, IOException {
+        @Override
+        protected void doPost(HttpServletRequest request, HttpServletResponse resp) throws ServletException, IOException {
             handleRequest(request, resp);
         }
 
-        @Override protected void doPut(HttpServletRequest request, HttpServletResponse resp) throws ServletException, IOException {
+        @Override
+        protected void doPut(HttpServletRequest request, HttpServletResponse resp) throws ServletException, IOException {
             handleRequest(request, resp);
         }
 
@@ -103,49 +111,49 @@ public class HttpTestUtil {
         serverKeyStore = createTempFile("server.jks");
         prepareCertStore(serverKeyStore);
         server = new Server();
-		WebAppContext ctx = new WebAppContext();
+        WebAppContext ctx = new WebAppContext();
         SessionHandler sh = new SessionHandler();
         ctx.setSessionHandler(sh);
         customizer.customize(ctx);
         ctx.setContextPath("/go");
-		server.setHandler(ctx);
+        server.setHandler(ctx);
     }
 
     public void httpConnector(final int port) {
-		ServerConnector connector = connectorWithPort(port);
+        ServerConnector connector = connectorWithPort(port);
         server.addConnector(connector);
     }
 
     public void httpConnector(final int port, final String host) {
-		ServerConnector connector = connectorWithPort(port);
+        ServerConnector connector = connectorWithPort(port);
         connector.setHost(host);
         server.addConnector(connector);
     }
 
-	private ServerConnector connectorWithPort(int port) {
-		ServerConnector http = new ServerConnector(server);
-		http.setPort(port);
-		return http;
-	}
+    private ServerConnector connectorWithPort(int port) {
+        ServerConnector http = new ServerConnector(server);
+        http.setPort(port);
+        return http;
+    }
 
-	public void httpsConnector(final int port) {
-		HttpConfiguration httpsConfig = new HttpConfiguration();
-		httpsConfig.setOutputBufferSize(RESPONSE_BUFFER_SIZE); // 32 MB
-		httpsConfig.addCustomizer(new SecureRequestCustomizer());
+    public void httpsConnector(final int port) {
+        HttpConfiguration httpsConfig = new HttpConfiguration();
+        httpsConfig.setOutputBufferSize(RESPONSE_BUFFER_SIZE); // 32 MB
+        httpsConfig.addCustomizer(new SecureRequestCustomizer());
 
-		SslContextFactory sslContextFactory = new SslContextFactory();
-		sslContextFactory.setKeyStorePath(serverKeyStore.getAbsolutePath());
-		sslContextFactory.setKeyStorePassword(STORE_PASSWORD);
-		sslContextFactory.setKeyManagerPassword(STORE_PASSWORD);
-		sslContextFactory.setWantClientAuth(true);
+        SslContextFactory sslContextFactory = new SslContextFactory();
+        sslContextFactory.setKeyStorePath(serverKeyStore.getAbsolutePath());
+        sslContextFactory.setKeyStorePassword(STORE_PASSWORD);
+        sslContextFactory.setKeyManagerPassword(STORE_PASSWORD);
+        sslContextFactory.setWantClientAuth(true);
 
-		ServerConnector https = new ServerConnector(server, new SslConnectionFactory(sslContextFactory, "http/1.1"), new HttpConnectionFactory(httpsConfig));
-		// https.setHost(host);
-		https.setPort(port);
-		https.setIdleTimeout(MAX_IDLE_TIME);
+        ServerConnector https = new ServerConnector(server, new SslConnectionFactory(sslContextFactory, "http/1.1"), new HttpConnectionFactory(httpsConfig));
+        // https.setHost(host);
+        https.setPort(port);
+        https.setIdleTimeout(MAX_IDLE_TIME);
 
-		server.addConnector(https);
-	}
+        server.addConnector(https);
+    }
 
     public synchronized void start() throws InterruptedException {
         if (blocker != null)
@@ -189,7 +197,7 @@ public class HttpTestUtil {
     private void prepareCertStore(File serverKeyStore) {
         KeyPair keyPair = generateKeyPair();
         X509Certificate cert = generateCert(keyPair);
-        try(FileOutputStream os = new FileOutputStream(serverKeyStore)) {
+        try (FileOutputStream os = new FileOutputStream(serverKeyStore)) {
             KeyStore store = KeyStore.getInstance("JKS");
             store.load(null, null);
             store.setKeyEntry("test", keyPair.getPrivate(), STORE_PASSWORD.toCharArray(), new Certificate[]{cert});
@@ -204,19 +212,18 @@ public class HttpTestUtil {
         Date expiryDate = day(+1);
         BigInteger serialNumber = new BigInteger("1000200030004000");
 
-        X509V1CertificateGenerator certGen = new X509V1CertificateGenerator();
-        X500Principal dnName = new X500Principal("CN=Test CA Certificate");
+        String dnName = "CN=Test CA Certificate";
 
-        certGen.setSerialNumber(serialNumber);
-        certGen.setIssuerDN(dnName);
-        certGen.setNotBefore(startDate);
-        certGen.setNotAfter(expiryDate);
-        certGen.setSubjectDN(dnName);                       // note: same as issuer
-        certGen.setPublicKey(keyPair.getPublic());
-        certGen.setSignatureAlgorithm("SHA1WITHRSA");
 
         try {
-            return certGen.generate(keyPair.getPrivate());
+            X500Name name = new X500Name(dnName);
+            X509v3CertificateBuilder certificateBuilder = new X509v3CertificateBuilder(name, serialNumber,
+                    startDate, expiryDate, name, SubjectPublicKeyInfo.getInstance(keyPair.getPublic().getEncoded()));
+            ContentSigner signer = new JcaContentSignerBuilder("SHA1WithRSA")
+                    .setProvider(new BouncyCastleProvider())
+                    .build(keyPair.getPrivate());
+            X509CertificateHolder holder = certificateBuilder.build(signer);
+            return new JcaX509CertificateConverter().setProvider(new BouncyCastleProvider()).getCertificate(holder);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

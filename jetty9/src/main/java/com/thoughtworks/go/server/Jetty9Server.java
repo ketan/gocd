@@ -17,7 +17,6 @@ package com.thoughtworks.go.server;
 
 import com.thoughtworks.go.server.config.GoSSLConfig;
 import com.thoughtworks.go.server.util.GoPlainSocketConnector;
-import com.thoughtworks.go.server.util.GoSslSocketConnector;
 import com.thoughtworks.go.util.SystemEnvironment;
 import org.apache.commons.io.FileUtils;
 import org.eclipse.jetty.deploy.App;
@@ -76,7 +75,6 @@ public class Jetty9Server extends AppServer {
     public void configure() throws Exception {
         server.addEventListener(mbeans());
         server.addConnector(plainConnector());
-        server.addConnector(sslConnector());
         ContextHandlerCollection handlers = new ContextHandlerCollection();
         deploymentManager.setContexts(handlers);
 
@@ -194,10 +192,6 @@ public class Jetty9Server extends AppServer {
 
     private Connector plainConnector() {
         return new GoPlainSocketConnector(this, systemEnvironment).getConnector();
-    }
-
-    private Connector sslConnector() {
-        return new GoSslSocketConnector(this, password, systemEnvironment, goSSLConfig).getConnector();
     }
 
 

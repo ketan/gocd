@@ -15,19 +15,14 @@
  */
 package com.thoughtworks.go.agent.service;
 
-import com.thoughtworks.go.agent.common.ssl.GoAgentServerClientBuilder;
 import com.thoughtworks.go.agent.common.ssl.GoAgentServerHttpClient;
 import com.thoughtworks.go.agent.common.ssl.GoAgentServerHttpClientBuilder;
 import com.thoughtworks.go.config.AgentAutoRegistrationProperties;
 import com.thoughtworks.go.config.AgentRegistry;
-import com.thoughtworks.go.security.KeyStoreManager;
-import com.thoughtworks.go.security.Registration;
-import com.thoughtworks.go.security.RegistrationJSONizer;
 import com.thoughtworks.go.server.service.AgentRuntimeInfo;
 import com.thoughtworks.go.util.SystemEnvironment;
 import com.thoughtworks.go.util.SystemUtil;
 import com.thoughtworks.go.util.URLService;
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.input.NullInputStream;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -44,8 +39,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 
-import static com.thoughtworks.go.security.CertificateUtil.md5Fingerprint;
-import static com.thoughtworks.go.util.ExceptionUtils.bomb;
 import static org.apache.http.HttpStatus.*;
 
 @Service
@@ -56,7 +49,6 @@ public class SslInfrastructureService {
     private static final int REGISTER_RETRY_INTERVAL = 5000;
     private static final Marker FATAL = MarkerFactory.getMarker("FATAL");
     private final RemoteRegistrationRequester remoteRegistrationRequester;
-    private final KeyStoreManager keyStoreManager;
     private final GoAgentServerHttpClient httpClient;
     private transient boolean registered = false;
     private TokenRequester tokenRequester;
@@ -77,8 +69,6 @@ public class SslInfrastructureService {
         this.httpClient = httpClient;
         this.tokenRequester = tokenRequester;
         this.agentRegistry = agentRegistry;
-        this.keyStoreManager = new KeyStoreManager();
-        this.keyStoreManager.preload(GoAgentServerClientBuilder.AGENT_CERTIFICATE_FILE, httpClientBuilder().keystorePassword());
     }
 
     private GoAgentServerHttpClientBuilder httpClientBuilder() {
@@ -91,8 +81,7 @@ public class SslInfrastructureService {
     }
 
     public void registerIfNecessary(AgentAutoRegistrationProperties agentAutoRegistrationProperties) throws Exception {
-        registered = keyStoreManager.hasCertificates(CHAIN_ALIAS, GoAgentServerClientBuilder.AGENT_CERTIFICATE_FILE,
-                httpClientBuilder().keystorePassword()) && agentRegistry.guidPresent();
+        registered = agentRegistry.guidPresent();
         if (!registered) {
             LOGGER.info("[Agent Registration] Starting to register agent.");
             register(agentAutoRegistrationProperties);
@@ -117,19 +106,19 @@ public class SslInfrastructureService {
 
     private void register(AgentAutoRegistrationProperties agentAutoRegistrationProperties) throws Exception {
         String hostName = SystemUtil.getLocalhostNameOrRandomNameIfNotFound();
-        Registration keyEntry = Registration.createNullPrivateKeyEntry();
-        while (!keyEntry.isValid()) {
+        boolean keyEntry = false;
+        while (!keyEntry) {
             try {
                 getTokenIfNecessary();
                 keyEntry = remoteRegistrationRequester.requestRegistration(hostName, agentAutoRegistrationProperties);
             } catch (Exception e) {
-                LOGGER.error("[Agent Registration] There was a problem registering with the go server.", e);
+                LOGGER.error("[Agent Registration] There was a problem registering with the GoCD server.", e);
                 throw e;
             }
 
-            if ((!keyEntry.isValid())) {
+            if (!keyEntry) {
                 try {
-                    LOGGER.debug("[Agent Registration] Retrieved agent key from Go server is not valid.");
+                    LOGGER.debug("[Agent Registration] Agent was not approved by the GoCD server.");
                     Thread.sleep(REGISTER_RETRY_INTERVAL);
                 } catch (InterruptedException e) {
                     // Ok
@@ -137,31 +126,7 @@ public class SslInfrastructureService {
             }
         }
         LOGGER.info("[Agent Registration] Retrieved registration from Go server.");
-        storeChainIntoAgentStore(keyEntry);
         agentAutoRegistrationProperties.scrubRegistrationProperties();
-    }
-
-    private void storeChainIntoAgentStore(Registration keyEntry) {
-        try {
-            keyStoreManager.storeCertificate(CHAIN_ALIAS, GoAgentServerClientBuilder.AGENT_CERTIFICATE_FILE, httpClientBuilder().keystorePassword(), keyEntry);
-            LOGGER.info("[Agent Registration] Stored registration for cert with hash code: {} not valid before: {}", md5Fingerprint(keyEntry.getFirstCertificate()), keyEntry.getCertificateNotBeforeDate());
-        } catch (Exception e) {
-            throw bomb("Couldn't save agent key into store", e);
-        }
-    }
-
-    public void invalidateAgentCertificate() {
-        try {
-            httpClient.reset();
-            keyStoreManager.deleteEntry(CHAIN_ALIAS, GoAgentServerClientBuilder.AGENT_CERTIFICATE_FILE, httpClientBuilder().keystorePassword());
-        } catch (Exception e) {
-            LOGGER.error(FATAL, "[Agent Registration] Error while deleting key from key store", e);
-            deleteKeyStores();
-        }
-    }
-
-    private void deleteKeyStores() {
-        FileUtils.deleteQuietly(GoAgentServerClientBuilder.AGENT_CERTIFICATE_FILE);
     }
 
     public static class RemoteRegistrationRequester {
@@ -175,7 +140,7 @@ public class SslInfrastructureService {
             this.agentRegistry = agentRegistry;
         }
 
-        protected Registration requestRegistration(String agentHostName, AgentAutoRegistrationProperties agentAutoRegisterProperties) throws IOException {
+        protected boolean requestRegistration(String agentHostName, AgentAutoRegistrationProperties agentAutoRegisterProperties) throws IOException {
             LOGGER.debug("[Agent Registration] Using URL {} to register.", serverUrl);
 
             HttpRequestBase postMethod = (HttpRequestBase) RequestBuilder.post(serverUrl)
@@ -194,27 +159,22 @@ public class SslInfrastructureService {
                     .build();
 
             try (CloseableHttpResponse response = httpClient.execute(postMethod)) {
-                Registration key = Registration.createNullPrivateKeyEntry();
 
                 switch (getStatusCode(response)) {
-                    case SC_ACCEPTED:
-                        LOGGER.debug("The server has accepted the registration request.");
-                        break;
                     case SC_FORBIDDEN:
                         LOGGER.debug("Server denied registration request due to invalid token. Deleting existing token from disk.");
                         agentRegistry.deleteToken();
                         break;
                     case SC_OK:
                         LOGGER.info("This agent is now approved by the server.");
-                        key = RegistrationJSONizer.fromJson(responseBody(response));
-                        break;
+                        return true;
                     case SC_UNPROCESSABLE_ENTITY:
                         LOGGER.error("Error occurred during agent registration process: {}", responseBody(response));
                         break;
                     default:
                         LOGGER.warn("The server sent a response that we could not understand. The HTTP status was {}. The response body was:\n{}", response.getStatusLine(), responseBody(response));
                 }
-                return key;
+                return false;
             } finally {
                 postMethod.releaseConnection();
             }

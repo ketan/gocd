@@ -147,7 +147,6 @@ public class AgentHTTPClientController extends AgentController {
             runner.run(work, agentWorkContext);
         } catch (UnregisteredAgentException e) {
             LOG.warn("[Agent Loop] Invalid agent certificate with fingerprint {}. Registering with server on next iteration.", e.getUuid());
-            sslInfrastructureService.invalidateAgentCertificate();
         } finally {
             getAgentRuntimeInfo().idle();
         }

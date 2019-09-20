@@ -18,12 +18,9 @@ package com.thoughtworks.go.agent.service;
 import com.thoughtworks.go.agent.AgentAutoRegistrationPropertiesImpl;
 import com.thoughtworks.go.agent.common.ssl.GoAgentServerClientBuilder;
 import com.thoughtworks.go.agent.common.ssl.GoAgentServerHttpClient;
-import com.thoughtworks.go.agent.testhelpers.AgentCertificateMother;
 import com.thoughtworks.go.config.AgentRegistry;
 import com.thoughtworks.go.config.GuidService;
 import com.thoughtworks.go.config.TokenService;
-import com.thoughtworks.go.security.Registration;
-import com.thoughtworks.go.security.RegistrationJSONizer;
 import com.thoughtworks.go.util.URLService;
 import org.apache.http.NameValuePair;
 import org.apache.http.ProtocolVersion;
@@ -44,7 +41,6 @@ import org.mockito.Mock;
 import org.springframework.http.HttpStatus;
 
 import java.io.File;
-import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.function.Predicate;
@@ -94,31 +90,6 @@ public class SslInfrastructureServiceTest {
     }
 
     @Test
-    void shouldInvalidateKeystore() throws Exception {
-        temporaryFolder.create();
-        File configFile = temporaryFolder.newFile();
-        when(httpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("https", 1, 2), 200, null));
-        when(httpResponse.getEntity()).thenReturn(new StringEntity(RegistrationJSONizer.toJson(createRegistration())));
-
-        when(agentRegistry.guidPresent()).thenReturn(true);
-        when(httpClient.execute(any(HttpRequestBase.class))).thenReturn(httpResponse);
-        when(agentRegistry.tokenPresent()).thenReturn(true);
-
-        shouldCreateSslInfrastructure();
-
-        sslInfrastructureService.registerIfNecessary(new AgentAutoRegistrationPropertiesImpl(configFile));
-        assertTrue(GoAgentServerClientBuilder.AGENT_CERTIFICATE_FILE.exists());
-        verify(httpClient, times(1)).execute(any(HttpRequestBase.class));
-
-        sslInfrastructureService.registerIfNecessary(new AgentAutoRegistrationPropertiesImpl(configFile));
-        verify(httpClient, times(1)).execute(any(HttpRequestBase.class));
-
-        sslInfrastructureService.invalidateAgentCertificate();
-        sslInfrastructureService.registerIfNecessary(new AgentAutoRegistrationPropertiesImpl(configFile));
-        verify(httpClient, times(2)).execute(any(HttpRequestBase.class));
-    }
-
-    @Test
     void shouldGetTokenFromServerIfOneNotExist() throws Exception {
         final ArgumentCaptor<HttpRequestBase> httpRequestBaseArgumentCaptor = ArgumentCaptor.forClass(HttpRequestBase.class);
         tokenService.delete();
@@ -143,7 +114,7 @@ public class SslInfrastructureServiceTest {
         when(agentRegistry.uuid()).thenReturn("some-uuid");
         when(agentRegistry.token()).thenReturn("some-token");
         when(httpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("https", 1, 2), 200, null));
-        when(httpResponse.getEntity()).thenReturn(new StringEntity(RegistrationJSONizer.toJson(createRegistration())));
+        when(httpResponse.getEntity()).thenReturn(new StringEntity(""));
         when(httpClient.execute(httpRequestBaseArgumentCaptor.capture())).thenReturn(httpResponse);
 
         sslInfrastructureService.createSslInfrastructure();
@@ -167,7 +138,7 @@ public class SslInfrastructureServiceTest {
         when(agentRegistry.tokenPresent()).thenReturn(true);
         when(httpResponse.getStatusLine()).thenReturn(new BasicStatusLine(protocolVersion, HttpStatus.OK.value(), null));
         when(httpResponseForbidden.getStatusLine()).thenReturn(new BasicStatusLine(protocolVersion, HttpStatus.FORBIDDEN.value(), null));
-        when(httpResponse.getEntity()).thenReturn(new StringEntity(RegistrationJSONizer.toJson(createRegistration())));
+        when(httpResponse.getEntity()).thenReturn(new StringEntity(""));
         when(httpResponseForbidden.getEntity()).thenReturn(new StringEntity("Not a valid token."));
         when(httpClient.execute(any(HttpRequestBase.class))).thenReturn(httpResponseForbidden).thenReturn(httpResponse);
         sslInfrastructureService.createSslInfrastructure();
@@ -188,12 +159,4 @@ public class SslInfrastructureServiceTest {
         }).findFirst().orElse(null);
     }
 
-    private void shouldCreateSslInfrastructure() throws Exception {
-        sslInfrastructureService.createSslInfrastructure();
-    }
-
-    private Registration createRegistration() throws IOException {
-        Registration certificates = AgentCertificateMother.agentCertificate(temporaryFolder);
-        return new Registration(certificates.getPrivateKey(), certificates.getChain());
-    }
 }

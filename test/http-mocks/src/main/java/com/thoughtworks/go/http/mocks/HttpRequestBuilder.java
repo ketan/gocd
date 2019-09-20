@@ -25,7 +25,6 @@ import org.apache.http.client.utils.URLEncodedUtils;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpSession;
 import java.nio.charset.Charset;
-import java.security.cert.X509Certificate;
 import java.util.*;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
@@ -194,10 +193,6 @@ public class HttpRequestBuilder {
     public HttpRequestBuilder withSession(HttpSession session) {
         request.setSession(session);
         return this;
-    }
-
-    public HttpRequestBuilder withX509(X509Certificate[] chain) {
-        return withAttribute("javax.servlet.request.X509Certificate", chain);
     }
 
     public HttpRequestBuilder withRequestedSessionId(String requestedSessionId) {
