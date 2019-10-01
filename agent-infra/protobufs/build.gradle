@@ -25,8 +25,8 @@ buildscript {
 apply plugin: 'java'
 apply plugin: 'com.google.protobuf'
 
-sourceCompatibility = 11
-targetCompatibility = 11
+sourceCompatibility = project.compilerOptions.sourceCompatibility
+targetCompatibility = project.compilerOptions.targetCompatibility
 
 dependencies {
   compile group: 'com.google.protobuf', name: 'protobuf-java', version: project.versions.protobuf
