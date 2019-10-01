@@ -83,7 +83,7 @@ class AgentCLITest {
     @Test
     void shouldDefaultsTheSslModeToNONEWhenNotSpecified() {
         AgentBootstrapperArgs agentBootstrapperArgs = agentCLI.parse("-serverUrl", "https://go.example.com/go");
-        assertThat(agentBootstrapperArgs.getSslVerificationMode()).isEqualTo(AgentBootstrapperArgs.SslMode.NONE);
+        assertThat(agentBootstrapperArgs.getSslVerificationMode()).isEqualTo(AgentBootstrapperArgs.SslMode.FULL);
     }
 
     @Test

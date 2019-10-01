@@ -16,23 +16,30 @@
 
 package com.thoughtworks.go.agent;
 
-import com.thoughtworks.go.agent.http.HttpClientBeanInitializer;
-import com.thoughtworks.go.agent.services.GuidService;
-import com.thoughtworks.go.agent.services.TokenService;
+import com.thoughtworks.go.agent.executors.WorkExecutor;
+import com.thoughtworks.go.agent.http.ServerApiClient;
+import com.thoughtworks.go.agent.services.AgentInitializer;
+import com.thoughtworks.go.protobufs.work.ProtoWork;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 
+import java.util.Optional;
+
+import static org.assertj.core.api.Assertions.assertThatCode;
+import static org.mockito.Mockito.*;
 import static org.mockito.MockitoAnnotations.initMocks;
 
 class LooperTest {
     @Mock
-    private HttpClientBeanInitializer client;
+    private ServerApiClient client;
     @Mock
-    private GuidService guidService;
+    private AgentInitializer agentInitializer;
     @Mock
-    private TokenService tokenService;
+    private WorkExecutor workExecutor;
+
     @InjectMocks
     private Looper looper;
 
@@ -42,7 +49,71 @@ class LooperTest {
     }
 
     @Test
-    void shouldAskForWorks() {
+    void shouldCallAgentInitializerInOrder() {
         looper.loop();
+
+        InOrder inOrder = inOrder(agentInitializer, client);
+
+        inOrder.verify(agentInitializer).getTokenFromServerIfRequired();
+        inOrder.verify(agentInitializer).registerWithServerIfRequired();
+        inOrder.verify(agentInitializer).getCookieFromServerIfRequired();
+        inOrder.verify(client).getWork(agentInitializer.getCookie(), agentInitializer.getToken(), agentInitializer.agentMeta());
+    }
+
+    @Test
+    void shouldNotCallRegisterWithServerWhenGetTokenFromServerBombs() {
+        doThrow(new RuntimeException("bomb!")).when(agentInitializer).getTokenFromServerIfRequired();
+
+        assertThatCode(() -> looper.loop()).isInstanceOf(RuntimeException.class);
+
+        verify(agentInitializer, never()).registerWithServerIfRequired();
+        verify(agentInitializer, never()).getCookieFromServerIfRequired();
+        verifyZeroInteractions(client);
+        verifyZeroInteractions(workExecutor);
+    }
+
+    @Test
+    void shouldNotCallGetCookieFromServerWhenRegisterWithServerBombs() {
+        doThrow(new RuntimeException("bomb!")).when(agentInitializer).registerWithServerIfRequired();
+
+        assertThatCode(() -> looper.loop()).isInstanceOf(RuntimeException.class);
+
+        verify(agentInitializer, never()).getCookieFromServerIfRequired();
+        verifyZeroInteractions(client);
+        verifyZeroInteractions(workExecutor);
+    }
+
+    @Test
+    void shouldNotGetWorkFromServerWhenGetCookieFromServerBombs() {
+        doThrow(new RuntimeException("bomb!")).when(agentInitializer).getCookieFromServerIfRequired();
+
+        assertThatCode(() -> looper.loop()).isInstanceOf(RuntimeException.class);
+
+        verifyZeroInteractions(client);
+        verifyZeroInteractions(workExecutor);
+    }
+
+    @Test
+    void shouldExecuteWorkWhenServerReturnsAWork() {
+        ProtoWork work = ProtoWork.newBuilder().build();
+        Optional<ProtoWork> optionalProtoWork = Optional.of(work);
+        when(client.getWork(agentInitializer.getCookie(), agentInitializer.getToken(), agentInitializer.agentMeta()))
+                .thenReturn(optionalProtoWork);
+
+        looper.loop();
+
+        verify(workExecutor).execute(work);
+        verifyZeroInteractions(workExecutor);
+    }
+
+    @Test
+    void shouldExecuteWorkWhenWorkThereIsNotWork() {
+        Optional<ProtoWork> optionalProtoWork = Optional.empty();
+        when(client.getWork(agentInitializer.getCookie(), agentInitializer.getToken(), agentInitializer.agentMeta()))
+                .thenReturn(optionalProtoWork);
+
+        looper.loop();
+
+        verifyZeroInteractions(workExecutor);
     }
 }

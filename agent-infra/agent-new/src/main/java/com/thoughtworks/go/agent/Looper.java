@@ -46,9 +46,9 @@ public class Looper {
     @Scheduled(fixedDelayString = "${go.agent.get.work.interval}")
     public void loop() {
         log.debug("[Agent Loop] Trying to retrieve work.");
-        agentInitializer.createTokenIfRequired();
-        agentInitializer.registerIfRequired();
-        agentInitializer.getCookiesIfRequired();
+        agentInitializer.getTokenFromServerIfRequired();
+        agentInitializer.registerWithServerIfRequired();
+        agentInitializer.getCookieFromServerIfRequired();
         Optional<ProtoWork> work = client.getWork(agentInitializer.getCookie(), agentInitializer.getToken(), agentInitializer.agentMeta());
         work.ifPresent(workExecutor::execute);
     }
