@@ -50,6 +50,11 @@ class UrlProvider {
         return buildUrl("cookie");
     }
 
+
+    URI workUrl() {
+        return buildUrl("work");
+    }
+
     private URI buildUrl(String path) {
         try {
             return new URIBuilder(serverUrl.toURI())

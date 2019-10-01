@@ -23,22 +23,25 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 
 @Slf4j
-class OnIdleOutputStream extends FilterOutputStream {
+public class OnIdleOutputStream extends FilterOutputStream {
     private final Thread monitorThread;
+    private final AtomicReference<Boolean> running = new AtomicReference<>(true);
     private final LinkedBlockingDeque<Object> queue = new LinkedBlockingDeque<>();
 
     public OnIdleOutputStream(OutputStream out, String name, Long idleTimeout, TimeUnit unit, Runnable callback) {
         super(out);
-
         monitorThread = new Thread("OnIdleOutputStream" + name) {
             @Override
             public void run() {
-                while (true) {
+                while (running.get()) {
                     try {
                         if (queue.pollLast(idleTimeout, unit) == null) {
                             callback.run();
+                            closeSilently();
+                            running.set(false);
                         }
                     } catch (InterruptedException e) {
                         log.warn("Thread was interrupted while polling on queue", e);
@@ -50,6 +53,15 @@ class OnIdleOutputStream extends FilterOutputStream {
 
         monitorThread.setDaemon(true);
         monitorThread.start();
+    }
+
+    private void closeSilently() {
+        try {
+            flush();
+            close();
+        } catch (IOException e) {
+            //ignore
+        }
     }
 
     @Override

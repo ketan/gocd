@@ -30,8 +30,8 @@ message AgentMeta {
     string location = 3;
     int64 usable_space = 4;
     string operating_system = 5;
+    string ip_address = 6;
 }
-
 
 message RegistrationPayload {
     AgentMeta agent_meta = 1;

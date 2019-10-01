@@ -17,7 +17,7 @@
 package com.thoughtworks.go.toprotobuf;
 
 import com.thoughtworks.go.config.NantTask;
-import com.thoughtworks.go.protobufs.tasks.Exec;
+import com.thoughtworks.go.protobufs.tasks.ProtoExec;
 import org.apache.tools.ant.types.Commandline;
 
 import java.util.List;
@@ -25,12 +25,13 @@ import java.util.List;
 import static org.apache.commons.io.FilenameUtils.separatorsToUnix;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
-class NAntBuilder implements Builder<NantTask, Exec> {
+class NAntBuilder implements Builder<NantTask, ProtoExec> {
     @Override
-    public Exec build(NantTask task) {
-        Exec.Builder builder = Exec.newBuilder()
-                .setWorkingDir(task.workingDirectory())
+    public ProtoExec build(NantTask task) {
+        ProtoExec.Builder builder = ProtoExec.newBuilder()
                 .setCommand("nant");
+
+        addWorkingDirIfPresent(task, builder);
 
         if (isNotBlank(task.getBuildFile())) {
             builder.addArgs("-f");
@@ -43,4 +44,5 @@ class NAntBuilder implements Builder<NantTask, Exec> {
 
         return builder.build();
     }
+
 }

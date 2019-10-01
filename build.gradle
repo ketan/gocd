@@ -219,7 +219,7 @@ rootProject.ext.versions = [
   objenesis           : '2.6',
   okhttp              : '4.0.0',
   oro                 : '2.0.8',
-  protobuf            : '3.9.2',
+  protobuf            : '3.10.0',
   quartz              : '2.3.1',
   rack                : '1.1.21',
   semanticVersion     : '1.2.0',

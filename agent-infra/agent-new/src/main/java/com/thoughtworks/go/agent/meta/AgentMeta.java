@@ -35,6 +35,7 @@ public class AgentMeta {
     private String location;
     private Long usableSpace;
     private String operationSystem;
+    private String ipAddress;
 
     public AgentMeta refreshUsableSpaceInPipelinesDir() {
         File file = new File(location, "pipelines");

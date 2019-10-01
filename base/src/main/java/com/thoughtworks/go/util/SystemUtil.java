@@ -133,7 +133,7 @@ public class SystemUtil {
     }
 
     public static boolean reachable(String name, int port) {
-        try(Socket ignored = new Socket(InetAddress.getByName(name), port)) {
+        try (Socket ignored = new Socket(InetAddress.getByName(name), port)) {
             return true;
         } catch (Exception e) {
             return false;

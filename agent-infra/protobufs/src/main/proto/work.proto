@@ -1,0 +1,37 @@
+syntax = "proto3";
+
+import "tasks.proto";
+
+option java_package = "com.thoughtworks.go.protobufs.work";
+option java_multiple_files = true;
+option java_outer_classname = "BuildWork";
+
+message ProtoWork {
+    ProtoJobIdentifier jobIdentifier = 1;
+    repeated ProtoMaterialRevision material = 2;
+    repeated ProtoExec task = 3;
+}
+
+message ProtoMaterialRevision {
+    oneof material {
+        ProtoGitMaterialRevision git = 1;
+    }
+}
+
+message ProtoGitMaterialRevision {
+    ProtoGitMaterialConfig config = 1;
+    ProtoGitRevision previous = 2;
+    ProtoGitRevision latest = 3;
+}
+
+message ProtoGitRevision {
+    string sha = 1;
+}
+
+message ProtoGitMaterialConfig {
+    string username = 1;
+    string password = 2;
+    string url = 3;
+    string branch = 4;
+    bool shallow = 5;
+}

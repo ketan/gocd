@@ -24,6 +24,7 @@ import com.thoughtworks.go.domain.builder.Builder;
 import com.thoughtworks.go.domain.materials.Material;
 import com.thoughtworks.go.domain.materials.Modification;
 import com.thoughtworks.go.util.command.EnvironmentVariableContext;
+import lombok.Getter;
 
 import java.io.File;
 import java.io.Serializable;
@@ -43,12 +44,19 @@ public class BuildAssignment implements Serializable, SecretParamAware {
     private final File buildWorkingDirectory;
     private final JobIdentifier jobIdentifier;
     private final EnvironmentVariableContext initialContext = new EnvironmentVariableContext();
+    @Getter
     private final MaterialRevisions materialRevisions = new MaterialRevisions();
     private final String approver;
 
-    private BuildAssignment(BuildCause buildCause, File buildWorkingDirectory, List<Builder> builder, JobIdentifier jobIdentifier,
-                            boolean fetchMaterials, boolean cleanWorkingDirectory, List<ArtifactPlan> artifactPlans,
-                            List<ArtifactPropertiesGenerator> propertyGenerators, ArtifactStores artifactStores) {
+    private BuildAssignment(BuildCause buildCause,
+                            File buildWorkingDirectory,
+                            List<Builder> builder,
+                            JobIdentifier jobIdentifier,
+                            boolean fetchMaterials,
+                            boolean cleanWorkingDirectory,
+                            List<ArtifactPlan> artifactPlans,
+                            List<ArtifactPropertiesGenerator> propertyGenerators,
+                            ArtifactStores artifactStores) {
         this.buildWorkingDirectory = buildWorkingDirectory;
         this.builders = builder;
         this.jobIdentifier = jobIdentifier;
@@ -76,7 +84,12 @@ public class BuildAssignment implements Serializable, SecretParamAware {
                 '}';
     }
 
-    public static BuildAssignment create(JobPlan plan, BuildCause buildCause, List<Builder> builders, File buildWorkingDirectory, EnvironmentVariableContext contextFromEnvironment, ArtifactStores artifactStores) {
+    public static BuildAssignment create(JobPlan plan,
+                                         BuildCause buildCause,
+                                         List<Builder> builders,
+                                         File buildWorkingDirectory,
+                                         EnvironmentVariableContext contextFromEnvironment,
+                                         ArtifactStores artifactStores) {
         BuildAssignment buildAssignment = new BuildAssignment(buildCause, buildWorkingDirectory, builders, plan.getIdentifier(), plan.shouldFetchMaterials(),
                 plan.shouldCleanWorkingDir(), plan.getArtifactPlans(), plan.getPropertyGenerators(), artifactStores);
 

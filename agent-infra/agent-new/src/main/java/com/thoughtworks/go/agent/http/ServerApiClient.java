@@ -20,6 +20,7 @@ import com.thoughtworks.go.agent.cli.AgentBootstrapperArgs;
 import com.thoughtworks.go.agent.meta.AgentMeta;
 import com.thoughtworks.go.agent.registration.AgentAutoRegistrationProperties;
 import com.thoughtworks.go.protobufs.registration.*;
+import com.thoughtworks.go.protobufs.work.ProtoWork;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.input.NullInputStream;
@@ -36,6 +37,7 @@ import java.io.InputStream;
 import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static org.apache.http.HttpStatus.*;
@@ -136,6 +138,26 @@ public class ServerApiClient {
 
     }
 
+
+    public Optional<ProtoWork> getWork(String cookie, String token, AgentMeta agentMeta) {
+        HttpPost post = new HttpPost(apiUrlHelper.workUrl());
+        addAuthenticationHeaders(post, agentMeta, token);
+        post.addHeader("X-Agent-Cookie", cookie);
+        post.setEntity(new ByteArrayEntity(toProtobuf(agentMeta).toByteArray()));
+
+        try (CloseableHttpResponse response = httpClient.execute(post)) {
+            if (response.getStatusLine().getStatusCode() == SC_OK) {
+                return Optional.of(ProtoWork.parseFrom(response.getEntity().getContent()));
+            } else if (response.getStatusLine().getStatusCode() == SC_ACCEPTED) {
+                log.debug("No work.");
+                return Optional.empty();
+            }
+            throw logResponseAndThrowError(response);
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
+    }
+
     private void addAuthenticationHeaders(HttpPost post, AgentMeta agentMeta, String token) {
         post.setHeader("X-Agent-GUID", agentMeta.getUuid());
         post.setHeader("Authorization", token);
@@ -158,6 +180,7 @@ public class ServerApiClient {
                 .setLocation(agentMeta.getLocation())
                 .setOperatingSystem(agentMeta.getOperationSystem())
                 .setUsableSpace(agentMeta.getUsableSpace())
+                .setIpAddress(agentMeta.getIpAddress())
                 .build();
     }
 
@@ -170,5 +193,4 @@ public class ServerApiClient {
     private void setContentType(AbstractHttpMessage request) {
         request.setHeader("Content-Type", "application/x-protobuf");
     }
-
 }

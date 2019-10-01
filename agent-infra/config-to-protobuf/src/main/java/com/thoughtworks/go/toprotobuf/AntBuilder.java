@@ -17,7 +17,7 @@
 package com.thoughtworks.go.toprotobuf;
 
 import com.thoughtworks.go.config.AntTask;
-import com.thoughtworks.go.protobufs.tasks.Exec;
+import com.thoughtworks.go.protobufs.tasks.ProtoExec;
 import org.apache.tools.ant.types.Commandline;
 
 import java.util.List;
@@ -25,12 +25,13 @@ import java.util.List;
 import static org.apache.commons.io.FilenameUtils.separatorsToUnix;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
-class AntBuilder implements Builder<AntTask, Exec> {
+class AntBuilder implements Builder<AntTask, ProtoExec> {
     @Override
-    public Exec build(AntTask antTask) {
-        Exec.Builder builder = Exec.newBuilder()
-                .setWorkingDir(antTask.workingDirectory())
+    public ProtoExec build(AntTask antTask) {
+        ProtoExec.Builder builder = ProtoExec.newBuilder()
                 .setCommand("ant");
+
+        addWorkingDirIfPresent(antTask, builder);
 
         if (isNotBlank(antTask.getBuildFile())) {
             builder.addArgs("-f");

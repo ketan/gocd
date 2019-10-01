@@ -17,26 +17,39 @@
 package com.thoughtworks.go.api.agentservices;
 
 import com.google.common.collect.ImmutableMap;
+import com.google.protobuf.MessageLite;
 import com.thoughtworks.go.api.ControllerMethods;
 import com.thoughtworks.go.api.agentservices.representers.AgentManifestRepresenter;
 import com.thoughtworks.go.api.agentservices.representers.AgentRegisterPayload;
 import com.thoughtworks.go.config.Agent;
 import com.thoughtworks.go.config.exceptions.BadRequestException;
 import com.thoughtworks.go.config.exceptions.NotAuthorizedException;
-import com.thoughtworks.go.domain.InputStreamSrc;
-import com.thoughtworks.go.domain.JarDetector;
+import com.thoughtworks.go.config.exceptions.UnprocessableEntityException;
+import com.thoughtworks.go.config.materials.git.GitMaterial;
+import com.thoughtworks.go.domain.*;
+import com.thoughtworks.go.domain.materials.Modification;
 import com.thoughtworks.go.plugin.infra.commons.PluginsZip;
 import com.thoughtworks.go.protobufs.ProtoMessage;
 import com.thoughtworks.go.protobufs.registration.AgentMeta;
 import com.thoughtworks.go.protobufs.registration.Cookie;
 import com.thoughtworks.go.protobufs.registration.Token;
 import com.thoughtworks.go.protobufs.registration.UUID;
+import com.thoughtworks.go.protobufs.tasks.ProtoExec;
+import com.thoughtworks.go.protobufs.tasks.ProtoJobIdentifier;
+import com.thoughtworks.go.protobufs.tasks.ProtoPipelineIdentifier;
+import com.thoughtworks.go.protobufs.tasks.ProtoStageIdentifier;
+import com.thoughtworks.go.protobufs.work.*;
+import com.thoughtworks.go.remote.AgentIdentifier;
+import com.thoughtworks.go.remote.work.BuildWork;
+import com.thoughtworks.go.remote.work.*;
 import com.thoughtworks.go.security.Registration;
+import com.thoughtworks.go.server.messaging.scheduling.WorkAssignments;
 import com.thoughtworks.go.server.service.AgentRuntimeInfo;
 import com.thoughtworks.go.server.service.AgentService;
 import com.thoughtworks.go.server.service.GoConfigService;
 import com.thoughtworks.go.spark.SparkController;
 import com.thoughtworks.go.spark.spring.SparkSpringController;
+import com.thoughtworks.go.toprotobuf.TaskConverterFactory;
 import com.thoughtworks.go.util.SystemEnvironment;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -57,13 +70,17 @@ import java.nio.charset.StandardCharsets;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.Base64;
+import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.stream.StreamSupport;
 
 import static java.lang.String.format;
 import static java.lang.String.join;
+import static java.util.stream.Collectors.toList;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.apache.http.HttpStatus.*;
 import static spark.Spark.*;
 
 @Component
@@ -77,16 +94,19 @@ public class AgentController implements SparkSpringController, ControllerMethods
 
     private final GoConfigService goConfigService;
     private final AgentService agentService;
+    private final WorkAssignments workAssignments;
 //    private final String mimeType;
 
     @Autowired
     public AgentController(SystemEnvironment systemEnvironment,
                            PluginsZip pluginsZip,
                            GoConfigService goConfigService,
-                           AgentService agentService) throws IOException {
+                           AgentService agentService,
+                           WorkAssignments workAssignments) throws IOException {
 //        this.mimeType = "application/x-protobuf";
         this.goConfigService = goConfigService;
         this.agentService = agentService;
+        this.workAssignments = workAssignments;
         this.handlers = new TreeMap<>(ImmutableMap.<String, Handler>builder()
                 .put("agent.jar", new AgentJarHandler(JarDetector.create(systemEnvironment, "agent.jar")))
                 .put("agent-launcher.jar", new AgentLauncherHandler(JarDetector.create(systemEnvironment, "agent-launcher.jar")))
@@ -113,6 +133,7 @@ public class AgentController implements SparkSpringController, ControllerMethods
 
             post("/register", this::register);
             post("/cookie", this::getCookie);
+            post("/work", this::getWork);
         });
     }
 
@@ -128,8 +149,6 @@ public class AgentController implements SparkSpringController, ControllerMethods
         String autoRegisterKey = request.headers("X-Auto-Register-Key");
 
         AgentRegisterPayload payload = AgentRegisterPayload.from(request.bodyAsBytes());
-        payload.setIpAddress(request.ip());
-
         payload.bombIfInvalid();
 
         denyRegistrationIfTokenDoesNotMatch(agentGUID, token, payload);
@@ -144,16 +163,16 @@ public class AgentController implements SparkSpringController, ControllerMethods
         if (serverAutoregisterKey().equals(autoRegisterKey)) {
             agentService.register(agent);
             bombIfAgentHasErrors(agent, payload);
-            return toMessage("Welcome!");
+            return toMessage("Welcome!").toByteArray();
         }
 
         AgentRuntimeInfo agentRuntimeInfo = payload.toRuntimeInfo(agentService.isRegistered(payload.getUuid()));
         Registration registration = agentService.requestRegistration(agentRuntimeInfo);
         if (registration.isValid()) {
-            return toMessage("Welcome!");
+            return toMessage("Welcome!").toByteArray();
         } else {
             response.status(202);
-            return toMessage("Agent is in pending state, waiting for approval from a GoCD server administrator.");
+            return toMessage("Agent is in pending state, waiting for approval from a GoCD server administrator.").toByteArray();
         }
     }
 
@@ -161,7 +180,7 @@ public class AgentController implements SparkSpringController, ControllerMethods
         AgentMeta agentMeta = AgentMeta.parseFrom(request.bodyAsBytes());
         Agent agent = agentService.findAgentByUUID(agentMeta.getUuid());
         if (agent == null) {
-            throw new BadRequestException(format("Agent with UUID %s does not exist.", agentMeta.getUuid()));
+            throw new UnprocessableEntityException(format("Agent with UUID %s does not exist.", agentMeta.getUuid()));
         }
 
         if (!agent.isEnabled()) {
@@ -174,12 +193,118 @@ public class AgentController implements SparkSpringController, ControllerMethods
         return Cookie.newBuilder().setCookie(agent.getCookie()).build().toByteArray();
     }
 
-    private byte[] toMessage(String s) {
+    private byte[] getWork(Request request, Response response) throws IOException {
+        String agentCookie = request.headers("X-Agent-Cookie");
+        AgentMeta agentMeta = AgentMeta.parseFrom(request.bodyAsBytes());
+        AgentIdentifier agentIdentifier = new AgentIdentifier(agentMeta.getHostname(), agentMeta.getIpAddress(), agentMeta.getUuid());
+        AgentRuntimeInfo agentRuntimeInfo = new AgentRuntimeInfo(agentIdentifier, AgentRuntimeStatus.Idle, agentMeta.getLocation(), agentCookie);
+
+        Work work = workAssignments.getWork(agentRuntimeInfo);
+        MessageLite message = toProtobuf(work, response);
+        return message.toByteArray();
+    }
+
+    private MessageLite toProtobuf(Work work, Response response) {
+        if (work instanceof NoWork) {
+            response.status(SC_ACCEPTED);
+            return toMessage("No work.");
+        }
+
+        if (work instanceof DeniedAgentWork) {
+            response.status(SC_FORBIDDEN);
+            return toMessage("Denied work. Agent is disabled.");
+        }
+
+        if (work instanceof UnregisteredAgentWork) {
+            response.status(SC_UNAUTHORIZED);
+            return toMessage("Agent is not registered.");
+        }
+
+        if (work instanceof BuildWork) {
+            BuildWork buildWork = (BuildWork) work;
+            BuildAssignment assignment = buildWork.getAssignment();
+            JobIdentifier jobIdentifier = assignment.getJobIdentifier();
+            List<Task> tasks = goConfigService.tasksForJob(jobIdentifier.getPipelineName(), jobIdentifier.getStageName(), jobIdentifier.getBuildName());
+
+            return ProtoWork.newBuilder()
+                    .setJobIdentifier(toProtobuf(jobIdentifier))
+                    .addAllMaterial(toProtobuf(assignment.getMaterialRevisions()))
+                    .addAllTask(tasks.stream().map(this::toProtobuf).collect(toList()))
+                    .build();
+        }
+
+        throw new IllegalArgumentException(format("Work type %s is not supported.", work.getClass().getName()));
+    }
+
+    private ProtoJobIdentifier toProtobuf(JobIdentifier jobIdentifier) {
+        ProtoPipelineIdentifier pipelineIdentifier = ProtoPipelineIdentifier.newBuilder()
+                .setPipelineName(jobIdentifier.getPipelineName())
+                .setPipelineCounter(jobIdentifier.getPipelineCounter())
+                .build();
+
+        ProtoStageIdentifier stageIdentifier = ProtoStageIdentifier.newBuilder()
+                .setStageCounter(Long.parseLong(jobIdentifier.getStageCounter()))
+                .setStageName(jobIdentifier.getStageName())
+                .setPipelineIdentifier(pipelineIdentifier)
+                .build();
+
+        return ProtoJobIdentifier.newBuilder()
+                .setJobName(jobIdentifier.getBuildName())
+                .setStageIdentifier(stageIdentifier)
+                .build();
+    }
+
+    private ProtoExec toProtobuf(Task task) {
+        return new TaskConverterFactory().toTask(task);
+    }
+
+    private List<ProtoMaterialRevision> toProtobuf(MaterialRevisions materialRevisions) {
+        return StreamSupport.stream(materialRevisions.spliterator(), false)
+                .map(this::toProtobuf)
+                .collect(toList());
+    }
+
+    private ProtoMaterialRevision toProtobuf(MaterialRevision materialRevision) {
+        ProtoMaterialRevision.Builder builder = ProtoMaterialRevision.newBuilder();
+        if (materialRevision.getMaterial() instanceof GitMaterial) {
+            builder.setGit(toProtobuf(materialRevision, (GitMaterial) materialRevision.getMaterial()));
+        }
+        return builder.build();
+    }
+
+    private ProtoGitMaterialRevision toProtobuf(MaterialRevision materialRevision, GitMaterial material) {
+        return ProtoGitMaterialRevision.newBuilder()
+                .setConfig(toProtobuf(material))
+                .setPrevious(toProtobuf(materialRevision.getModifications().first()))
+                .setLatest(toProtobuf(materialRevision.getModifications().last()))
+                .build();
+    }
+
+    private ProtoGitMaterialConfig toProtobuf(GitMaterial material) {
+        ProtoGitMaterialConfig.Builder builder = ProtoGitMaterialConfig.newBuilder()
+                .setUrl(material.urlForCommandLine())
+                .setBranch(material.getBranch())
+                .setShallow(material.isShallowClone());
+
+        if (isNotBlank(material.getUserName())) {
+            builder.setUsername(material.getUsername());
+        }
+
+        if (isNotBlank(material.getPassword())) {
+            builder.setPassword(material.getPassword());
+        }
+        return builder.build();
+    }
+
+    private ProtoGitRevision toProtobuf(Modification modification) {
+        return ProtoGitRevision.newBuilder().setSha(modification.getRevision()).build();
+    }
+
+    private MessageLite toMessage(String s) {
         return ProtoMessage
                 .newBuilder()
                 .setMessage(s)
-                .build()
-                .toByteArray();
+                .build();
     }
 
     private void bombIfAgentHasErrors(Agent agent, AgentRegisterPayload payload) {

@@ -138,6 +138,7 @@ public class AgentRegisterPayload {
         }
 
         return new AgentRegisterPayload()
+                .setIpAddress(payload.getAgentMeta().getIpAddress())
                 .setHostname(payload.getAgentMeta().getHostname())
                 .setUuid(payload.getAgentMeta().getUuid())
                 .setLocation(payload.getAgentMeta().getLocation())

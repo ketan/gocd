@@ -16,7 +16,6 @@
 
 package com.thoughtworks.go.agent.system;
 
-import ch.qos.logback.core.util.ContextUtil;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -24,8 +23,6 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
 import java.io.File;
-import java.net.SocketException;
-import java.net.UnknownHostException;
 
 @Getter
 @Setter
@@ -38,17 +35,8 @@ public class GoAgentProperties {
     private String[] cipherSuites;
     private StatusAPI statusApi;
 
-
     public File autoRegisterProperties() {
         return new File(configDir, "autoregister.properties");
-    }
-
-    public static String getLocalHostName() {
-        try {
-            return ContextUtil.getLocalHostName();
-        } catch (UnknownHostException | SocketException e) {
-            return "localhost";
-        }
     }
 
     @Getter

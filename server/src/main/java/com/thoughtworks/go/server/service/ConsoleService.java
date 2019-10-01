@@ -60,7 +60,8 @@ public class ConsoleService {
         chooser.add(new BuildIdArtifactLocator(artifactsDirHolder.getArtifactsDir()));
     }
 
-    public ConsoleConsumer getStreamer(long startingLine, JobIdentifier identifier) throws IllegalArtifactLocationException {
+    public ConsoleConsumer getStreamer(long startingLine,
+                                       JobIdentifier identifier) throws IllegalArtifactLocationException {
         Path path = consoleLogFile(identifier).toPath();
         return new ConsoleStreamer(path, startingLine);
     }
@@ -82,7 +83,8 @@ public class ConsoleService {
         return artifact.exists() ? artifact : chooser.temporaryConsoleFile(jobIdentifier);
     }
 
-    public void appendToConsoleLog(JobIdentifier jobIdentifier, String text) throws IllegalArtifactLocationException, IOException {
+    public void appendToConsoleLog(JobIdentifier jobIdentifier,
+                                   String text) throws IllegalArtifactLocationException, IOException {
         updateConsoleLog(consoleLogFile(jobIdentifier), new ByteArrayInputStream(text.getBytes()));
     }
 

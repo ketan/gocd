@@ -16,6 +16,8 @@
 
 package com.thoughtworks.go.agent.services;
 
+import ch.qos.logback.core.util.ContextUtil;
+import com.thoughtworks.go.agent.cli.AgentBootstrapperArgs;
 import com.thoughtworks.go.agent.http.RegistrationStatus;
 import com.thoughtworks.go.agent.http.ServerApiClient;
 import com.thoughtworks.go.agent.meta.AgentMeta;
@@ -28,9 +30,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.io.File;
+import java.net.*;
+import java.util.Collections;
+import java.util.List;
 
 import static com.thoughtworks.go.agent.http.RegistrationStatus.OK;
-import static com.thoughtworks.go.agent.system.GoAgentProperties.getLocalHostName;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
@@ -40,22 +44,32 @@ public class AgentInitializer {
     private final ServerApiClient client;
     private final TokenService tokenService;
     private final GuidService guidService;
+    private final String currentWorkingDir = new File(".").getAbsolutePath();
     private GoAgentProperties goAgentProperties;
+    private final AgentBootstrapperArgs bootstrapperArgs;
     @Getter
     private String token;
     @Getter
     private boolean registered;
+    @Getter
     private String cookie;
+    @Getter(lazy = true)
+    private static final List<NetworkInterface> localInterfaces = findLocalInterfaces();
+    @Getter(lazy = true)
+    private final String ipUsedToConnectWithServer = findIpUsedToConnectWithServer();
+
 
     @Autowired
     public AgentInitializer(ServerApiClient client,
                             TokenService tokenService,
                             GuidService guidService,
-                            GoAgentProperties goAgentProperties) {
+                            GoAgentProperties goAgentProperties,
+                            AgentBootstrapperArgs bootstrapperArgs) {
         this.client = client;
         this.tokenService = tokenService;
         this.guidService = guidService;
         this.goAgentProperties = goAgentProperties;
+        this.bootstrapperArgs = bootstrapperArgs;
     }
 
     // because IdService will go to disk on almost all method invocations
@@ -99,13 +113,60 @@ public class AgentInitializer {
         cookie = client.getCookie(agentMeta(), token);
     }
 
-    private AgentMeta agentMeta() {
+    public AgentMeta agentMeta() {
         return new AgentMeta()
                 .setUuid(guidService.load())
                 .setHostname(getLocalHostName())
-                .setLocation(new File(".").getAbsolutePath())
+                .setLocation(currentWorkingDir)
                 .refreshUsableSpaceInPipelinesDir()
+                .setIpAddress(getIpUsedToConnectWithServer())
                 .setOperationSystem(OperatingSystem.getCompleteName());
     }
 
+    private String findIpUsedToConnectWithServer() {
+        try {
+            URL url = bootstrapperArgs.getServerUrl();
+            int port = url.getPort();
+            if (port == -1) {
+                port = url.getDefaultPort();
+            }
+            try (Socket socket = new Socket(url.getHost(), port)) {
+                return socket.getLocalAddress().getHostAddress();
+            }
+        } catch (Exception e) {
+            return getFirstLocalNonLoopbackIpAddress();
+        }
+    }
+
+    private static String getFirstLocalNonLoopbackIpAddress() {
+        return getLocalInterfaces().stream()
+                .flatMap(NetworkInterface::inetAddresses)
+                .filter(address -> address instanceof Inet4Address)
+                .filter(address -> !address.isLoopbackAddress())
+                .map(InetAddress::getHostAddress)
+                .sorted()
+                .findFirst()
+                .orElseThrow(() -> new RuntimeException("Failed to get non-loopback local ip address!"));
+    }
+
+
+    private static List<NetworkInterface> findLocalInterfaces() {
+        //This must be done only once
+        //This method call is extremely slow on JDK 1.7 + Windows combination
+        try {
+            return Collections.list(NetworkInterface.getNetworkInterfaces());
+        } catch (SocketException e) {
+            throw new RuntimeException("Could not retrieve local network interfaces", e);
+        }
+    }
+
+
+    //TODO: make it lazzy
+    public static String getLocalHostName() {
+        try {
+            return ContextUtil.getLocalHostName();
+        } catch (UnknownHostException | SocketException e) {
+            return "localhost";
+        }
+    }
 }

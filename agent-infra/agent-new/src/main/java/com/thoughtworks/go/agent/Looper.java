@@ -16,23 +16,31 @@
 
 package com.thoughtworks.go.agent;
 
+import com.thoughtworks.go.agent.executors.WorkExecutor;
 import com.thoughtworks.go.agent.http.ServerApiClient;
 import com.thoughtworks.go.agent.services.AgentInitializer;
+import com.thoughtworks.go.protobufs.work.ProtoWork;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+
+import java.util.Optional;
 
 @Service
 @Slf4j
 public class Looper {
     private final ServerApiClient client;
     private final AgentInitializer agentInitializer;
+    private final WorkExecutor workExecutor;
 
     @Autowired
-    public Looper(ServerApiClient client, AgentInitializer agentInitializer) {
+    public Looper(ServerApiClient client,
+                  AgentInitializer agentInitializer,
+                  WorkExecutor workExecutor) {
         this.client = client;
         this.agentInitializer = agentInitializer;
+        this.workExecutor = workExecutor;
     }
 
     @Scheduled(fixedDelayString = "${go.agent.get.work.interval}")
@@ -41,5 +49,7 @@ public class Looper {
         agentInitializer.createTokenIfRequired();
         agentInitializer.registerIfRequired();
         agentInitializer.getCookiesIfRequired();
+        Optional<ProtoWork> work = client.getWork(agentInitializer.getCookie(), agentInitializer.getToken(), agentInitializer.agentMeta());
+        work.ifPresent(workExecutor::execute);
     }
 }

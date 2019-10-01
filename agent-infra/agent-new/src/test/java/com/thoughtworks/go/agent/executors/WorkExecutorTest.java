@@ -14,20 +14,19 @@
  * limitations under the License.
  */
 
-package com.thoughtworks.go.toprotobuf;
+package com.thoughtworks.go.agent.executors;
 
-import com.thoughtworks.go.config.BuildTask;
 import com.thoughtworks.go.protobufs.tasks.ProtoExec;
+import org.junit.jupiter.api.Test;
 
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.junit.jupiter.api.Assertions.*;
 
-interface Builder<ConfigType, ProtobufType> {
-    ProtobufType build(ConfigType configObj);
-
-
-    default void addWorkingDirIfPresent(BuildTask task, ProtoExec.Builder builder) {
-        if (isNotBlank(task.workingDirectory())) {
-            builder.setWorkingDir(task.workingDirectory());
-        }
+class WorkExecutorTest {
+    @Test
+    void name() {
+        ProtoExec build = ProtoExec.newBuilder()
+                .setCommand("foo")
+                .buildPartial();
+        System.out.println("build = " + build);
     }
 }

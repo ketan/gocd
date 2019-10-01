@@ -55,8 +55,12 @@ public class ArtifactsService implements ArtifactUrlReader {
         this(jobResolverService, stageDao, artifactsDirHolder, zipUtil, systemService, new ArtifactDirectoryChooser());
     }
 
-    protected ArtifactsService(JobResolverService jobResolverService, StageDao stageDao,
-                               ArtifactsDirHolder artifactsDirHolder, ZipUtil zipUtil, SystemService systemService, ArtifactDirectoryChooser chooser) {
+    protected ArtifactsService(JobResolverService jobResolverService,
+                               StageDao stageDao,
+                               ArtifactsDirHolder artifactsDirHolder,
+                               ZipUtil zipUtil,
+                               SystemService systemService,
+                               ArtifactDirectoryChooser chooser) {
         this.artifactsDirHolder = artifactsDirHolder;
         this.zipUtil = zipUtil;
         this.jobResolverService = jobResolverService;
