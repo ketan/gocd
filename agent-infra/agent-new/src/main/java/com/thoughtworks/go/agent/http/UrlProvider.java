@@ -23,10 +23,10 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 
-class GoServerApiUrls {
+class UrlProvider {
     private final URL serverUrl;
 
-    GoServerApiUrls(URL serverUrl) {
+    UrlProvider(URL serverUrl) {
         String url = serverUrl.toString();
         if (url.endsWith("/")) {
             url = url.substring(0, url.length() - 1);
@@ -42,6 +42,14 @@ class GoServerApiUrls {
         return buildUrl("token");
     }
 
+    URI registerUrl() {
+        return buildUrl("register");
+    }
+
+    URI cookieUrl() {
+        return buildUrl("cookie");
+    }
+
     private URI buildUrl(String path) {
         try {
             return new URIBuilder(serverUrl.toURI())
@@ -50,13 +58,5 @@ class GoServerApiUrls {
         } catch (URISyntaxException e) {
             throw new RuntimeException(e);
         }
-    }
-
-    URI registerUrl() {
-        return buildUrl("register");
-    }
-
-    URI cookieUrl() {
-        return buildUrl("cookie");
     }
 }

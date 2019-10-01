@@ -44,12 +44,12 @@ import static java.lang.String.format;
 
 @Slf4j
 @Component
-public class GoCDServerHttpClient {
+public class HttpClientBeanInitializer {
     private final GoAgentProperties agentProperties;
     private final AgentBootstrapperArgs agentBootstrapperArgs;
 
     @Autowired
-    public GoCDServerHttpClient(GoAgentProperties agentProperties, AgentBootstrapperArgs agentBootstrapperArgs) {
+    public HttpClientBeanInitializer(GoAgentProperties agentProperties, AgentBootstrapperArgs agentBootstrapperArgs) {
         this.agentProperties = agentProperties;
         this.agentBootstrapperArgs = agentBootstrapperArgs;
     }
@@ -70,22 +70,6 @@ public class GoCDServerHttpClient {
             throw new RuntimeException(e);
         }
     }
-
-//    public String requestToken() throws IOException {
-//        CloseableHttpResponse response = httpClient().execute(new HttpGet(buildUrl("/go/token")));
-//        return response.getEntity().toString();
-//    }
-
-//    private URI buildUrl(String path) {
-//        try {
-//            return new URIBuilder(agentBootstrapperArgs.getServerUrl().toURI())
-//                    .setPath(path)
-//                    .build();
-//        } catch (URISyntaxException e) {
-//            log.error(format("Failed to build url using path %s. Errors: %s", path, e));
-//            throw new RuntimeException(e);
-//        }
-//    }
 
     private SSLConnectionSocketFactory getSslConnectionSocketFactory() throws IOException, GeneralSecurityException {
         HostnameVerifier hostnameVerifier = getHostnameVerifier(agentBootstrapperArgs.getSslVerificationMode());
@@ -132,9 +116,5 @@ public class GoCDServerHttpClient {
         }
 
         return trustStore;
-    }
-
-    public void getWork() {
-
     }
 }

@@ -42,14 +42,14 @@ import static org.apache.http.HttpStatus.*;
 
 @Slf4j
 @Component
-public class GoCDServerAPIProxy {
+public class ServerApiClient {
     private final CloseableHttpClient httpClient;
-    private final GoServerApiUrls apiUrlHelper;
+    private final UrlProvider apiUrlHelper;
 
     @Autowired
-    public GoCDServerAPIProxy(CloseableHttpClient httpClient, AgentBootstrapperArgs agentBootstrapperArgs) {
+    public ServerApiClient(CloseableHttpClient httpClient, AgentBootstrapperArgs agentBootstrapperArgs) {
         this.httpClient = httpClient;
-        this.apiUrlHelper = new GoServerApiUrls(agentBootstrapperArgs.getServerUrl());
+        this.apiUrlHelper = new UrlProvider(agentBootstrapperArgs.getServerUrl());
     }
 
     public String getToken(String uuid) {

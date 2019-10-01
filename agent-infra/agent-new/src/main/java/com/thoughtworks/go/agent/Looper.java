@@ -16,8 +16,8 @@
 
 package com.thoughtworks.go.agent;
 
-import com.thoughtworks.go.agent.http.GoCDServerAPIProxy;
-import com.thoughtworks.go.agent.services.TokenInitializer;
+import com.thoughtworks.go.agent.http.ServerApiClient;
+import com.thoughtworks.go.agent.services.AgentInitializer;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -26,20 +26,20 @@ import org.springframework.stereotype.Service;
 @Service
 @Slf4j
 public class Looper {
-    private final GoCDServerAPIProxy client;
-    private final TokenInitializer tokenInitializer;
+    private final ServerApiClient client;
+    private final AgentInitializer agentInitializer;
 
     @Autowired
-    public Looper(GoCDServerAPIProxy client, TokenInitializer tokenInitializer) {
+    public Looper(ServerApiClient client, AgentInitializer agentInitializer) {
         this.client = client;
-        this.tokenInitializer = tokenInitializer;
+        this.agentInitializer = agentInitializer;
     }
 
     @Scheduled(fixedDelayString = "${go.agent.get.work.interval}")
     public void loop() {
         log.debug("[Agent Loop] Trying to retrieve work.");
-        tokenInitializer.createTokenIfRequired();
-        tokenInitializer.registerIfRequired();
-        tokenInitializer.getCookiesIfRequired();
+        agentInitializer.createTokenIfRequired();
+        agentInitializer.registerIfRequired();
+        agentInitializer.getCookiesIfRequired();
     }
 }

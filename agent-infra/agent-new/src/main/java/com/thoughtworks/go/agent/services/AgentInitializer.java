@@ -16,8 +16,8 @@
 
 package com.thoughtworks.go.agent.services;
 
-import com.thoughtworks.go.agent.http.GoCDServerAPIProxy;
 import com.thoughtworks.go.agent.http.RegistrationStatus;
+import com.thoughtworks.go.agent.http.ServerApiClient;
 import com.thoughtworks.go.agent.meta.AgentMeta;
 import com.thoughtworks.go.agent.registration.AgentAutoRegistrationProperties;
 import com.thoughtworks.go.agent.system.GoAgentProperties;
@@ -36,8 +36,8 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 @Component
 @Slf4j
-public class TokenInitializer {
-    private final GoCDServerAPIProxy client;
+public class AgentInitializer {
+    private final ServerApiClient client;
     private final TokenService tokenService;
     private final GuidService guidService;
     private GoAgentProperties goAgentProperties;
@@ -48,7 +48,7 @@ public class TokenInitializer {
     private String cookie;
 
     @Autowired
-    public TokenInitializer(GoCDServerAPIProxy client,
+    public AgentInitializer(ServerApiClient client,
                             TokenService tokenService,
                             GuidService guidService,
                             GoAgentProperties goAgentProperties) {

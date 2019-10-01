@@ -16,7 +16,7 @@
 
 package com.thoughtworks.go.agent;
 
-import com.thoughtworks.go.agent.http.GoCDServerHttpClient;
+import com.thoughtworks.go.agent.http.HttpClientBeanInitializer;
 import com.thoughtworks.go.agent.services.GuidService;
 import com.thoughtworks.go.agent.services.TokenService;
 import org.junit.jupiter.api.BeforeEach;
@@ -28,7 +28,7 @@ import static org.mockito.MockitoAnnotations.initMocks;
 
 class LooperTest {
     @Mock
-    private GoCDServerHttpClient client;
+    private HttpClientBeanInitializer client;
     @Mock
     private GuidService guidService;
     @Mock

@@ -15,6 +15,7 @@
  */
 package com.thoughtworks.go.agent.system;
 
+import lombok.Getter;
 import org.apache.commons.lang3.StringUtils;
 import org.zeroturnaround.exec.ProcessExecutor;
 
@@ -23,26 +24,10 @@ import java.io.FileReader;
 import java.util.Properties;
 
 public class OperatingSystem {
+    @Getter(lazy = true)
+    private static final String completeName = detectCompleteName();
     private static final String OS_FAMILY_NAME = System.getProperty("os.name");
     private static final String WINDOWS = "Windows";
-    private static String OS_COMPLETE_NAME = detectCompleteName();
-
-    private static String detectCompleteName() {
-        String[] command = {"python", "-c", "import platform;print(platform.linux_distribution())"};
-        try {
-            OS_COMPLETE_NAME = cleanUpPythonOutput(new ProcessExecutor()
-                    .command(command)
-                    .readOutput(true)
-                    .execute().outputUTF8());
-        } catch (Exception e) {
-            try {
-                OS_COMPLETE_NAME = readFromOsRelease();
-            } catch (Exception ignored) {
-                OS_COMPLETE_NAME = OS_FAMILY_NAME;
-            }
-        }
-        return OS_COMPLETE_NAME;
-    }
 
     private static String readFromOsRelease() throws Exception {
         try (FileReader fileReader = new FileReader(new File("/etc/os-release"))) {
@@ -60,10 +45,6 @@ public class OperatingSystem {
         return output;
     }
 
-    public static String getCompleteName() {
-        return OS_COMPLETE_NAME;
-    }
-
     public static String getFamilyName() {
         if (OS_FAMILY_NAME.startsWith(WINDOWS)) {
             return WINDOWS;
@@ -75,8 +56,23 @@ public class OperatingSystem {
         return getFamilyName().equals(familyName);
     }
 
-    public static String unQuote(String string) {
+    private static String unQuote(String string) {
         return string == null ? null : string.replaceAll("^\"|\"$", "");
     }
 
+    private static String detectCompleteName() {
+        String[] command = {"python", "-c", "import platform;print(platform.linux_distribution())"};
+        try {
+            return cleanUpPythonOutput(new ProcessExecutor()
+                    .command(command)
+                    .readOutput(true)
+                    .execute().outputUTF8());
+        } catch (Exception e) {
+            try {
+                return readFromOsRelease();
+            } catch (Exception ignored) {
+                return OS_FAMILY_NAME;
+            }
+        }
+    }
 }
