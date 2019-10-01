@@ -447,3 +447,15 @@ api/api-template-config-v5/config/
 api/api-agent-services/out/
 api/api-agent-services/target/
 api/api-agent-services/logs/
+agent-infra/agent-new/config/
+agent-infra/agent-new/logs/
+agent-infra/agent-new/out/
+agent-infra/agent-new/target/
+agent-infra/config-to-protobuf/config/
+agent-infra/config-to-protobuf/logs/
+agent-infra/config-to-protobuf/out/
+agent-infra/config-to-protobuf/target/
+agent-infra/protobufs/config/
+agent-infra/protobufs/logs/
+agent-infra/protobufs/out/
+agent-infra/protobufs/target/

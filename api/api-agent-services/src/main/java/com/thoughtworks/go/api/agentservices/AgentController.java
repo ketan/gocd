@@ -17,22 +17,25 @@
 package com.thoughtworks.go.api.agentservices;
 
 import com.google.common.collect.ImmutableMap;
-import com.thoughtworks.go.api.ApiController;
-import com.thoughtworks.go.api.ApiVersion;
+import com.thoughtworks.go.api.ControllerMethods;
 import com.thoughtworks.go.api.agentservices.representers.AgentManifestRepresenter;
 import com.thoughtworks.go.api.agentservices.representers.AgentRegisterPayload;
-import com.thoughtworks.go.api.base.JsonOutputWriter;
-import com.thoughtworks.go.api.util.MessageJson;
 import com.thoughtworks.go.config.Agent;
 import com.thoughtworks.go.config.exceptions.BadRequestException;
 import com.thoughtworks.go.config.exceptions.NotAuthorizedException;
 import com.thoughtworks.go.domain.InputStreamSrc;
 import com.thoughtworks.go.domain.JarDetector;
 import com.thoughtworks.go.plugin.infra.commons.PluginsZip;
+import com.thoughtworks.go.protobufs.ProtoMessage;
+import com.thoughtworks.go.protobufs.registration.AgentMeta;
+import com.thoughtworks.go.protobufs.registration.Cookie;
+import com.thoughtworks.go.protobufs.registration.Token;
+import com.thoughtworks.go.protobufs.registration.UUID;
 import com.thoughtworks.go.security.Registration;
 import com.thoughtworks.go.server.service.AgentRuntimeInfo;
 import com.thoughtworks.go.server.service.AgentService;
 import com.thoughtworks.go.server.service.GoConfigService;
+import com.thoughtworks.go.spark.SparkController;
 import com.thoughtworks.go.spark.spring.SparkSpringController;
 import com.thoughtworks.go.util.SystemEnvironment;
 import lombok.Getter;
@@ -54,7 +57,6 @@ import java.nio.charset.StandardCharsets;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.Base64;
-import java.util.Collections;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -66,7 +68,7 @@ import static spark.Spark.*;
 
 @Component
 @Slf4j
-public class AgentController extends ApiController implements SparkSpringController {
+public class AgentController implements SparkSpringController, ControllerMethods, SparkController {
 
     private final Map<String, Handler> handlers;
 
@@ -75,10 +77,14 @@ public class AgentController extends ApiController implements SparkSpringControl
 
     private final GoConfigService goConfigService;
     private final AgentService agentService;
+//    private final String mimeType;
 
     @Autowired
-    public AgentController(SystemEnvironment systemEnvironment, PluginsZip pluginsZip, GoConfigService goConfigService, AgentService agentService) throws IOException {
-        super(ApiVersion.v1);
+    public AgentController(SystemEnvironment systemEnvironment,
+                           PluginsZip pluginsZip,
+                           GoConfigService goConfigService,
+                           AgentService agentService) throws IOException {
+//        this.mimeType = "application/x-protobuf";
         this.goConfigService = goConfigService;
         this.agentService = agentService;
         this.handlers = new TreeMap<>(ImmutableMap.<String, Handler>builder()
@@ -91,7 +97,7 @@ public class AgentController extends ApiController implements SparkSpringControl
 
     @Override
     public String controllerBasePath() {
-        return "/api/agent_services";
+        return "/agent_services";
     }
 
     @Override
@@ -101,36 +107,27 @@ public class AgentController extends ApiController implements SparkSpringControl
                     get("/" + jar, handler.route())
             );
 
-            before("/manifest", mimeType, this::setContentType);
-            get("/manifest", mimeType, this::manifest);
+            get("/manifest", this::manifest);
 
-            before("/token", mimeType, this::verifyContentType);
-            before("/token", mimeType, this::setContentType);
-            post("/token", mimeType, this::generateToken);
+            post("/token", this::generateToken);
 
-            before("/register", mimeType, this::verifyContentType);
-            before("/register", mimeType, this::setContentType);
-            post("/register", mimeType, this::register);
+            post("/register", this::register);
+            post("/cookie", this::getCookie);
         });
     }
 
-    private String generateToken(Request request, Response response) throws Exception {
-        Map<String, Object> map = this.readRequestBodyAsJSON(request);
-        Object uuid = map.get("uuid");
-        if (uuid instanceof String) {
-            String token = computeToken((String) uuid);
-            return JsonOutputWriter.OBJECT_MAPPER.writeValueAsString(Collections.singletonMap("token", token));
-        } else {
-            throw new BadRequestException("UUID must be a string!");
-        }
+    private byte[] generateToken(Request request, Response response) throws Exception {
+        UUID uuid = UUID.parseFrom(request.bodyAsBytes());
+        String token = computeToken(uuid.getUuid());
+        return Token.newBuilder().setToken(token).build().toByteArray();
     }
 
-    private String register(Request request, Response response) throws IOException {
+    private byte[] register(Request request, Response response) throws IOException {
         String agentGUID = request.headers("X-Agent-GUID");
         String token = request.headers("Authorization");
         String autoRegisterKey = request.headers("X-Auto-Register-Key");
 
-        AgentRegisterPayload payload = JsonOutputWriter.OBJECT_MAPPER.readValue(request.body(), AgentRegisterPayload.class);
+        AgentRegisterPayload payload = AgentRegisterPayload.from(request.bodyAsBytes());
         payload.setIpAddress(request.ip());
 
         payload.bombIfInvalid();
@@ -147,17 +144,42 @@ public class AgentController extends ApiController implements SparkSpringControl
         if (serverAutoregisterKey().equals(autoRegisterKey)) {
             agentService.register(agent);
             bombIfAgentHasErrors(agent, payload);
-            return MessageJson.create("Welcome!");
+            return toMessage("Welcome!");
         }
 
         AgentRuntimeInfo agentRuntimeInfo = payload.toRuntimeInfo(agentService.isRegistered(payload.getUuid()));
         Registration registration = agentService.requestRegistration(agentRuntimeInfo);
         if (registration.isValid()) {
-            return MessageJson.create("Welcome!");
+            return toMessage("Welcome!");
         } else {
             response.status(202);
-            return MessageJson.create("Agent is in pending state, waiting for approval from a GoCD server administrator.");
+            return toMessage("Agent is in pending state, waiting for approval from a GoCD server administrator.");
         }
+    }
+
+    private byte[] getCookie(Request request, Response response) throws Exception {
+        AgentMeta agentMeta = AgentMeta.parseFrom(request.bodyAsBytes());
+        Agent agent = agentService.findAgentByUUID(agentMeta.getUuid());
+        if (agent == null) {
+            throw new BadRequestException(format("Agent with UUID %s does not exist.", agentMeta.getUuid()));
+        }
+
+        if (!agent.isEnabled()) {
+            throw new BadRequestException(format("Agent with uuid %s is not registered with server yet, waiting for approval from a GoCD server administrator.", agentMeta.getUuid()));
+        }
+
+        agent.refreshCookie();
+        agentService.saveOrUpdate(agent);
+
+        return Cookie.newBuilder().setCookie(agent.getCookie()).build().toByteArray();
+    }
+
+    private byte[] toMessage(String s) {
+        return ProtoMessage
+                .newBuilder()
+                .setMessage(s)
+                .build()
+                .toByteArray();
     }
 
     private void bombIfAgentHasErrors(Agent agent, AgentRegisterPayload payload) {
@@ -168,7 +190,8 @@ public class AgentController extends ApiController implements SparkSpringControl
         }
     }
 
-    private void denyRegistrationIfAutoRegisterKeyIsNotProvidedForAnElasticAgent(AgentRegisterPayload payload, String autoRegisterKey) {
+    private void denyRegistrationIfAutoRegisterKeyIsNotProvidedForAnElasticAgent(AgentRegisterPayload payload,
+                                                                                 String autoRegisterKey) {
         if (payload.getAutoRegister().isElastic() && isBlank(autoRegisterKey)) {
             log.error("Rejecting request for registration because the auto register key must be provided for an elastic agent!. The remote agent was identified by: {}", payload);
             throw new NotAuthorizedException("Auto register key must be provided!");
@@ -189,7 +212,8 @@ public class AgentController extends ApiController implements SparkSpringControl
         }
     }
 
-    private void denyRegistrationIfProvidedAutoRegisterKeyDoesNotMatch(String autoRegisterKey, AgentRegisterPayload payload) {
+    private void denyRegistrationIfProvidedAutoRegisterKeyDoesNotMatch(String autoRegisterKey,
+                                                                       AgentRegisterPayload payload) {
         if (isNotBlank(autoRegisterKey) && !autoRegisterKey.equals(serverAutoregisterKey())) {
             log.error("Rejecting request for registration because the auto register key is invalid. The remote agent was identified by: {}", payload);
             throw new NotAuthorizedException("Invalid auto register key!");
@@ -212,7 +236,10 @@ public class AgentController extends ApiController implements SparkSpringControl
         return NOTHING;
     }
 
-    private String sendJarIfChecksumMatch(Request request, Response response, String etag, InputStreamSrc jarSrc) throws IOException {
+    private String sendJarIfChecksumMatch(Request request,
+                                          Response response,
+                                          String etag,
+                                          InputStreamSrc jarSrc) throws IOException {
         if (fresh(request, etag)) {
             return notModified(response);
         } else {

@@ -16,10 +16,11 @@
 
 package com.thoughtworks.go.api.agentservices.representers;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.protobuf.InvalidProtocolBufferException;
 import com.thoughtworks.go.config.Agent;
 import com.thoughtworks.go.config.exceptions.BadRequestException;
 import com.thoughtworks.go.domain.IpAddress;
+import com.thoughtworks.go.protobufs.registration.RegistrationPayload;
 import com.thoughtworks.go.server.service.AgentRuntimeInfo;
 import com.thoughtworks.go.server.service.ElasticAgentRuntimeInfo;
 import lombok.Getter;
@@ -42,22 +43,12 @@ import static org.apache.commons.lang3.StringUtils.*;
 @ToString
 @Slf4j
 public class AgentRegisterPayload {
-    @JsonProperty("hostname")
     private String hostname;
-
     private String ipAddress;
-
-    @JsonProperty("uuid")
     private String uuid;
-
-    @JsonProperty("location")
     private String location;
-    @JsonProperty("usable_space")
     private Long usableSpace;
-    @JsonProperty("operating_system")
     private String operatingSystem;
-
-    @JsonProperty("auto_register")
     private AutoRegisterPayload autoRegister;
 
     @Getter
@@ -66,15 +57,10 @@ public class AgentRegisterPayload {
     @NoArgsConstructor
     @ToString
     public static class AutoRegisterPayload {
-        @JsonProperty("environments")
         private List<String> environments;
-        @JsonProperty("resources")
         private List<String> resources;
-        @JsonProperty("hostname")
         private String hostname;
-        @JsonProperty("elastic_agent_id")
         private String elasticAgentId;
-        @JsonProperty("elastic_plugin_id")
         private String elasticPluginId;
 
         public boolean isElastic() {
@@ -135,5 +121,28 @@ public class AgentRegisterPayload {
             agentRuntimeInfo = ElasticAgentRuntimeInfo.fromServer(agentRuntimeInfo, autoRegister.elasticAgentId, autoRegister.elasticPluginId);
         }
         return agentRuntimeInfo;
+    }
+
+    public static AgentRegisterPayload from(byte[] bytes) throws InvalidProtocolBufferException {
+        RegistrationPayload payload = RegistrationPayload.parseFrom(bytes);
+
+        AutoRegisterPayload autoRegister = null;
+
+        if (payload.getAutoRegister() != null) {
+            autoRegister = new AutoRegisterPayload()
+                    .setHostname(payload.getAutoRegister().getHostname())
+                    .setElasticAgentId(payload.getAutoRegister().getElasticAgentId())
+                    .setElasticPluginId(payload.getAutoRegister().getElasticPluginId())
+                    .setResources(payload.getAutoRegister().getResourcesList())
+                    .setEnvironments(payload.getAutoRegister().getEnvironmentsList());
+        }
+
+        return new AgentRegisterPayload()
+                .setHostname(payload.getAgentMeta().getHostname())
+                .setUuid(payload.getAgentMeta().getUuid())
+                .setLocation(payload.getAgentMeta().getLocation())
+                .setUsableSpace(payload.getAgentMeta().getUsableSpace())
+                .setOperatingSystem(payload.getAgentMeta().getOperatingSystem())
+                .setAutoRegister(autoRegister);
     }
 }

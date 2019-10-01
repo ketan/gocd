@@ -22,7 +22,6 @@ import com.thoughtworks.go.util.SystemEnvironment;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 
-
 public final class AgentMain {
     private static final String DEFAULT_LOGBACK_CONFIGURATION_FILE = "agent-logback.xml";
 

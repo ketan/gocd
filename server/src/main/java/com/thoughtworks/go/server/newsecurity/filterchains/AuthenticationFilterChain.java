@@ -41,7 +41,7 @@ public class AuthenticationFilterChain extends FilterChainProxy {
 
                 // For addons
                 .addFilterChain("/add-on/**", assumeAnonymousUserFilter)
-                .addFilterChain("/api/agent_services/**", assumeAnonymousUserFilter)
+                .addFilterChain("/agent_services/**", assumeAnonymousUserFilter)
 
                 // For API authentication
                 .addFilterChain("/api/config-repository.git/**", invalidateAuthenticationOnSecurityConfigChangeFilter, assumeAnonymousUserFilter, reAuthenticationWithChallenge, basicAuthenticationWithChallengeFilter)

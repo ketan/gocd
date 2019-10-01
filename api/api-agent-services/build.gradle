@@ -19,6 +19,7 @@ apply plugin: 'groovy'
 
 dependencies {
   compile project(':api:api-base')
+  compile project(':agent-infra:protobufs')
   compileOnly group: 'org.projectlombok', name: 'lombok', version: project.versions.lombok
   annotationProcessor group: 'org.projectlombok', name: 'lombok', version: project.versions.lombok
 

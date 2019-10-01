@@ -129,7 +129,6 @@ class AgentControllerTest implements ControllerTrait<AgentController> {
 
       assertThatResponse()
         .isOk()
-        .hasContentType(controller.mimeType)
     }
   }
 
@@ -180,7 +179,6 @@ class AgentControllerTest implements ControllerTrait<AgentController> {
       verify(agentService).register(any(Agent))
       assertThatResponse()
         .isOk()
-        .hasContentType(controller.mimeType)
         .hasJsonMessage("Welcome!")
     }
 
@@ -203,7 +201,6 @@ class AgentControllerTest implements ControllerTrait<AgentController> {
       verify(agentService).requestRegistration(any(AgentRuntimeInfo))
       assertThatResponse()
         .isAccepted()
-        .hasContentType(controller.mimeType)
         .hasJsonMessage("Agent is in pending state, waiting for approval from a GoCD server administrator.")
     }
 
@@ -228,7 +225,6 @@ class AgentControllerTest implements ControllerTrait<AgentController> {
       verify(agentService).requestRegistration(any(AgentRuntimeInfo))
       assertThatResponse()
         .isOk()
-        .hasContentType(controller.mimeType)
         .hasJsonMessage("Welcome!")
     }
 
@@ -246,7 +242,6 @@ class AgentControllerTest implements ControllerTrait<AgentController> {
       verifyZeroInteractions(agentService)
       assertThatResponse()
         .isUnauthorized()
-        .hasContentType(controller.mimeType)
         .hasJsonMessage("Invalid token!")
     }
 
@@ -265,7 +260,6 @@ class AgentControllerTest implements ControllerTrait<AgentController> {
       verifyZeroInteractions(agentService)
       assertThatResponse()
         .isUnauthorized()
-        .hasContentType(controller.mimeType)
         .hasJsonMessage("Invalid auto register key!")
     }
 
@@ -285,7 +279,6 @@ class AgentControllerTest implements ControllerTrait<AgentController> {
       verify(agentService, never()).register(any())
       assertThatResponse()
         .isBadRequest()
-        .hasContentType(controller.mimeType)
         .hasJsonMessage("UUID cannot be empty.")
     }
 
@@ -308,7 +301,6 @@ class AgentControllerTest implements ControllerTrait<AgentController> {
         verify(agentService, never()).register(any())
         assertThatResponse()
           .isBadRequest()
-          .hasContentType(controller.mimeType)
           .hasJsonMessage("Duplicate Elastic agent Id used to register elastic agent.")
       }
 
@@ -329,7 +321,6 @@ class AgentControllerTest implements ControllerTrait<AgentController> {
         verify(agentService, never()).register(any())
         assertThatResponse()
           .isBadRequest()
-          .hasContentType(controller.mimeType)
           .hasJsonMessage("Elastic agents must submit both elastic_agent_id and elastic_plugin_id.")
       }
 
@@ -350,7 +341,6 @@ class AgentControllerTest implements ControllerTrait<AgentController> {
         verify(agentService, never()).register(any())
         assertThatResponse()
           .isBadRequest()
-          .hasContentType(controller.mimeType)
           .hasJsonMessage("Elastic agents must submit both elastic_agent_id and elastic_plugin_id.")
       }
 
@@ -368,7 +358,6 @@ class AgentControllerTest implements ControllerTrait<AgentController> {
         verifyZeroInteractions(agentService)
         assertThatResponse()
           .isUnauthorized()
-          .hasContentType(controller.mimeType)
           .hasJsonMessage("Auto register key must be provided!")
       }
     }

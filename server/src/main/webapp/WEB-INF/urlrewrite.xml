@@ -26,8 +26,8 @@
 
   <rule>
     <name>Agent Services</name>
-    <from>^/api/agent_services/(.*)$</from>
-    <to last="true">/spark/api/agent_services/${escape:$1}</to>
+    <from>^/agent_services/(.*)$</from>
+    <to last="true">/spark/agent_services/${escape:$1}</to>
   </rule>
 
   <rule>

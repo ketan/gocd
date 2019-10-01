@@ -386,4 +386,8 @@ public class Agent extends PersistentObject {
     public boolean isDeleted() {
         return deleted;
     }
+
+    public void refreshCookie() {
+        this.cookie = java.util.UUID.randomUUID().toString();
+    }
 }

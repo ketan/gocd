@@ -1,0 +1,39 @@
+syntax = "proto3";
+
+option java_package = "com.thoughtworks.go.protobufs.registration";
+option java_outer_classname = "Registration";
+option java_multiple_files = true;
+
+message Token {
+    string token = 1;
+}
+
+message UUID {
+    string uuid = 1;
+}
+
+message Cookie {
+    string cookie = 1;
+}
+
+message AgentAutoRegistration {
+    string hostname = 1;
+    string elastic_agent_id = 2;
+    string elastic_plugin_id = 3;
+    repeated string environments = 4;
+    repeated string resources = 5;
+}
+
+message AgentMeta {
+    string uuid = 1;
+    string hostname = 2;
+    string location = 3;
+    int64 usable_space = 4;
+    string operating_system = 5;
+}
+
+
+message RegistrationPayload {
+    AgentMeta agent_meta = 1;
+    AgentAutoRegistration auto_register = 2;
+}

@@ -39,7 +39,7 @@ public class AuthorizeFilterChain extends FilterChainProxy {
                 .addAuthorityFilterChain("/remoting/properties/**", apiAccessDeniedHandler, ROLE_AGENT)
                 .addFilterChain("/remoting/**", new DenyAllAccessFilter())
 
-                .addFilterChain("/api/agent_services/**", allowAllAccessFilter)
+                .addFilterChain("/agent_services/**", allowAllAccessFilter)
 
                 // authentication urls, allow everyone
                 .addFilterChain("/auth/*", allowAllAccessFilter)

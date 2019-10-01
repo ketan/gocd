@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+option java_package = "com.thoughtworks.go.protobufs.materials";
+option java_multiple_files = true;
+
+message Material {
+    string type = 1;
+
+}
+
+message Git {
+
+}
+
+message MaterialRevision {
+    repeated Material material = 1;
+}
