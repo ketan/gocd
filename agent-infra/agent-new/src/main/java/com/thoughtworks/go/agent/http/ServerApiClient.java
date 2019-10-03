@@ -40,6 +40,7 @@ import java.util.Arrays;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import static com.thoughtworks.go.agent.converters.Converter.toProto;
 import static org.apache.http.HttpStatus.*;
 
 @Slf4j
@@ -86,8 +87,8 @@ public class ServerApiClient {
                                        String token) {
 
         RegistrationProto registrationPayload = RegistrationProto.newBuilder()
-                .setAgentMeta(toProtobuf(agentMeta))
-                .setAutoRegister(toProtobuf(autoRegistrationProperties))
+                .setAgentMeta(toProto(agentMeta))
+                .setAutoRegister(toProto(autoRegistrationProperties))
                 .build();
 
         HttpPost post = new HttpPost(apiUrlHelper.registerUrl());
@@ -118,7 +119,7 @@ public class ServerApiClient {
     }
 
     public String getCookie(AgentMeta agentMeta, String token) {
-        AgentMetaProto protobuf = toProtobuf(agentMeta);
+        AgentMetaProto protobuf = toProto(agentMeta);
         HttpPost post = new HttpPost(apiUrlHelper.cookieUrl());
         setContentType(post);
         addAuthenticationHeaders(post, agentMeta, token);
@@ -143,7 +144,7 @@ public class ServerApiClient {
         HttpPost post = new HttpPost(apiUrlHelper.workUrl());
         addAuthenticationHeaders(post, agentMeta, token);
         post.addHeader("X-Agent-Cookie", cookie);
-        post.setEntity(new ByteArrayEntity(toProtobuf(agentMeta).toByteArray()));
+        post.setEntity(new ByteArrayEntity(toProto(agentMeta).toByteArray()));
 
         try (CloseableHttpResponse response = httpClient.execute(post)) {
             if (response.getStatusLine().getStatusCode() == SC_OK) {
@@ -161,27 +162,6 @@ public class ServerApiClient {
     private void addAuthenticationHeaders(HttpPost post, AgentMeta agentMeta, String token) {
         post.setHeader("X-Agent-GUID", agentMeta.getUuid());
         post.setHeader("Authorization", token);
-    }
-
-    private AgentAutoRegistrationProto toProtobuf(AgentAutoRegistrationProperties autoRegistrationProperties) {
-        return AgentAutoRegistrationProto.newBuilder()
-                .setHostname(autoRegistrationProperties.agentAutoRegisterHostname())
-                .addAllEnvironments(autoRegistrationProperties.agentAutoRegisterEnvironments())
-                .addAllResources(autoRegistrationProperties.agentAutoRegisterResources())
-                .setElasticAgentId(autoRegistrationProperties.agentAutoRegisterElasticAgentId())
-                .setElasticPluginId(autoRegistrationProperties.agentAutoRegisterElasticPluginId())
-                .build();
-    }
-
-    private AgentMetaProto toProtobuf(AgentMeta agentMeta) {
-        return AgentMetaProto.newBuilder()
-                .setUuid(agentMeta.getUuid())
-                .setHostname(agentMeta.getHostname())
-                .setLocation(agentMeta.getLocation())
-                .setOperatingSystem(agentMeta.getOperationSystem())
-                .setUsableSpace(agentMeta.getUsableSpace())
-                .setIpAddress(agentMeta.getIpAddress())
-                .build();
     }
 
     private String responseBody(CloseableHttpResponse response) throws IOException {
