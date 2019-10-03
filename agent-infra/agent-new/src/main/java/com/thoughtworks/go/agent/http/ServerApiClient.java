@@ -20,7 +20,7 @@ import com.thoughtworks.go.agent.cli.AgentBootstrapperArgs;
 import com.thoughtworks.go.agent.meta.AgentMeta;
 import com.thoughtworks.go.agent.registration.AgentAutoRegistrationProperties;
 import com.thoughtworks.go.protobufs.registration.*;
-import com.thoughtworks.go.protobufs.work.ProtoWork;
+import com.thoughtworks.go.protobufs.work.WorkProto;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.input.NullInputStream;
@@ -57,7 +57,7 @@ public class ServerApiClient {
     public String getToken(String uuid) {
         HttpPost request = new HttpPost(apiUrlHelper.tokenUrl());
         setContentType(request);
-        request.setEntity(new ByteArrayEntity(UUID.newBuilder().setUuid(uuid).build().toByteArray()));
+        request.setEntity(new ByteArrayEntity(UUIDProto.newBuilder().setUuid(uuid).build().toByteArray()));
 
         try (CloseableHttpResponse response = httpClient.execute(request)) {
             if (response.getStatusLine().getStatusCode() != SC_OK) {
@@ -65,7 +65,7 @@ public class ServerApiClient {
             }
 
             log.info("The server has generated token for the agent.");
-            return Token.parseFrom(response.getEntity().getContent()).getToken();
+            return TokenProto.parseFrom(response.getEntity().getContent()).getToken();
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
@@ -85,7 +85,7 @@ public class ServerApiClient {
                                        AgentAutoRegistrationProperties autoRegistrationProperties,
                                        String token) {
 
-        RegistrationPayload registrationPayload = RegistrationPayload.newBuilder()
+        RegistrationProto registrationPayload = RegistrationProto.newBuilder()
                 .setAgentMeta(toProtobuf(agentMeta))
                 .setAutoRegister(toProtobuf(autoRegistrationProperties))
                 .build();
@@ -118,7 +118,7 @@ public class ServerApiClient {
     }
 
     public String getCookie(AgentMeta agentMeta, String token) {
-        com.thoughtworks.go.protobufs.registration.AgentMeta protobuf = toProtobuf(agentMeta);
+        AgentMetaProto protobuf = toProtobuf(agentMeta);
         HttpPost post = new HttpPost(apiUrlHelper.cookieUrl());
         setContentType(post);
         addAuthenticationHeaders(post, agentMeta, token);
@@ -127,7 +127,7 @@ public class ServerApiClient {
         log.info("About to get cookie from the server.");
         try (CloseableHttpResponse response = httpClient.execute(post)) {
             if (response.getStatusLine().getStatusCode() == SC_OK) {
-                Cookie cookie = Cookie.parseFrom(response.getEntity().getContent());
+                CookieProto cookie = CookieProto.parseFrom(response.getEntity().getContent());
                 log.info("Got cookie: {}", cookie.getCookie());
                 return cookie.getCookie();
             }
@@ -139,7 +139,7 @@ public class ServerApiClient {
     }
 
 
-    public Optional<ProtoWork> getWork(String cookie, String token, AgentMeta agentMeta) {
+    public Optional<WorkProto> getWork(String cookie, String token, AgentMeta agentMeta) {
         HttpPost post = new HttpPost(apiUrlHelper.workUrl());
         addAuthenticationHeaders(post, agentMeta, token);
         post.addHeader("X-Agent-Cookie", cookie);
@@ -147,7 +147,7 @@ public class ServerApiClient {
 
         try (CloseableHttpResponse response = httpClient.execute(post)) {
             if (response.getStatusLine().getStatusCode() == SC_OK) {
-                return Optional.of(ProtoWork.parseFrom(response.getEntity().getContent()));
+                return Optional.of(WorkProto.parseFrom(response.getEntity().getContent()));
             } else if (response.getStatusLine().getStatusCode() == SC_ACCEPTED) {
                 log.debug("No work.");
                 return Optional.empty();
@@ -163,8 +163,8 @@ public class ServerApiClient {
         post.setHeader("Authorization", token);
     }
 
-    private AgentAutoRegistration toProtobuf(AgentAutoRegistrationProperties autoRegistrationProperties) {
-        return AgentAutoRegistration.newBuilder()
+    private AgentAutoRegistrationProto toProtobuf(AgentAutoRegistrationProperties autoRegistrationProperties) {
+        return AgentAutoRegistrationProto.newBuilder()
                 .setHostname(autoRegistrationProperties.agentAutoRegisterHostname())
                 .addAllEnvironments(autoRegistrationProperties.agentAutoRegisterEnvironments())
                 .addAllResources(autoRegistrationProperties.agentAutoRegisterResources())
@@ -173,8 +173,8 @@ public class ServerApiClient {
                 .build();
     }
 
-    private com.thoughtworks.go.protobufs.registration.AgentMeta toProtobuf(AgentMeta agentMeta) {
-        return com.thoughtworks.go.protobufs.registration.AgentMeta.newBuilder()
+    private AgentMetaProto toProtobuf(AgentMeta agentMeta) {
+        return AgentMetaProto.newBuilder()
                 .setUuid(agentMeta.getUuid())
                 .setHostname(agentMeta.getHostname())
                 .setLocation(agentMeta.getLocation())

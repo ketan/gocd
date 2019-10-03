@@ -4,19 +4,19 @@ option java_package = "com.thoughtworks.go.protobufs.registration";
 option java_outer_classname = "Registration";
 option java_multiple_files = true;
 
-message Token {
+message TokenProto {
     string token = 1;
 }
 
-message UUID {
+message UUIDProto {
     string uuid = 1;
 }
 
-message Cookie {
+message CookieProto {
     string cookie = 1;
 }
 
-message AgentAutoRegistration {
+message AgentAutoRegistrationProto {
     string hostname = 1;
     string elastic_agent_id = 2;
     string elastic_plugin_id = 3;
@@ -24,7 +24,7 @@ message AgentAutoRegistration {
     repeated string resources = 5;
 }
 
-message AgentMeta {
+message AgentMetaProto {
     string uuid = 1;
     string hostname = 2;
     string location = 3;
@@ -33,7 +33,7 @@ message AgentMeta {
     string ip_address = 6;
 }
 
-message RegistrationPayload {
-    AgentMeta agent_meta = 1;
-    AgentAutoRegistration auto_register = 2;
+message RegistrationProto {
+    AgentMetaProto agent_meta = 1;
+    AgentAutoRegistrationProto auto_register = 2;
 }

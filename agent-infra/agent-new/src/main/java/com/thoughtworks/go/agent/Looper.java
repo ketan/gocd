@@ -19,7 +19,7 @@ package com.thoughtworks.go.agent;
 import com.thoughtworks.go.agent.executors.WorkExecutor;
 import com.thoughtworks.go.agent.http.ServerApiClient;
 import com.thoughtworks.go.agent.services.AgentInitializer;
-import com.thoughtworks.go.protobufs.work.ProtoWork;
+import com.thoughtworks.go.protobufs.work.WorkProto;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -49,7 +49,7 @@ public class Looper {
         agentInitializer.getTokenFromServerIfRequired();
         agentInitializer.registerWithServerIfRequired();
         agentInitializer.getCookieFromServerIfRequired();
-        Optional<ProtoWork> work = client.getWork(agentInitializer.getCookie(), agentInitializer.getToken(), agentInitializer.agentMeta());
+        Optional<WorkProto> work = client.getWork(agentInitializer.getCookie(), agentInitializer.getToken(), agentInitializer.agentMeta());
         work.ifPresent(workExecutor::execute);
     }
 }

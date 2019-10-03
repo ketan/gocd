@@ -19,7 +19,7 @@ package com.thoughtworks.go.agent;
 import com.thoughtworks.go.agent.executors.WorkExecutor;
 import com.thoughtworks.go.agent.http.ServerApiClient;
 import com.thoughtworks.go.agent.services.AgentInitializer;
-import com.thoughtworks.go.protobufs.work.ProtoWork;
+import com.thoughtworks.go.protobufs.work.WorkProto;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InOrder;
@@ -95,8 +95,8 @@ class LooperTest {
 
     @Test
     void shouldExecuteWorkWhenServerReturnsAWork() {
-        ProtoWork work = ProtoWork.newBuilder().build();
-        Optional<ProtoWork> optionalProtoWork = Optional.of(work);
+        WorkProto work = WorkProto.newBuilder().build();
+        Optional<WorkProto> optionalProtoWork = Optional.of(work);
         when(client.getWork(agentInitializer.getCookie(), agentInitializer.getToken(), agentInitializer.agentMeta()))
                 .thenReturn(optionalProtoWork);
 
@@ -108,7 +108,7 @@ class LooperTest {
 
     @Test
     void shouldExecuteWorkWhenWorkThereIsNotWork() {
-        Optional<ProtoWork> optionalProtoWork = Optional.empty();
+        Optional<WorkProto> optionalProtoWork = Optional.empty();
         when(client.getWork(agentInitializer.getCookie(), agentInitializer.getToken(), agentInitializer.agentMeta()))
                 .thenReturn(optionalProtoWork);
 

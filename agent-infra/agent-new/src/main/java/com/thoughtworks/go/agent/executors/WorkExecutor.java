@@ -18,7 +18,7 @@ package com.thoughtworks.go.agent.executors;
 
 import com.thoughtworks.go.agent.io.OnIdleOutputStream;
 import com.thoughtworks.go.protobufs.tasks.ProtoExec;
-import com.thoughtworks.go.protobufs.work.ProtoWork;
+import com.thoughtworks.go.protobufs.work.WorkProto;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.zeroturnaround.exec.ProcessExecutor;
@@ -43,7 +43,7 @@ import static org.zeroturnaround.exec.stream.NullOutputStream.NULL_OUTPUT_STREAM
 @Component
 @Slf4j
 public class WorkExecutor {
-    public void execute(ProtoWork work) {
+    public void execute(WorkProto work) {
         work.getTaskList().forEach(this::execute);
     }
 

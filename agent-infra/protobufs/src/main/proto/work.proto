@@ -6,29 +6,29 @@ option java_package = "com.thoughtworks.go.protobufs.work";
 option java_multiple_files = true;
 option java_outer_classname = "BuildWork";
 
-message ProtoWork {
+message WorkProto {
     ProtoJobIdentifier jobIdentifier = 1;
-    repeated ProtoMaterialRevision material = 2;
+    repeated MaterialProto material = 2;
     repeated ProtoExec task = 3;
 }
 
-message ProtoMaterialRevision {
+message MaterialProto {
     oneof material {
-        ProtoGitMaterialRevision git = 1;
+        GitProto git = 1;
     }
 }
 
-message ProtoGitMaterialRevision {
-    ProtoGitMaterialConfig config = 1;
-    ProtoGitRevision previous = 2;
-    ProtoGitRevision latest = 3;
+message GitProto {
+    GitConfigProto config = 1;
+    GitRevisionProto previous = 2;
+    GitRevisionProto latest = 3;
 }
 
-message ProtoGitRevision {
+message GitRevisionProto {
     string sha = 1;
 }
 
-message ProtoGitMaterialConfig {
+message GitConfigProto {
     string username = 1;
     string password = 2;
     string url = 3;

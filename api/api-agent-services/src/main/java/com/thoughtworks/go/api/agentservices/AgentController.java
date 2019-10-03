@@ -29,11 +29,11 @@ import com.thoughtworks.go.config.materials.git.GitMaterial;
 import com.thoughtworks.go.domain.*;
 import com.thoughtworks.go.domain.materials.Modification;
 import com.thoughtworks.go.plugin.infra.commons.PluginsZip;
-import com.thoughtworks.go.protobufs.ProtoMessage;
-import com.thoughtworks.go.protobufs.registration.AgentMeta;
-import com.thoughtworks.go.protobufs.registration.Cookie;
-import com.thoughtworks.go.protobufs.registration.Token;
-import com.thoughtworks.go.protobufs.registration.UUID;
+import com.thoughtworks.go.protobufs.MessageProto;
+import com.thoughtworks.go.protobufs.registration.AgentMetaProto;
+import com.thoughtworks.go.protobufs.registration.CookieProto;
+import com.thoughtworks.go.protobufs.registration.TokenProto;
+import com.thoughtworks.go.protobufs.registration.UUIDProto;
 import com.thoughtworks.go.protobufs.tasks.ProtoExec;
 import com.thoughtworks.go.protobufs.tasks.ProtoJobIdentifier;
 import com.thoughtworks.go.protobufs.tasks.ProtoPipelineIdentifier;
@@ -138,9 +138,9 @@ public class AgentController implements SparkSpringController, ControllerMethods
     }
 
     private byte[] generateToken(Request request, Response response) throws Exception {
-        UUID uuid = UUID.parseFrom(request.bodyAsBytes());
+        UUIDProto uuid = UUIDProto.parseFrom(request.bodyAsBytes());
         String token = computeToken(uuid.getUuid());
-        return Token.newBuilder().setToken(token).build().toByteArray();
+        return TokenProto.newBuilder().setToken(token).build().toByteArray();
     }
 
     private byte[] register(Request request, Response response) throws IOException {
@@ -177,7 +177,7 @@ public class AgentController implements SparkSpringController, ControllerMethods
     }
 
     private byte[] getCookie(Request request, Response response) throws Exception {
-        AgentMeta agentMeta = AgentMeta.parseFrom(request.bodyAsBytes());
+        AgentMetaProto agentMeta = AgentMetaProto.parseFrom(request.bodyAsBytes());
         Agent agent = agentService.findAgentByUUID(agentMeta.getUuid());
         if (agent == null) {
             throw new UnprocessableEntityException(format("Agent with UUID %s does not exist.", agentMeta.getUuid()));
@@ -190,12 +190,12 @@ public class AgentController implements SparkSpringController, ControllerMethods
         agent.refreshCookie();
         agentService.saveOrUpdate(agent);
 
-        return Cookie.newBuilder().setCookie(agent.getCookie()).build().toByteArray();
+        return CookieProto.newBuilder().setCookie(agent.getCookie()).build().toByteArray();
     }
 
     private byte[] getWork(Request request, Response response) throws IOException {
         String agentCookie = request.headers("X-Agent-Cookie");
-        AgentMeta agentMeta = AgentMeta.parseFrom(request.bodyAsBytes());
+        AgentMetaProto agentMeta = AgentMetaProto.parseFrom(request.bodyAsBytes());
         AgentIdentifier agentIdentifier = new AgentIdentifier(agentMeta.getHostname(), agentMeta.getIpAddress(), agentMeta.getUuid());
         AgentRuntimeInfo agentRuntimeInfo = new AgentRuntimeInfo(agentIdentifier, AgentRuntimeStatus.Idle, agentMeta.getLocation(), agentCookie);
 
@@ -226,7 +226,7 @@ public class AgentController implements SparkSpringController, ControllerMethods
             JobIdentifier jobIdentifier = assignment.getJobIdentifier();
             List<Task> tasks = goConfigService.tasksForJob(jobIdentifier.getPipelineName(), jobIdentifier.getStageName(), jobIdentifier.getBuildName());
 
-            return ProtoWork.newBuilder()
+            return WorkProto.newBuilder()
                     .setJobIdentifier(toProtobuf(jobIdentifier))
                     .addAllMaterial(toProtobuf(assignment.getMaterialRevisions()))
                     .addAllTask(tasks.stream().map(this::toProtobuf).collect(toList()))
@@ -258,30 +258,30 @@ public class AgentController implements SparkSpringController, ControllerMethods
         return new TaskConverterFactory().toTask(task);
     }
 
-    private List<ProtoMaterialRevision> toProtobuf(MaterialRevisions materialRevisions) {
+    private List<MaterialProto> toProtobuf(MaterialRevisions materialRevisions) {
         return StreamSupport.stream(materialRevisions.spliterator(), false)
                 .map(this::toProtobuf)
                 .collect(toList());
     }
 
-    private ProtoMaterialRevision toProtobuf(MaterialRevision materialRevision) {
-        ProtoMaterialRevision.Builder builder = ProtoMaterialRevision.newBuilder();
+    private MaterialProto toProtobuf(MaterialRevision materialRevision) {
+        MaterialProto.Builder builder = MaterialProto.newBuilder();
         if (materialRevision.getMaterial() instanceof GitMaterial) {
             builder.setGit(toProtobuf(materialRevision, (GitMaterial) materialRevision.getMaterial()));
         }
         return builder.build();
     }
 
-    private ProtoGitMaterialRevision toProtobuf(MaterialRevision materialRevision, GitMaterial material) {
-        return ProtoGitMaterialRevision.newBuilder()
+    private GitProto toProtobuf(MaterialRevision materialRevision, GitMaterial material) {
+        return GitProto.newBuilder()
                 .setConfig(toProtobuf(material))
                 .setPrevious(toProtobuf(materialRevision.getModifications().first()))
                 .setLatest(toProtobuf(materialRevision.getModifications().last()))
                 .build();
     }
 
-    private ProtoGitMaterialConfig toProtobuf(GitMaterial material) {
-        ProtoGitMaterialConfig.Builder builder = ProtoGitMaterialConfig.newBuilder()
+    private GitConfigProto toProtobuf(GitMaterial material) {
+        GitConfigProto.Builder builder = GitConfigProto.newBuilder()
                 .setUrl(material.urlForCommandLine())
                 .setBranch(material.getBranch())
                 .setShallow(material.isShallowClone());
@@ -296,12 +296,12 @@ public class AgentController implements SparkSpringController, ControllerMethods
         return builder.build();
     }
 
-    private ProtoGitRevision toProtobuf(Modification modification) {
-        return ProtoGitRevision.newBuilder().setSha(modification.getRevision()).build();
+    private GitRevisionProto toProtobuf(Modification modification) {
+        return GitRevisionProto.newBuilder().setSha(modification.getRevision()).build();
     }
 
     private MessageLite toMessage(String s) {
-        return ProtoMessage
+        return MessageProto
                 .newBuilder()
                 .setMessage(s)
                 .build();

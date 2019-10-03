@@ -20,7 +20,7 @@ import com.google.protobuf.InvalidProtocolBufferException;
 import com.thoughtworks.go.config.Agent;
 import com.thoughtworks.go.config.exceptions.BadRequestException;
 import com.thoughtworks.go.domain.IpAddress;
-import com.thoughtworks.go.protobufs.registration.RegistrationPayload;
+import com.thoughtworks.go.protobufs.registration.RegistrationProto;
 import com.thoughtworks.go.server.service.AgentRuntimeInfo;
 import com.thoughtworks.go.server.service.ElasticAgentRuntimeInfo;
 import lombok.Getter;
@@ -124,7 +124,7 @@ public class AgentRegisterPayload {
     }
 
     public static AgentRegisterPayload from(byte[] bytes) throws InvalidProtocolBufferException {
-        RegistrationPayload payload = RegistrationPayload.parseFrom(bytes);
+        RegistrationProto payload = RegistrationProto.parseFrom(bytes);
 
         AutoRegisterPayload autoRegister = null;
 
