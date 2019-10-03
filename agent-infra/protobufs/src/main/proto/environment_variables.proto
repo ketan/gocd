@@ -3,12 +3,8 @@ syntax = "proto3";
 option java_package = "com.thoughtworks.go.protobufs.pipelineconfig";
 option java_multiple_files = true;
 
-message EnvironmentVariable {
+message EnvironmentVariableProto {
     string name = 1;
     string value = 2;
     bool secure = 3;
-}
-
-message EnvironmentVariables {
-    repeated EnvironmentVariable environmentVariables = 1;
 }

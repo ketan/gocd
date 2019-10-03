@@ -25,24 +25,13 @@ import com.thoughtworks.go.config.Agent;
 import com.thoughtworks.go.config.exceptions.BadRequestException;
 import com.thoughtworks.go.config.exceptions.NotAuthorizedException;
 import com.thoughtworks.go.config.exceptions.UnprocessableEntityException;
-import com.thoughtworks.go.config.materials.git.GitMaterial;
 import com.thoughtworks.go.domain.*;
-import com.thoughtworks.go.domain.materials.Modification;
 import com.thoughtworks.go.plugin.infra.commons.PluginsZip;
 import com.thoughtworks.go.protobufs.MessageProto;
-import com.thoughtworks.go.protobufs.materials.GitConfigProto;
-import com.thoughtworks.go.protobufs.materials.GitProto;
-import com.thoughtworks.go.protobufs.materials.GitRevisionProto;
 import com.thoughtworks.go.protobufs.registration.AgentMetaProto;
 import com.thoughtworks.go.protobufs.registration.CookieProto;
 import com.thoughtworks.go.protobufs.registration.TokenProto;
 import com.thoughtworks.go.protobufs.registration.UUIDProto;
-import com.thoughtworks.go.protobufs.tasks.ProtoExec;
-import com.thoughtworks.go.protobufs.tasks.ProtoJobIdentifier;
-import com.thoughtworks.go.protobufs.tasks.ProtoPipelineIdentifier;
-import com.thoughtworks.go.protobufs.tasks.ProtoStageIdentifier;
-import com.thoughtworks.go.protobufs.work.MaterialProto;
-import com.thoughtworks.go.protobufs.work.WorkProto;
 import com.thoughtworks.go.remote.AgentIdentifier;
 import com.thoughtworks.go.remote.work.*;
 import com.thoughtworks.go.security.Registration;
@@ -52,7 +41,6 @@ import com.thoughtworks.go.server.service.AgentService;
 import com.thoughtworks.go.server.service.GoConfigService;
 import com.thoughtworks.go.spark.SparkController;
 import com.thoughtworks.go.spark.spring.SparkSpringController;
-import com.thoughtworks.go.toprotobuf.TaskConverterFactory;
 import com.thoughtworks.go.util.SystemEnvironment;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -76,11 +64,10 @@ import java.util.Base64;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
-import java.util.stream.StreamSupport;
 
+import static com.thoughtworks.go.api.agentservices.converters.Converter.toProtoWork;
 import static java.lang.String.format;
 import static java.lang.String.join;
-import static java.util.stream.Collectors.toList;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.http.HttpStatus.*;
@@ -203,104 +190,31 @@ public class AgentController implements SparkSpringController, ControllerMethods
         AgentRuntimeInfo agentRuntimeInfo = new AgentRuntimeInfo(agentIdentifier, AgentRuntimeStatus.Idle, agentMeta.getLocation(), agentCookie);
 
         Work work = workAssignments.getWork(agentRuntimeInfo);
-        MessageLite message = toProtobuf(work, response);
-        return message.toByteArray();
-    }
 
-    private MessageLite toProtobuf(Work work, Response response) {
         if (work instanceof NoWork) {
             response.status(SC_ACCEPTED);
-            return toMessage("No work.");
+            return toMessage("No work.").toByteArray();
         }
 
         if (work instanceof DeniedAgentWork) {
             response.status(SC_FORBIDDEN);
-            return toMessage("Denied work. Agent is disabled.");
+            return toMessage("Denied work. Agent is disabled.").toByteArray();
         }
 
         if (work instanceof UnregisteredAgentWork) {
             response.status(SC_UNAUTHORIZED);
-            return toMessage("Agent is not registered.");
+            return toMessage("Agent is not registered.").toByteArray();
         }
 
         if (work instanceof BuildWork) {
             BuildWork buildWork = (BuildWork) work;
-            BuildAssignment assignment = buildWork.getAssignment();
-            JobIdentifier jobIdentifier = assignment.getJobIdentifier();
+            JobIdentifier jobIdentifier = buildWork.getAssignment().getJobIdentifier();
             List<Task> tasks = goConfigService.tasksForJob(jobIdentifier.getPipelineName(), jobIdentifier.getStageName(), jobIdentifier.getBuildName());
-
-            return WorkProto.newBuilder()
-                    .setJobIdentifier(toProtobuf(jobIdentifier))
-                    .addAllMaterial(toProtobuf(assignment.getMaterialRevisions()))
-                    .addAllTask(tasks.stream().map(this::toProtobuf).collect(toList()))
-                    .build();
+            return toProtoWork(buildWork, tasks).toByteArray();
         }
 
         throw new IllegalArgumentException(format("Work type %s is not supported.", work.getClass().getName()));
-    }
 
-    private ProtoJobIdentifier toProtobuf(JobIdentifier jobIdentifier) {
-        ProtoPipelineIdentifier pipelineIdentifier = ProtoPipelineIdentifier.newBuilder()
-                .setPipelineName(jobIdentifier.getPipelineName())
-                .setPipelineCounter(jobIdentifier.getPipelineCounter())
-                .build();
-
-        ProtoStageIdentifier stageIdentifier = ProtoStageIdentifier.newBuilder()
-                .setStageCounter(Long.parseLong(jobIdentifier.getStageCounter()))
-                .setStageName(jobIdentifier.getStageName())
-                .setPipelineIdentifier(pipelineIdentifier)
-                .build();
-
-        return ProtoJobIdentifier.newBuilder()
-                .setJobName(jobIdentifier.getBuildName())
-                .setStageIdentifier(stageIdentifier)
-                .build();
-    }
-
-    private ProtoExec toProtobuf(Task task) {
-        return new TaskConverterFactory().toTask(task);
-    }
-
-    private List<MaterialProto> toProtobuf(MaterialRevisions materialRevisions) {
-        return StreamSupport.stream(materialRevisions.spliterator(), false)
-                .map(this::toProtobuf)
-                .collect(toList());
-    }
-
-    private MaterialProto toProtobuf(MaterialRevision materialRevision) {
-        MaterialProto.Builder builder = MaterialProto.newBuilder();
-        if (materialRevision.getMaterial() instanceof GitMaterial) {
-            builder.setGit(toProtobuf(materialRevision, (GitMaterial) materialRevision.getMaterial()));
-        }
-        return builder.build();
-    }
-
-    private GitProto toProtobuf(MaterialRevision materialRevision, GitMaterial material) {
-        return GitProto.newBuilder()
-                .setConfig(toProtobuf(material))
-                .setPrevious(toProtobuf(materialRevision.getModifications().first()))
-                .setLatest(toProtobuf(materialRevision.getModifications().last()))
-                .build();
-    }
-
-    private GitConfigProto toProtobuf(GitMaterial material) {
-        GitConfigProto.Builder builder = GitConfigProto.newBuilder()
-                .setUrl(material.urlForCommandLine())
-                .setBranch(material.getBranch())
-                .setShallow(material.isShallowClone());
-
-        if (isNotBlank(material.getUserName())) {
-            builder.setUsername(material.getUsername());
-        }
-
-        if (isNotBlank(material.getPassword())) {
-            builder.setPassword(material.getPassword());
-        }
-        return builder.build();
-    }
-
-    private GitRevisionProto toProtobuf(Modification modification) {
-        return GitRevisionProto.newBuilder().setSha(modification.getRevision()).build();
     }
 
     private MessageLite toMessage(String s) {

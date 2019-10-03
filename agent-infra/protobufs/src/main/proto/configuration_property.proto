@@ -1,0 +1,11 @@
+syntax = "proto3";
+
+option java_package = "com.thoughtworks.go.protobufs.plugin";
+option java_multiple_files = true;
+option java_outer_classname = "Plugins";
+
+message ConfigurationPropertyProto {
+    string name = 1;
+    string value = 2;
+    bool secure = 3;
+}

@@ -48,6 +48,8 @@ public class WorkExecutor {
     }
 
     private void execute(ProtoExec protoExec) {
+        log.info("Starting to execute the work.");
+
         AtomicReference<StartedProcess> processReference = new AtomicReference<>();
         List<String> command = new ArrayList<>(protoExec.getArgsList());
         command.add(0, protoExec.getCommand());

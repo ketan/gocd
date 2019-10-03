@@ -1,0 +1,26 @@
+syntax = "proto3";
+
+import "configuration_property.proto";
+
+option java_package = "com.thoughtworks.go.protobufs.artifacts";
+option java_multiple_files = true;
+option java_outer_classname = "Artifacts";
+
+enum ArtifactTypeProto {
+    UNIT = 0;
+    FILE = 1;
+    EXTERNAL = 2;
+}
+
+message ArtifactPlanProto {
+    ArtifactTypeProto type = 1;
+    string source = 2;
+    string destination = 3;
+    string pluggableArtifactConfigJson = 4;
+}
+
+message ArtifactStoreProto {
+    string id = 1;
+    string pluginId = 2;
+    repeated ConfigurationPropertyProto property = 3;
+}
