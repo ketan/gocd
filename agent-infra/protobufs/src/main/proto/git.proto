@@ -1,0 +1,23 @@
+syntax = "proto3";
+
+option java_package = "com.thoughtworks.go.protobufs.materials";
+option java_multiple_files = true;
+option java_outer_classname = "Materials";
+
+message GitProto {
+    GitConfigProto config = 1;
+    GitRevisionProto previous = 2;
+    GitRevisionProto latest = 3;
+}
+
+message GitRevisionProto {
+    string sha = 1;
+}
+
+message GitConfigProto {
+    string username = 1;
+    string password = 2;
+    string url = 3;
+    string branch = 4;
+    bool shallow = 5;
+}
