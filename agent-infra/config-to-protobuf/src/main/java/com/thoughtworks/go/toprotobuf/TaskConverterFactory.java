@@ -21,12 +21,12 @@ import com.thoughtworks.go.config.ExecTask;
 import com.thoughtworks.go.config.NantTask;
 import com.thoughtworks.go.config.RakeTask;
 import com.thoughtworks.go.domain.Task;
-import com.thoughtworks.go.protobufs.tasks.ProtoExec;
+import com.thoughtworks.go.protobufs.tasks.ExecProto;
 
 import static java.lang.String.format;
 
 public class TaskConverterFactory {
-    public ProtoExec toTask(Task task) {
+    public ExecProto toTask(Task task) {
         if (task instanceof ExecTask) {
             return new ExecBuilder().build((ExecTask) task);
         } else if (task instanceof AntTask) {

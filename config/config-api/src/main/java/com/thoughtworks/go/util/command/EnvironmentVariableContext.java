@@ -260,6 +260,10 @@ public class EnvironmentVariableContext implements Serializable, SecretParamAwar
         return equals((EnvironmentVariableContext) that);
     }
 
+    public List<EnvironmentVariable> getAll() {
+        return this.properties;
+    }
+
     private boolean equals(EnvironmentVariableContext that) {
         if (!this.properties.equals(that.properties)) {
             return false;

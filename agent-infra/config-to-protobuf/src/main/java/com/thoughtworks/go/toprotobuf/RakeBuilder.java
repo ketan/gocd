@@ -17,7 +17,7 @@
 package com.thoughtworks.go.toprotobuf;
 
 import com.thoughtworks.go.config.RakeTask;
-import com.thoughtworks.go.protobufs.tasks.ProtoExec;
+import com.thoughtworks.go.protobufs.tasks.ExecProto;
 import org.apache.tools.ant.types.Commandline;
 
 import java.util.List;
@@ -25,10 +25,10 @@ import java.util.List;
 import static org.apache.commons.io.FilenameUtils.separatorsToUnix;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
-class RakeBuilder implements Builder<RakeTask, ProtoExec> {
+class RakeBuilder implements Builder<RakeTask, ExecProto> {
     @Override
-    public ProtoExec build(RakeTask task) {
-        ProtoExec.Builder builder = ProtoExec.newBuilder()
+    public ExecProto build(RakeTask task) {
+        ExecProto.Builder builder = ExecProto.newBuilder()
                 .setCommand("rake");
 
         addWorkingDirIfPresent(task, builder);

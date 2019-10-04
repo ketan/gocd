@@ -17,7 +17,7 @@
 package com.thoughtworks.go.toprotobuf;
 
 import com.thoughtworks.go.config.BuildTask;
-import com.thoughtworks.go.protobufs.tasks.ProtoExec;
+import com.thoughtworks.go.protobufs.tasks.ExecProto;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
@@ -25,7 +25,7 @@ interface Builder<ConfigType, ProtobufType> {
     ProtobufType build(ConfigType configObj);
 
 
-    default void addWorkingDirIfPresent(BuildTask task, ProtoExec.Builder builder) {
+    default void addWorkingDirIfPresent(BuildTask task, ExecProto.Builder builder) {
         if (isNotBlank(task.workingDirectory())) {
             builder.setWorkingDir(task.workingDirectory());
         }

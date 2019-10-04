@@ -10,13 +10,13 @@ option java_multiple_files = true;
 option java_outer_classname = "BuildWork";
 
 message WorkProto {
-    ProtoJobIdentifier jobIdentifier = 1;
+    JobIdentifierProto jobIdentifier = 1;
     bool fetchMaterials = 2;
     bool cleanWorkingDirectory = 3;
     string buildWorkingDirectory = 4;
     repeated EnvironmentVariableProto environmentVariable = 5;
     repeated MaterialProto material = 6;
-    repeated ProtoExec task = 7;
+    repeated ExecProto task = 7;
     repeated ArtifactPlanProto artifactPlan = 8;
     repeated ArtifactStoreProto artifactStore = 9;
 }

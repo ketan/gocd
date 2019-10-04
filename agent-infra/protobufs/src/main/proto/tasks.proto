@@ -4,36 +4,24 @@ option java_package = "com.thoughtworks.go.protobufs.tasks";
 option java_outer_classname = "Tasks";
 option java_multiple_files = true;
 
-message ProtoExec {
+message ExecProto {
     string workingDir = 1;
     string command = 2;
     repeated string args = 3;
 }
 
-message ProtoFetchArtifact {
-    string src = 1;
-    ProtoSrcType srcType = 2;
-    string dest = 3;
-    ProtoJobIdentifier jobIdentifier = 4;
-
-    enum ProtoSrcType {
-        FILE = 0;
-        DIR = 1;
-    }
-}
-
-message ProtoPipelineIdentifier {
+message PipelineIdentifierProto {
     string pipelineName = 1;
     int64 pipelineCounter = 2;
 }
 
-message ProtoStageIdentifier {
-    ProtoPipelineIdentifier pipelineIdentifier = 1;
+message StageIdentifierProto {
+    PipelineIdentifierProto pipelineIdentifier = 1;
     string stageName = 2;
     int64 stageCounter = 3;
 }
 
-message ProtoJobIdentifier {
-    ProtoStageIdentifier stageIdentifier = 1;
+message JobIdentifierProto {
+    StageIdentifierProto stageIdentifier = 1;
     string jobName = 2;
 }

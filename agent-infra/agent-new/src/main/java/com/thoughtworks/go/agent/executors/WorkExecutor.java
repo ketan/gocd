@@ -17,7 +17,7 @@
 package com.thoughtworks.go.agent.executors;
 
 import com.thoughtworks.go.agent.io.OnIdleOutputStream;
-import com.thoughtworks.go.protobufs.tasks.ProtoExec;
+import com.thoughtworks.go.protobufs.tasks.ExecProto;
 import com.thoughtworks.go.protobufs.work.WorkProto;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -47,12 +47,12 @@ public class WorkExecutor {
         work.getTaskList().forEach(this::execute);
     }
 
-    private void execute(ProtoExec protoExec) {
+    private void execute(ExecProto execProto) {
         log.info("Starting to execute the work.");
 
         AtomicReference<StartedProcess> processReference = new AtomicReference<>();
-        List<String> command = new ArrayList<>(protoExec.getArgsList());
-        command.add(0, protoExec.getCommand());
+        List<String> command = new ArrayList<>(execProto.getArgsList());
+        command.add(0, execProto.getCommand());
         //TODO: send it to server
         OutputStream serverOutputStream = new ByteArrayOutputStream();
         try {
@@ -66,13 +66,13 @@ public class WorkExecutor {
                     .redirectErrorAlsoTo(serverOutputStream)
                     .destroyOnExit();
 
-            if (isNotBlank(protoExec.getWorkingDir())) {
-                processExecutor.directory(new File(protoExec.getWorkingDir()));
+            if (isNotBlank(execProto.getWorkingDir())) {
+                processExecutor.directory(new File(execProto.getWorkingDir()));
             }
 
             processReference.set(processExecutor.start());
         } catch (IOException e) {
-            log.error("Task execution failed for the task {}", protoExec, e);
+            log.error("Task execution failed for the task {}", execProto, e);
         }
     }
 

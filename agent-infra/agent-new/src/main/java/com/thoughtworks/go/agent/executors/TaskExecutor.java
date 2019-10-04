@@ -16,5 +16,5 @@
 
 package com.thoughtworks.go.agent.executors;
 
-class WorkExecutorTest {
+public class TaskExecutor {
 }

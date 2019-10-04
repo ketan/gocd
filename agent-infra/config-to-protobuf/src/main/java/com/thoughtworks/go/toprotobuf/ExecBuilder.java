@@ -17,17 +17,17 @@
 package com.thoughtworks.go.toprotobuf;
 
 import com.thoughtworks.go.config.ExecTask;
-import com.thoughtworks.go.protobufs.tasks.ProtoExec;
+import com.thoughtworks.go.protobufs.tasks.ExecProto;
 import org.apache.tools.ant.types.Commandline;
 
 import java.util.List;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
-class ExecBuilder implements Builder<ExecTask, ProtoExec> {
+class ExecBuilder implements Builder<ExecTask, ExecProto> {
     @Override
-    public ProtoExec build(ExecTask task) {
-        ProtoExec.Builder builder = ProtoExec.newBuilder()
+    public ExecProto build(ExecTask task) {
+        ExecProto.Builder builder = ExecProto.newBuilder()
                 .setCommand(task.getCommand())
                 .addAllArgs(List.of(task.getArgList().toStringArray()));
 

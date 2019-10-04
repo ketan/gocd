@@ -30,10 +30,10 @@ import com.thoughtworks.go.protobufs.materials.GitProto;
 import com.thoughtworks.go.protobufs.materials.GitRevisionProto;
 import com.thoughtworks.go.protobufs.pipelineconfig.EnvironmentVariableProto;
 import com.thoughtworks.go.protobufs.plugin.ConfigurationPropertyProto;
-import com.thoughtworks.go.protobufs.tasks.ProtoExec;
-import com.thoughtworks.go.protobufs.tasks.ProtoJobIdentifier;
-import com.thoughtworks.go.protobufs.tasks.ProtoPipelineIdentifier;
-import com.thoughtworks.go.protobufs.tasks.ProtoStageIdentifier;
+import com.thoughtworks.go.protobufs.tasks.ExecProto;
+import com.thoughtworks.go.protobufs.tasks.JobIdentifierProto;
+import com.thoughtworks.go.protobufs.tasks.PipelineIdentifierProto;
+import com.thoughtworks.go.protobufs.tasks.StageIdentifierProto;
 import com.thoughtworks.go.protobufs.work.MaterialProto;
 import com.thoughtworks.go.protobufs.work.WorkProto;
 import com.thoughtworks.go.remote.work.BuildAssignment;
@@ -54,7 +54,7 @@ public class Converter {
         JobIdentifier jobIdentifier = assignment.getJobIdentifier();
 
         final List<EnvironmentVariableProto> envVars = assignment.initialEnvironmentVariableContext()
-                .getSecureEnvironmentVariables()
+                .getAll()
                 .stream()
                 .map(Converter::toProto)
                 .collect(toList());
@@ -128,25 +128,25 @@ public class Converter {
                 .build();
     }
 
-    public static ProtoJobIdentifier toProto(JobIdentifier jobIdentifier) {
-        ProtoPipelineIdentifier pipelineIdentifier = ProtoPipelineIdentifier.newBuilder()
+    public static JobIdentifierProto toProto(JobIdentifier jobIdentifier) {
+        PipelineIdentifierProto pipelineIdentifier = PipelineIdentifierProto.newBuilder()
                 .setPipelineName(jobIdentifier.getPipelineName())
                 .setPipelineCounter(jobIdentifier.getPipelineCounter())
                 .build();
 
-        ProtoStageIdentifier stageIdentifier = ProtoStageIdentifier.newBuilder()
+        StageIdentifierProto stageIdentifier = StageIdentifierProto.newBuilder()
                 .setStageCounter(Long.parseLong(jobIdentifier.getStageCounter()))
                 .setStageName(jobIdentifier.getStageName())
                 .setPipelineIdentifier(pipelineIdentifier)
                 .build();
 
-        return ProtoJobIdentifier.newBuilder()
+        return JobIdentifierProto.newBuilder()
                 .setJobName(jobIdentifier.getBuildName())
                 .setStageIdentifier(stageIdentifier)
                 .build();
     }
 
-    public static ProtoExec toProto(Task task) {
+    public static ExecProto toProto(Task task) {
         return new TaskConverterFactory().toTask(task);
     }
 
