@@ -76,7 +76,6 @@ import static spark.Spark.*;
 @Component
 @Slf4j
 public class AgentController implements SparkSpringController, ControllerMethods, SparkController {
-
     private final Map<String, Handler> handlers;
 
     @Getter(lazy = true)
@@ -85,7 +84,6 @@ public class AgentController implements SparkSpringController, ControllerMethods
     private final GoConfigService goConfigService;
     private final AgentService agentService;
     private final WorkAssignments workAssignments;
-//    private final String mimeType;
 
     @Autowired
     public AgentController(SystemEnvironment systemEnvironment,
@@ -93,7 +91,6 @@ public class AgentController implements SparkSpringController, ControllerMethods
                            GoConfigService goConfigService,
                            AgentService agentService,
                            WorkAssignments workAssignments) throws IOException {
-//        this.mimeType = "application/x-protobuf";
         this.goConfigService = goConfigService;
         this.agentService = agentService;
         this.workAssignments = workAssignments;

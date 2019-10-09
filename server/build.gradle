@@ -253,6 +253,9 @@ dependencies {
   copyOnly project(path: ':agent-launcher', configuration: 'fatJarConfig')
   copyOnlyTestData project(':test:test-agent')
 
+  compile group: 'org.springframework', name: 'spring-messaging', version: project.versions.spring
+  compile group: 'org.springframework', name: 'spring-websocket', version: project.versions.spring
+
   compile group: 'org.apache.commons', name: 'commons-dbcp2', version: project.versions.commonsDbcp
   compile group: 'com.h2database', name: 'h2', version: project.versions.h2db
   compile group: 'net.sf', name: 'dbdeploy', version: '2.11.1'
@@ -731,7 +734,7 @@ task configureWar {
       exclude("**/rails/**/jruby/*/cache/*.gem")
       exclude("**/rails/app/assets/")
       exclude("**/rails/webpack/")
-    new JsonSlurper().parse(findGemsToNotPack.outputFile).each { gem ->
+      new JsonSlurper().parse(findGemsToNotPack.outputFile).each { gem ->
         theSpec.exclude("**/rails/gems/jruby/${RUBY_VERSION}/gems/${gem}")
         theSpec.exclude("**/rails/gems/jruby/${RUBY_VERSION}/specifications/${gem}.gemspec")
         theSpec.exclude("**/rails/gems/jruby/${RUBY_VERSION}/build_info/${gem}.info")

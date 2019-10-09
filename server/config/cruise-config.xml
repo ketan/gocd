@@ -31,6 +31,14 @@
       </admins>
     </authorization>
     <pipeline name="up42">
+      <environmentvariables>
+        <variable name="Foo">
+          <value>bar</value>
+        </variable>
+        <variable name="SecureFoo" secure="true">
+          <encryptedValue>AES:NKjOdokdLNYUIOrNEvkpsw==:7YMAo3BPFms57sj1gdqo0A==</encryptedValue>
+        </variable>
+      </environmentvariables>
       <materials>
         <git url="test-repo" />
       </materials>
@@ -40,6 +48,9 @@
             <tasks>
               <exec command="ls" />
             </tasks>
+            <artifacts>
+              <artifact type="build" src="*" dest="foo" />
+            </artifacts>
           </job>
         </jobs>
       </stage>

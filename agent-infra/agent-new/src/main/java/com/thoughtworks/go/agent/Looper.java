@@ -19,6 +19,7 @@ package com.thoughtworks.go.agent;
 import com.thoughtworks.go.agent.executors.WorkExecutor;
 import com.thoughtworks.go.agent.http.ServerApiClient;
 import com.thoughtworks.go.agent.services.AgentInitializer;
+import com.thoughtworks.go.agent.websocket.WebSocketClient;
 import com.thoughtworks.go.protobufs.work.WorkProto;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,14 +34,16 @@ public class Looper {
     private final ServerApiClient client;
     private final AgentInitializer agentInitializer;
     private final WorkExecutor workExecutor;
+    private final WebSocketClient webSocketClient;
 
     @Autowired
     public Looper(ServerApiClient client,
                   AgentInitializer agentInitializer,
-                  WorkExecutor workExecutor) {
+                  WorkExecutor workExecutor, WebSocketClient webSocketClient) {
         this.client = client;
         this.agentInitializer = agentInitializer;
         this.workExecutor = workExecutor;
+        this.webSocketClient = webSocketClient;
     }
 
     @Scheduled(fixedDelayString = "${go.agent.get.work.interval}")
@@ -48,6 +51,7 @@ public class Looper {
         agentInitializer.getTokenFromServerIfRequired();
         agentInitializer.registerWithServerIfRequired();
         agentInitializer.getCookieFromServerIfRequired();
+        webSocketClient.tryEstablishingConnection();
         log.debug("[Agent Loop] Trying to retrieve work.");
         Optional<WorkProto> work = client.getWork(agentInitializer.getCookie(), agentInitializer.getToken(), agentInitializer.agentMeta());
         work.ifPresent(workExecutor::execute);
