@@ -1,4 +1,4 @@
-#*
+<#--
  * Copyright 2022 ThoughtWorks, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,5 +12,17 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *#
-$presenter.renderArtifactFiles($req.getContextPath())
+ -->
+<div id="tab-content-of-tests" class="widget" ${tests_extra_attrs}>
+    <div class="files">
+        <#if presenter.hasTests()>
+            <#if useIframeSandbox>
+                <iframe sandbox="allow-scripts" src="${req.getContextPath()}/${presenter.indexPageURL}" width="95%" height="500" frameborder="0"></iframe>
+            <#else>
+              <iframe src="${req.getContextPath()}/${presenter.indexPageURL}" width="95%" height="500" frameborder="0"></iframe>
+            </#if>
+        <#else>
+            <#include "_test_output_config.ftl">
+        </#if>
+    </div>
+</div>

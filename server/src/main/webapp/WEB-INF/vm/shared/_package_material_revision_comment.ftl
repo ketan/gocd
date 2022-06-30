@@ -1,4 +1,4 @@
-#*
+<#--
  * Copyright 2022 ThoughtWorks, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,14 +12,14 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *#
+ -->
 {if modification.comment != null && modification.comment != ""}
     {var comment_map = JSON.parse(modification.comment)}
     {if comment_map.COMMENT != null}
-        ${%comment_map.COMMENT%}<br/>
+        ${r'${%comment_map.COMMENT%}'}<br/>
     {/if}
     {if comment_map.TRACKBACK_URL != null}
-        Trackback: <a href="${%comment_map.TRACKBACK_URL%}">${%comment_map.TRACKBACK_URL%}</a>
+        Trackback: <a href="${r'${%comment_map.TRACKBACK_URL%}'}">${r'${%comment_map.TRACKBACK_URL%}'}</a>
     {else}
         Trackback: Not Provided
     {/if}

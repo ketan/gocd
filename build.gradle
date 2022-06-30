@@ -248,11 +248,6 @@ allprojects {
 
   repositories {
     mavenCentral()
-    maven {
-      // Only for velocity-tools-view 1.4
-      url 'https://repo1.maven.org/maven2'
-      metadataSources { artifact() }
-    }
   }
 }
 

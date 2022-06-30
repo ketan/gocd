@@ -1,4 +1,4 @@
-#*
+<#--
  * Copyright 2022 ThoughtWorks, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,15 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *#
-<div id="tab-content-of-materials" class="widget" $modification_extra_attrs>
-    <script type="text/javascript">
-        var json = ${presenter.getMaterialRevisionsJson()};
-    </script>
-    <script type="text/javascript">
-        Event.observe(window, 'load', function(){
-            $('tab-content-of-materials').innerHTML = $('tab-content-of-materials-template').value.process({revisions:json});
-        });
-    </script>
-    #parse('build_detail/_material_revisions_jstemplate.vm')
+ -->
+<div id="tab-content-of-console" class="ansi-color-toggle" ${buildoutput_extra_attrs}>
+    <#include "_build_output_raw.ftl">
 </div>

@@ -1,4 +1,4 @@
-#*
+<#--
  * Copyright 2022 ThoughtWorks, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *#
+ -->
 </div>
 
 
@@ -26,20 +26,5 @@
 
     <script type="text/javascript">
         restoreSidebarStatus();
-
-        ##new AjaxRefresher("$req.getContextPath()/server/messages.json", "$req.getContextPath()/auth/login", {executeImmediately: true});
-
-        #if($global_error_message && $global_error_message != "")
-            FlashMessageLauncher.warn("$esc.javascript("$global_error_message")", null, true);
-        #end
-
-        if(Prototype.Browser.IE){
-            $$('.rounded-corner-for-body').each(function(container){
-                $(container);
-                if(container.getWidth() % 2 == 1){
-                    container.setStyle({width: container.getWidth() + 1 + 'px'});
-                }
-            })
-        }
     </script>
 </html>

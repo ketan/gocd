@@ -283,25 +283,15 @@ dependencies {
   implementation project.deps.aspectjWeaver
   implementation project.deps.urlrewrite
 
-  implementation project.deps.velocity
+  implementation project.deps.freemarker
+  runtimeOnly project.deps.freemarker
+  sharedTestRuntimeOnly project.deps.freemarker
+  runtimeOnly project.deps.commonsDigester
+
   constraints {
     implementation(project.deps.commonsCollections) {
-      because 'used by both velocity/velocityToolsView, but out of date'
+      because 'used by hibernate, but out of date'
     }
-    implementation(project.deps.commonsLang) {
-      because 'used by velocity, but out of date'
-    }
-  }
-
-  runtimeOnly project.deps.velocityToolsView
-  sharedTestRuntimeOnly project.deps.velocityToolsView
-  if (project.deps.velocityToolsView) {
-    // Transitive dependencies required only for velocityTools which does not publish a POM properly: https://velocity.apache.org/tools/devel/dependencies.html#VelocityView
-    // Also see https://github.com/apache/velocity-tools/blob/1.x/pom.xml
-    sharedTestRuntimeOnly project.deps.commonsCollections
-    sharedTestRuntimeOnly project.deps.commonsLang
-    runtimeOnly project.deps.commonsDigester
-    integrationTestRuntimeOnly project.deps.commonsDigester
   }
 
   implementation project.deps.guava
@@ -919,8 +909,6 @@ task verifyWar(type: VerifyJarTask) {
         "txw2-${project.versions.jaxb}.jar",
         "urlrewritefilter-${project.versions.urlrewrite}.jar",
         "util-${project.version}.jar",
-        "velocity-${project.versions.velocity}.jar",
-        "velocity-tools-view-${project.versions.velocityToolsView}.jar",
         "zt-exec-${project.versions.ztExec}.jar",
       ])
   ]
@@ -1007,19 +995,6 @@ task licenseReportAggregate {
         [
           moduleLicense   : 'MIT',
           moduleLicenseUrl: "https://spdx.org/licenses/MIT.html"
-        ]
-      ]
-    ],
-    [
-      moduleName    : 'velocity-tools:velocity-tools-view',
-      moduleVersion : project.versions.velocityToolsView,
-      moduleUrls    : [
-        "https://velocity.apache.org"
-      ],
-      moduleLicenses: [
-        [
-          moduleLicense   : 'Apache-2.0',
-          moduleLicenseUrl: "https://spdx.org/licenses/Apache-2.0.html"
         ]
       ]
     ],

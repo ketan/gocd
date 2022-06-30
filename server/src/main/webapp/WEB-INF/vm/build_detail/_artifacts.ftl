@@ -1,4 +1,4 @@
-#*
+<#--
  * Copyright 2022 ThoughtWorks, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,7 +12,16 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *#
-<div id="tab-content-of-console" class="ansi-color-toggle" $buildoutput_extra_attrs>
-    #parse("build_detail/_build_output_raw.vm")
+ -->
+<div class="widget container-in-body" id="tab-content-of-artifacts" ${artifacts_extra_attrs}>
+    <#if presenter.artifactFiles??>
+        <#if presenter.artifactFiles?size > 0>
+            <div class="artifacts-operations-container">
+            <a class="collapse-all" onclick="BuildDetail.expandAll()">(+) Expand All</a> <a class="expand-all" onclick="BuildDetail.collapseAll()">(-) Collapse All</a>
+            </div>
+        </#if>
+    </#if>
+    <div class="files">
+        <#include "../shared/_artifacts.ftl">
+    </div>
 </div>

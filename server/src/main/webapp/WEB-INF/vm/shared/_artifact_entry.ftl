@@ -1,4 +1,4 @@
-#*
+<#--
  * Copyright 2022 ThoughtWorks, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,19 +12,5 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *#
-<div id="trans_message" style="position:absolute;display:none">
-    <b class="rtop" style="display:block;background-color: transparent;">
-       <b class="r1"></b>
-       <b class="r2"></b>
-       <b class="r3"></b>
-       <b class="r4"></b>
-    </b>
-    <div class="transparent_message" id="trans_content"></div>
-    <b class="rbottom" style="display:block;background-color: transparent;">
-        <b class="r4"></b>
-        <b class="r3"></b>
-        <b class="r2"></b>
-        <b class="r1"></b>
-    </b>    
-</div>
+ -->
+${presenter.renderArtifactFiles(req.getContextPath())}
